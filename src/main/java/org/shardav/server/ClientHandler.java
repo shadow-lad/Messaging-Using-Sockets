@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class ClientHandler implements Runnable {
 
-    private static final String LOG_TAG = ClientHandler.class.getCanonicalName();
+    private static final String LOG_TAG = ClientHandler.class.getSimpleName();
 
     private String name;
     final DataInputStream in;

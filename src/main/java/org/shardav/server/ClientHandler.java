@@ -20,6 +20,9 @@ public class ClientHandler implements Runnable {
     Socket socket;
     boolean isLoggedIn;
 
+    private static final String FROM = "from";
+    private static final String TO = "to";
+
     public ClientHandler(Socket s, String name, DataInputStream in, DataOutputStream out){
 
         this.socket = s;
@@ -40,7 +43,7 @@ public class ClientHandler implements Runnable {
                 JSONParser parser = new JSONParser();
                 try{
                     JSONObject object = (JSONObject) parser.parse(received);
-                    object.put("from",this.name);
+                    object.put(FROM,this.name);
                     String message = (String) object.get("message");
                     String to = (String) object.get("to");
                     long time = (long) object.get("time");
@@ -55,7 +58,7 @@ public class ClientHandler implements Runnable {
                         if(client.name.equals(to) && client.isLoggedIn){
                             client.out.writeUTF(object.toJSONString());
                             if(message.equals("logout") && to.equals(this.name))
-                                disconnect();
+                                disconnect(false);
                             break;
                         }
                     }
@@ -67,7 +70,7 @@ public class ClientHandler implements Runnable {
 
             } catch (IOException ex){
                 if(ex instanceof EOFException)
-                    disconnect();
+                    disconnect(false);
                 else
                     Log.e(LOG_TAG, "Error occurred", ex);
             }
@@ -77,14 +80,14 @@ public class ClientHandler implements Runnable {
 
     String getName(){return name;}
 
-    private void disconnect(){
+    protected void disconnect(boolean kicked){
         try {
             isLoggedIn = false;
             socket.close();
             in.close();
             out.close();
             Server.clients.remove(this);
-            Log.i(LOG_TAG, name + " left the session.");
+            Log.i(LOG_TAG, name + (kicked? " was kicked from the server.": " left the session."));
         } catch (IOException ex){
             Log.e(LOG_TAG, "Error occurred",ex);
         }

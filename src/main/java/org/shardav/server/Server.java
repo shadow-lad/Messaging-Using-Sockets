@@ -5,6 +5,7 @@ import shardav.utils.Log;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,6 +26,7 @@ public class Server {
     private static final AtomicBoolean running = new AtomicBoolean(true);
     private static final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
+    //ServerSocket, should be on at all times.
     private static ServerSocket server;
 
     //Driver method to call the member functions
@@ -72,33 +74,18 @@ public class Server {
         }
     }
 
-    //Cleans up and closes the server
-    private static void quitServer() {
-        Log.i(LOG_TAG, "Shutting down server...");
-        goToSleep(2000);
-        running.compareAndSet(true,false);
-        try {
-            for (ClientHandler currentClient : clients) {
-                if(currentClient.isLoggedIn) {
-                    currentClient.isLoggedIn = false;
-                    currentClient.in.close();
-                    currentClient.out.close();
-                    currentClient.socket.close();
-                }
-            }
-        } catch (IOException ex){
-            Log.e(LOG_TAG, "An error occurred",ex);
-        }
-        System.exit(0);
-    }
-
-    //TODO: Implement this
-    /*private static void getServerConfig(){
+    private static void getServerConfig(){
         //TODO: Get server config from JSON file
         // NOTE: Use System.get("user.dir") to get current directory
-    }*/
+    }
 
-    private static void startServer(){
+
+    private static void loadExistingUsers(){
+        //TODO: Get users already registered to the server
+        // NOTE: This means loading users from the SQL database.
+    }
+
+    private static void startServer() {
 
         try {
 
@@ -116,38 +103,40 @@ public class Server {
             displayHelpMenu();
 
         } catch (IOException ex) {
-            Log.e(LOG_TAG, "An error occurred while trying to start the server: "+ ex.getMessage(),ex);
+            Log.e(LOG_TAG, "An error occurred while trying to start the server: " + ex.getMessage(), ex);
         }
 
     }
 
     //Start the thread that lets clients connect to the server
-    private static void startAcceptingClients(){
+    private static void startAcceptingClients() {
         new Thread(() -> {
 
             while (running.get()) {
 
                 try {
 
-                    Socket client = server.accept();
+                    Socket client = server.accept(); //Accept connections to the server
                     DataInputStream in = new DataInputStream(client.getInputStream());
                     DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
-                    String userName = in.readUTF();
+                    String userName = in.readUTF(); //Read username from the client
+                    //TODO: Create a proper user database
 
                     Log.i(LOG_TAG, "New Client Request Received: " + userName);
                     Log.v(LOG_TAG, "Creating a new Handler for " + userName);
 
+                    //Creating a new thread to handle client requests
                     ClientHandler clientHandler = new ClientHandler(client, userName, in, out);
-
                     Thread t = new Thread(clientHandler);
-
                     Log.i(LOG_TAG, "Adding " + userName + " to active clients list");
-                    clients.add(clientHandler);
+                    clients.add(clientHandler); //Adding the client to the list of clients
+                    //TODO: Handle this to only add clients if there aren't already registered
                     t.start();
 
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    if(!ex.getMessage().equals("socket closed"))
+                        Log.e(LOG_TAG, "An error occurred: " + ex.getMessage(), ex);
                 }
             }
 
@@ -155,7 +144,7 @@ public class Server {
     }
 
     // Enable operating on the server while it is running
-    private static void initializeServerOperations(){
+    private static void initializeServerOperations() {
         new Thread(() -> {
             while (running.get()) {
                 try {
@@ -185,6 +174,27 @@ public class Server {
                 }
             }
         }).start();
+    }
+
+    //Cleans up and closes the server
+    private static void quitServer() {
+        Log.i(LOG_TAG, "Shutting down server...");
+        goToSleep(2000);
+        if (running.get()) {
+            try {
+                running.set(false);
+                server.close();
+                for (ClientHandler currentClient : clients) {
+                    if (currentClient.isLoggedIn)
+                        currentClient.disconnect(true);
+                }
+            } catch (IOException ex) {
+                Log.e(LOG_TAG, "Server force closed: " + ex.getMessage(), ex);
+            } finally {
+                Log.i(LOG_TAG, "Server Shutdown, EXITING...");
+                goToSleep(2000);
+            }
+        }
     }
 
 }

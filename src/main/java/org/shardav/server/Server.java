@@ -5,7 +5,6 @@ import shardav.utils.Log;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,7 +30,9 @@ public class Server {
 
     //Driver method to call the member functions
     public static void main(String[] args) {
-        startServer();
+        getServerConfig(); // Load the configuration from the server-config.json file
+        loadExistingUsers(); // Load the existing users from the SQLite database
+        startServer(); // Start the server once setup is done
     }
 
     //Displays the help menu
@@ -47,11 +48,20 @@ public class Server {
                         "? - Show this menu\n");
     }
 
-    //Prints the active client table
-    private static void printActiveClientTable() {
+    //Returns a list of currently active clients
+    private static List<String> getActiveClients(){
+        List<String> clientList = new ArrayList<>();
+        for(ClientHandler currentClient: clients){
+            clientList.add(currentClient.getName());
+        }
+        return clientList;
+    }
+
+    //Prints the active clients
+    private static void printActiveClients() {
         Log.i(LOG_TAG, "Active Clients: " + (clients.size() == 0 ? "No Active Clients" : ""));
-        for (ClientHandler currentClient : clients) {
-            Log.i(LOG_TAG, currentClient.getName());
+        for (String currentClient : getActiveClients()) {
+            Log.i(LOG_TAG, currentClient);
         }
     }
 
@@ -152,7 +162,7 @@ public class Server {
                     if (operation.length() == 1)
                         switch (operation.charAt(0)) {
                             case 'l': // List active clients
-                                printActiveClientTable();
+                                printActiveClients();
                                 break;
                             case 'v': // Activate verbose logging
                                 toggleVerbose();

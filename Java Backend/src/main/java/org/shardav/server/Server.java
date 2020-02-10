@@ -128,22 +128,13 @@ public class Server {
                 try {
 
                     Socket client = messageServerSocket.accept(); //Accept connections to the server
-                    DataInputStream in = new DataInputStream(client.getInputStream());
-                    DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
-                    String userName = in.readUTF(); //Read username from the client
                     //TODO: Create a proper user database
 
-                    Log.i(LOG_TAG, "New Client Request Received: " + userName);
-                    Log.v(LOG_TAG, "Creating a new Handler for " + userName);
-
-                    //Creating a new thread to handle client requests
-                    ClientHandler clientHandler = new ClientHandler(client, userName, in, out);
-                    Thread t = new Thread(clientHandler);
-                    Log.i(LOG_TAG, "Adding " + userName + " to active clients list");
-                    clients.add(clientHandler); //Adding the client to the list of clients
-                    //TODO: Handle this to only add clients if there aren't already registered
-                    t.start();
+                    //Creating a new thread to handle logging in
+                    // so that client requests are not queued
+                    Thread login = new Thread(new LoginHandler(client));
+                    login.start();
 
                 } catch (IOException ex) {
                     if(!ex.getMessage().equals("socket closed"))

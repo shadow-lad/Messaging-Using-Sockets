@@ -15,28 +15,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
 
-    static List<ClientHandler> clients = new ArrayList<>(); // List of clients
-
     //TODO: Implement HashMap to find clients faster.
     // static HashMap<String,Integer> clientMap;
+    static List<ClientHandler> clients = new ArrayList<>(); // List of clients
 
     //Log tag
     private static final String LOG_TAG = Server.class.getSimpleName();
-    private static final AtomicBoolean running = new AtomicBoolean(true);
-    private static final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+    private static final AtomicBoolean RUNNING = new AtomicBoolean(true);
+    private static final BufferedReader INPUT = new BufferedReader(new InputStreamReader(System.in));
 
     //ServerSocket, should be on at all times.
-    private static ServerSocket server;
+    private static ServerSocket messageServerSocket;
 
+    private Server(){}
     //Driver method to call the member functions
     public static void main(String[] args) {
-        getServerConfig(); // Load the configuration from the server-config.json file
-        loadExistingUsers(); // Load the existing users from the SQLite database
-        startServer(); // Start the server once setup is done
+        Server server = new Server();
+        server.getServerConfig(); // Load the configuration from the server-config.json file
+        server.loadExistingUsers(); // Load the existing users from the SQLite database
+        server.startServer(); // Start the server once setup is done
     }
 
     //Displays the help menu
-    private static void displayHelpMenu() {
+    private void displayHelpMenu() {
         System.out.println(
                 "--------\n" +
                         "  HELP\n" +
@@ -49,7 +50,7 @@ public class Server {
     }
 
     //Returns a list of currently active clients
-    private static List<String> getActiveClients(){
+    private List<String> getActiveClients(){
         List<String> clientList = new ArrayList<>();
         for(ClientHandler currentClient: clients){
             clientList.add(currentClient.getName());
@@ -58,7 +59,7 @@ public class Server {
     }
 
     //Prints the active clients
-    private static void printActiveClients() {
+    private void printActiveClients() {
         Log.i(LOG_TAG, "Active Clients: " + (clients.size() == 0 ? "No Active Clients" : ""));
         for (String currentClient : getActiveClients()) {
             Log.i(LOG_TAG, currentClient);
@@ -66,7 +67,7 @@ public class Server {
     }
 
     //Toggles verbose output
-    private static void toggleVerbose() {
+    private void toggleVerbose() {
         boolean previous = Log.getVerbose();
         if (previous)
             Log.i(LOG_TAG, "Disabling verbose output.");
@@ -76,7 +77,7 @@ public class Server {
     }
 
     //Sends the calling thread to sleep
-    private static void goToSleep(long millis) {
+    private void goToSleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ex) {
@@ -84,18 +85,18 @@ public class Server {
         }
     }
 
-    private static void getServerConfig(){
+    private void getServerConfig(){
         //TODO: Get server config from JSON file
         // NOTE: Use System.get("user.dir") to get current directory
     }
 
 
-    private static void loadExistingUsers(){
+    private void loadExistingUsers(){
         //TODO: Get users already registered to the server
         // NOTE: This means loading users from the SQL database.
     }
 
-    private static void startServer() {
+    private void startServer() {
 
         try {
 
@@ -103,7 +104,7 @@ public class Server {
             goToSleep(5000);
 
             //Creating a new server on port 6969
-            server = new ServerSocket(6969);
+            messageServerSocket = new ServerSocket(6969);
             Log.i(LOG_TAG, "Server started on port 6969");
             goToSleep(2000);
 
@@ -119,14 +120,14 @@ public class Server {
     }
 
     //Start the thread that lets clients connect to the server
-    private static void startAcceptingClients() {
+    private void startAcceptingClients() {
         new Thread(() -> {
 
-            while (running.get()) {
+            while (RUNNING.get()) {
 
                 try {
 
-                    Socket client = server.accept(); //Accept connections to the server
+                    Socket client = messageServerSocket.accept(); //Accept connections to the server
                     DataInputStream in = new DataInputStream(client.getInputStream());
                     DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
@@ -154,11 +155,11 @@ public class Server {
     }
 
     // Enable operating on the server while it is running
-    private static void initializeServerOperations() {
+    private void initializeServerOperations() {
         new Thread(() -> {
-            while (running.get()) {
+            while (RUNNING.get()) {
                 try {
-                    String operation = input.readLine();
+                    String operation = INPUT.readLine();
                     if (operation.length() == 1)
                         switch (operation.charAt(0)) {
                             case 'l': // List active clients
@@ -187,13 +188,13 @@ public class Server {
     }
 
     //Cleans up and closes the server
-    private static void quitServer() {
+    private void quitServer() {
         Log.i(LOG_TAG, "Shutting down server...");
         goToSleep(2000);
-        if (running.get()) {
+        if (RUNNING.get()) {
             try {
-                running.set(false);
-                server.close();
+                RUNNING.set(false);
+                messageServerSocket.close();
                 for (ClientHandler currentClient : clients) {
                     if (currentClient.isLoggedIn)
                         currentClient.disconnect(true);

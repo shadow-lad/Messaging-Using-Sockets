@@ -50,14 +50,10 @@ public class ClientHandler implements Runnable {
                 if (to.equals("server") && message.equals("logout"))
                     to = this.name;
                 object.put("to", to);
-                for (ClientHandler client : Server.clients) {
-                    if (client.name.equals(to) && client.isLoggedIn) {
-                        client.out.writeUTF(object.toString());
-                        if (message.equals("logout") && to.equals(this.name))
-                            disconnect(false);
-                        break;
-                    }
-                }
+                if(to.equals("everybody")){
+                    sendToEverybody(object);
+                } else
+                    sendPrivate(to, message, object);
 
             } catch (IOException ex) {
                 if (ex instanceof EOFException)
@@ -83,6 +79,26 @@ public class ClientHandler implements Runnable {
             Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
         } catch (IOException ex) {
             Log.e(LOG_TAG, "Error occurred", ex);
+        }
+    }
+
+    private void sendPrivate(String to, String message, JSONObject object)throws IOException{
+
+        for (ClientHandler client : Server.clients) {
+            if (client.name.equals(to) && client.isLoggedIn) {
+                client.out.writeUTF(object.toString());
+                if (message.equals("logout") && to.equals(this.name))
+                    disconnect(false);
+                break;
+            }
+        }
+
+    }
+
+    private void sendToEverybody(JSONObject object)throws IOException{
+        for (ClientHandler client: Server.clients){
+            if(!client.getName().equals(name) && client.isLoggedIn)
+                client.out.writeUTF(object.toString());
         }
     }
 

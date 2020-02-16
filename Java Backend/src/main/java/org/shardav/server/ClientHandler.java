@@ -43,14 +43,14 @@ public class ClientHandler implements Runnable {
                 String message = object.getString("message");
                 String to = object.getString("to");
                 long time = object.getLong("time");
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss aa");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss aa");
                 String timestamp = dateFormat.format(new Date(time));
                 Log.i(LOG_TAG, String.format("To: %s, From: %s, Message: %s, Timestamp: %s",
                         to, this.name, message, timestamp));
                 if (to.equals("server") && message.equals("logout"))
                     to = this.name;
                 object.put("to", to);
-                if(to.equals("everybody")){
+                if (to.equals("everybody")) {
                     sendToEverybody(object);
                 } else
                     sendPrivate(to, message, object);
@@ -69,7 +69,7 @@ public class ClientHandler implements Runnable {
         return name;
     }
 
-    protected void disconnect(boolean kicked) {
+    synchronized protected void disconnect(boolean kicked) {
         try {
             isLoggedIn = false;
             socket.close();
@@ -82,7 +82,8 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void sendPrivate(String to, String message, JSONObject object)throws IOException{
+
+    private void sendPrivate(String to, String message, JSONObject object) throws IOException {
 
         for (ClientHandler client : Server.clients) {
             if (client.name.equals(to) && client.isLoggedIn) {
@@ -95,9 +96,9 @@ public class ClientHandler implements Runnable {
 
     }
 
-    private void sendToEverybody(JSONObject object)throws IOException{
-        for (ClientHandler client: Server.clients){
-            if(!client.getName().equals(name) && client.isLoggedIn)
+    private void sendToEverybody(JSONObject object) throws IOException {
+        for (ClientHandler client : Server.clients) {
+            if (!client.getName().equals(name) && client.isLoggedIn)
                 client.out.writeUTF(object.toString());
         }
     }

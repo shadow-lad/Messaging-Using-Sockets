@@ -70,15 +70,17 @@ public class ClientHandler implements Runnable {
     }
 
     synchronized protected void disconnect(boolean kicked) {
-        try {
-            isLoggedIn = false;
-            socket.close();
-            in.close();
-            out.close();
-            Server.clients.remove(this);
-            Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
-        } catch (IOException ex) {
-            Log.e(LOG_TAG, "Error occurred", ex);
+        if(socket != null && socket.isConnected()) {
+            try {
+                isLoggedIn = false;
+                socket.close();
+                in.close();
+                out.close();
+                Server.clients.remove(this);
+                Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
+            } catch (IOException ex) {
+                Log.e(LOG_TAG, "Error occurred", ex);
+            }
         }
     }
 

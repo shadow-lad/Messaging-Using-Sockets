@@ -58,8 +58,10 @@ public class ClientHandler implements Runnable {
             } catch (IOException ex) {
                 if (ex instanceof EOFException)
                     disconnect(false);
-                else
+                else {
                     Log.e(LOG_TAG, "Error occurred", ex);
+                    System.exit(0);
+                }
             }
 
         }
@@ -69,13 +71,34 @@ public class ClientHandler implements Runnable {
         return name;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+    protected void disconnect(boolean kicked) {
+        try {
+            isLoggedIn = false;
+            socket.close();
+            in.close();
+            out.close();
+            Server.clients.remove(this);
+            Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
+        } catch (IOException ex) {
+            Log.e(LOG_TAG, "Error occurred", ex);
+=======
+>>>>>>> master
     synchronized protected void disconnect(boolean kicked) {
         if(socket != null && socket.isConnected()) {
             try {
                 isLoggedIn = false;
+<<<<<<< HEAD
                 socket.close();
                 in.close();
                 out.close();
+=======
+                in.close();
+                out.close();
+                socket.close();
+>>>>>>> master
                 Server.clients.remove(this);
                 Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
             } catch (IOException ex) {
@@ -102,6 +125,10 @@ public class ClientHandler implements Runnable {
         for (ClientHandler client : Server.clients) {
             if (!client.getName().equals(name) && client.isLoggedIn)
                 client.out.writeUTF(object.toString());
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> master
         }
     }
 

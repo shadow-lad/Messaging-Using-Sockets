@@ -62,8 +62,10 @@ public class ClientHandler implements Runnable {
             } catch (IOException ex) {
                 if (ex instanceof EOFException)
                     disconnect(false);
-                else
+                else {
                     Log.e(LOG_TAG, "Error occurred", ex);
+                    System.exit(0);
+                }
             }
 
         }
@@ -73,6 +75,7 @@ public class ClientHandler implements Runnable {
         return name;
     }
 
+<<<<<<< Updated upstream
     protected void disconnect(boolean kicked) {
         try {
             isLoggedIn = false;
@@ -83,6 +86,41 @@ public class ClientHandler implements Runnable {
             Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
         } catch (IOException ex) {
             Log.e(LOG_TAG, "Error occurred", ex);
+=======
+    synchronized protected void disconnect(boolean kicked) {
+        if(socket != null && socket.isConnected()) {
+            try {
+                isLoggedIn = false;
+                in.close();
+                out.close();
+                socket.close();
+                Server.clients.remove(this);
+                Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
+            } catch (IOException ex) {
+                Log.e(LOG_TAG, "Error occurred", ex);
+            }
+        }
+    }
+
+
+    private void sendPrivate(String to, String message, JSONObject object) throws IOException {
+
+        for (ClientHandler client : Server.clients) {
+            if (client.name.equals(to) && client.isLoggedIn) {
+                client.out.writeUTF(object.toString());
+                if (message.equals("logout") && to.equals(this.name))
+                    disconnect(false);
+                break;
+            }
+        }
+
+    }
+
+    private void sendToEverybody(JSONObject object) throws IOException {
+        for (ClientHandler client : Server.clients) {
+            if (!client.getName().equals(name) && client.isLoggedIn)
+                client.out.writeUTF(object.toString());
+>>>>>>> Stashed changes
         }
     }
 

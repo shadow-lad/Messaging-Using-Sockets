@@ -9,16 +9,24 @@
       - [if credentials found](#if-credentials-found)
       - [if credentials not found](#if-credentials-not-found)
   - [Messages](#messages)
-    - [Private Message](#private-message)
+    - [Global Message](#global-message)
       - [Sending Message](#sending-message)
         - [Without media](#without-media)
         - [With media](#with-media)
-    - [Receiving Message](#receiving-message)
-      - [Without media](#without-media-1)
-      - [With media](#with-media-1)
+      - [Receiving Message](#receiving-message)
+        - [Without media](#without-media-1)
+        - [With media](#with-media-1)
+    - [Private Message](#private-message)
+      - [Sending Message](#sending-message-1)
+        - [Without media](#without-media-2)
+        - [With media](#with-media-2)
+      - [Receiving Message](#receiving-message-1)
+        - [Without media](#without-media-3)
+        - [With media](#with-media-3)
 
 ## Login
 The first message sent must be a login request to the server when making a socket connection. Failure to do so will result in error. It should be a valid JSON message.
+
 ### Client Request
 ```json
 {
@@ -26,8 +34,7 @@ The first message sent must be a login request to the server when making a socke
     "details" : {
 
         "user_name": "xyz or xyz@abc.com",
-        "password" : "md5-hashed-password"
-    
+        "password" : "md5-hashed-password"    
     }
 
 }
@@ -52,6 +59,74 @@ The first message sent must be a login request to the server when making a socke
 ## Messages
 
 This is the basic message conversation format. It is to be assummed that every message is sent when you have an active connection to the server. The message layout of all messages are similar with some minor important changes.
+
+### Global Message
+
+Used to communicate with all the users in the server, these messages are to be sent when the user wants to send the message to everyone. (This feature will be deprecated in the future.)
+
+#### Sending Message
+
+##### Without media
+```json
+{
+    "request" : "message",
+    "type" : "private",
+    "details" : {
+        "id" : "some-id",
+        "type" : "private",
+        "to" : "xyz",
+        "message" : "Hello World",
+        "media" : null
+    }
+}
+```
+
+##### With media
+```json
+{
+    "request" : "message",
+    "type" : "private",
+    "details" : {
+        "id" : "some-id",
+        "type" : "private",
+        "to" : "xyz",
+        "message" : "Hello World",
+        "media" : "https://url-to-firestore/"
+    }
+}
+```
+
+#### Receiving Message
+
+##### Without media
+```json
+{
+    "request" : "message",
+    "type" : "private",
+    "details" : {
+        "id" : "some-id",
+        "type" : "private",
+        "from" : "xyz",
+        "message" : "Hello World",
+        "media" : null
+    }
+}
+```
+
+##### With media
+```json
+{
+    "request" : "message",
+    "type" : "private",
+    "details" : {
+        "id" : "some-id",
+        "type" : "private",
+        "from" : "xyz",
+        "message" : "Hello World",
+        "media" : "https://url-to-firestore/"
+    }
+}
+```
 
 ### Private Message
 
@@ -89,9 +164,9 @@ Also known as direct messages, these messages are to be sent when the user wants
 }
 ```
 
-### Receiving Message
+#### Receiving Message
 
-#### Without media
+##### Without media
 ```json
 {
     "request" : "message",
@@ -106,7 +181,7 @@ Also known as direct messages, these messages are to be sent when the user wants
 }
 ```
 
-#### With media
+##### With media
 ```json
 {
     "request" : "message",

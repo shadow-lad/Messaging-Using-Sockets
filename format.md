@@ -70,11 +70,12 @@ Used to communicate with all the users in the server, these messages are to be s
 ```json
 {
     "request" : "message",
-    "type" : "gloabal",
+    "type" : "global",
     "details" : {
         "id" : "some-id",
         "message" : "Hello World",
-        "media" : null
+        "media" : null,
+        "time": 1214343465
     }
 }
 ```
@@ -87,7 +88,8 @@ Used to communicate with all the users in the server, these messages are to be s
     "details" : {
         "id" : "some-id",
         "message" : "Hello World",
-        "media" : "https://url-to-firestore/"
+        "media" : "https://url-to-firestore/",
+        "time": 1214343465
     }
 }
 ```
@@ -103,7 +105,8 @@ Used to communicate with all the users in the server, these messages are to be s
         "id" : "some-id",
         "from" : "xyz",
         "message" : "Hello World",
-        "media" : null
+        "media" : null,
+        "time": 1214343465
     }
 }
 ```
@@ -117,7 +120,8 @@ Used to communicate with all the users in the server, these messages are to be s
         "id" : "some-id",
         "from" : "xyz",
         "message" : "Hello World",
-        "media" : "https://url-to-firestore/"
+        "media" : "https://url-to-firestore/",
+        "time": 1214343465
     }
 }
 ```
@@ -137,7 +141,8 @@ Also known as direct messages, these messages are to be sent when the user wants
         "id" : "some-id",
         "to" : "xyz",
         "message" : "Hello World",
-        "media" : null
+        "media" : null,
+        "time": 1214343465
     }
 }
 ```
@@ -151,7 +156,8 @@ Also known as direct messages, these messages are to be sent when the user wants
         "id" : "some-id",
         "to" : "xyz",
         "message" : "Hello World",
-        "media" : "https://url-to-firestore/"
+        "media" : "https://url-to-firestore/",
+        "time": 1214343465
     }
 }
 ```
@@ -167,7 +173,8 @@ Also known as direct messages, these messages are to be sent when the user wants
         "id" : "some-id",
         "from" : "xyz",
         "message" : "Hello World",
-        "media" : null
+        "media" : null,
+        "time": 1214343465
     }
 }
 ```
@@ -181,7 +188,8 @@ Also known as direct messages, these messages are to be sent when the user wants
         "id" : "some-id",
         "from" : "xyz",
         "message" : "Hello World",
-        "media" : "https://url-to-firestore/"
+        "media" : "https://url-to-firestore/",
+        "time": 1214343465
     }
 }
 ```

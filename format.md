@@ -18,13 +18,14 @@
       - [With media](#with-media-1)
 
 ## Login
+The first message sent must be a login request to the server when making a socket connection. Failure to do so will result in error. It should be a valid JSON message.
 ### Client Request
 ```json
 {
     "request" : "login",
     "details" : {
 
-        "user_name": "xyz" or "xyz@abc.com",
+        "user_name": "xyz or xyz@abc.com",
         "password" : "md5-hashed-password"
     
     }
@@ -50,7 +51,11 @@
 ```
 ## Messages
 
+This is the basic message conversation format. It is to be assummed that every message is sent when you have an active connection to the server. The message layout of all messages are similar with some minor important changes.
+
 ### Private Message
+
+Also known as direct messages, these messages are to be sent when the user wants to send the message to only one specific user.
 
 #### Sending Message
 
@@ -58,6 +63,7 @@
 ```json
 {
     "request" : "message",
+    "type" : "private",
     "details" : {
         "id" : "some-id",
         "type" : "private",
@@ -72,6 +78,7 @@
 ```json
 {
     "request" : "message",
+    "type" : "private",
     "details" : {
         "id" : "some-id",
         "type" : "private",
@@ -83,10 +90,12 @@
 ```
 
 ### Receiving Message
+
 #### Without media
 ```json
 {
     "request" : "message",
+    "type" : "private",
     "details" : {
         "id" : "some-id",
         "type" : "private",
@@ -101,6 +110,7 @@
 ```json
 {
     "request" : "message",
+    "type" : "private",
     "details" : {
         "id" : "some-id",
         "type" : "private",

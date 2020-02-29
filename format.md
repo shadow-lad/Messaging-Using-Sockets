@@ -70,11 +70,9 @@ Used to communicate with all the users in the server, these messages are to be s
 ```json
 {
     "request" : "message",
-    "type" : "private",
+    "type" : "gloabal",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
-        "to" : "xyz",
         "message" : "Hello World",
         "media" : null
     }
@@ -85,11 +83,9 @@ Used to communicate with all the users in the server, these messages are to be s
 ```json
 {
     "request" : "message",
-    "type" : "private",
+    "type" : "global",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
-        "to" : "xyz",
         "message" : "Hello World",
         "media" : "https://url-to-firestore/"
     }
@@ -102,10 +98,9 @@ Used to communicate with all the users in the server, these messages are to be s
 ```json
 {
     "request" : "message",
-    "type" : "private",
+    "type" : "global",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
         "from" : "xyz",
         "message" : "Hello World",
         "media" : null
@@ -117,10 +112,9 @@ Used to communicate with all the users in the server, these messages are to be s
 ```json
 {
     "request" : "message",
-    "type" : "private",
+    "type" : "global",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
         "from" : "xyz",
         "message" : "Hello World",
         "media" : "https://url-to-firestore/"
@@ -141,7 +135,6 @@ Also known as direct messages, these messages are to be sent when the user wants
     "type" : "private",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
         "to" : "xyz",
         "message" : "Hello World",
         "media" : null
@@ -156,7 +149,6 @@ Also known as direct messages, these messages are to be sent when the user wants
     "type" : "private",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
         "to" : "xyz",
         "message" : "Hello World",
         "media" : "https://url-to-firestore/"
@@ -173,7 +165,6 @@ Also known as direct messages, these messages are to be sent when the user wants
     "type" : "private",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
         "from" : "xyz",
         "message" : "Hello World",
         "media" : null
@@ -188,7 +179,6 @@ Also known as direct messages, these messages are to be sent when the user wants
     "type" : "private",
     "details" : {
         "id" : "some-id",
-        "type" : "private",
         "from" : "xyz",
         "message" : "Hello World",
         "media" : "https://url-to-firestore/"

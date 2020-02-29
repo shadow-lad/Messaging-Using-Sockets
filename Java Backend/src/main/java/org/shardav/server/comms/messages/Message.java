@@ -5,8 +5,19 @@ import org.shardav.server.comms.Request;
 public abstract class Message extends Request {
 
     enum MessageType{
-        GLOBAL,
-        PRIVATE
+        GLOBAL("global"),
+        PRIVATE("private");
+
+        private String messageType;
+
+        MessageType(String type){
+            this.messageType = type;
+        }
+
+        public String getMessageType(){
+            return this.messageType;
+        }
+
     }
 
     MessageType messageType;

@@ -12,6 +12,7 @@ import java.net.Socket;
 
 public class LoginHandler implements Runnable {
 
+    //TODO: Use the classes created in org.shardav.server.comms to handle request and make the code more readable
     private Socket client;
     private static final String LOG_TAG = LoginHandler.class.getSimpleName();
 

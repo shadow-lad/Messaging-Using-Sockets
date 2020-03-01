@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
 
+    //TODO: Use the classes created in org.shardav.server.comms to make the code more readable
+
     //TODO: Implement HashMap to find clients faster.
     // static HashMap<String,Integer> clientMap;
     static List<ClientHandler> clients = new ArrayList<>(); // List of clients

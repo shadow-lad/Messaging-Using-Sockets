@@ -9,7 +9,7 @@ public class LoginRequest extends Request {
      *
      * @param details An instance of login details containing the username and password
      */
-    public LoginRequest(LoginDetails details) {
+    private LoginRequest(LoginDetails details) {
         super(RequestType.LOGIN, details);
     }
 
@@ -22,4 +22,12 @@ public class LoginRequest extends Request {
     public LoginDetails getDetails() {
         return (LoginDetails) this.details;
     }
+
+    public static LoginRequest getInstance(){
+
+        //TODO : Use proper error handling to return a valid LoginDetails object be it global or private
+
+        return null;
+    }
+
 }

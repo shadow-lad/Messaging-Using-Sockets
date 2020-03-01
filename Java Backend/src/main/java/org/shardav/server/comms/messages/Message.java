@@ -1,5 +1,6 @@
 package org.shardav.server.comms.messages;
 
+import org.json.JSONObject;
 import org.shardav.server.comms.Request;
 
 import java.util.Map;
@@ -40,7 +41,7 @@ public class Message extends Request {
      *
      * @param details The details of the message of type &lt;? extends MessageDetails&gt;
      */
-    public Message( MessageDetails details ) {
+    private Message( MessageDetails details ) {
         super(RequestType.MESSAGE, details);
         if(details instanceof PrivateMessageDetails)
             this.messageType = MessageType.PRIVATE;
@@ -80,4 +81,10 @@ public class Message extends Request {
     public MessageDetails getDetails() {
         return (MessageDetails) this.details;
     }
+
+    public static Message getInstance(JSONObject messageObject){
+        //TODO: Use proper error handling to return a valid Message object be it global or private
+        return null;
+    }
+
 }

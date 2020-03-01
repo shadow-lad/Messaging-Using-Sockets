@@ -11,6 +11,7 @@ import java.util.Date;
 
 public class ClientHandler implements Runnable {
 
+    //TODO: Use the classes created in com.shardav.server.comms to make the code more readable
     private static final String LOG_TAG = ClientHandler.class.getSimpleName();
 
     private String name;

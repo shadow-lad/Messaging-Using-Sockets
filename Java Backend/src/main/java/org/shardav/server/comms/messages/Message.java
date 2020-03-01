@@ -38,13 +38,13 @@ public class Message extends Request {
     /**
      * Constructor used to create a message
      *
-     * @param details The details of the message which can be an instance of subclass of MessageDetails
+     * @param details The details of the message of type &lt;? extends MessageDetails&gt;
      */
     public Message( MessageDetails details ) {
         super(RequestType.MESSAGE, details);
         if(details instanceof PrivateMessageDetails)
             this.messageType = MessageType.PRIVATE;
-        else
+        else if(details instanceof GlobalMessageDetails)
             this.messageType = MessageType.GLOBAL;
 
     }
@@ -71,4 +71,13 @@ public class Message extends Request {
         return messageType;
     }
 
+    /**
+     * Fetch the details of the current message object
+     *
+     * @return An object of type MessageDetails
+     */
+    @Override
+    public MessageDetails getDetails() {
+        return (MessageDetails) this.details;
+    }
 }

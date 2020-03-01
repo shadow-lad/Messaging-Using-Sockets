@@ -1,7 +1,6 @@
 package org.shardav.server.comms.messages;
 
 import org.json.JSONObject;
-import org.shardav.server.comms.login.LoginDetails;
 
 import java.util.Map;
 
@@ -59,6 +58,12 @@ public class PrivateMessageDetails extends MessageDetails {
         return object;
     }
 
+    /**
+     * Returns an instance of PrivateMessageDetails object
+     *
+     * @param detailsObject An object of type &lt;? extends JSONObject&gt;
+     * @return An instance of PrivateMessageDetails class
+     */
     public static PrivateMessageDetails getInstance(JSONObject detailsObject){
 
         PrivateMessageDetails messageDetails = (PrivateMessageDetails) MessageDetails.getInstance(detailsObject);

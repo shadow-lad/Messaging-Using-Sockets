@@ -6,7 +6,7 @@ import org.shardav.server.comms.Details;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageDetails implements Details {
+abstract class MessageDetails implements Details {
 
     private String id, message, media, sender;
 
@@ -100,7 +100,13 @@ public class MessageDetails implements Details {
         return timeStamp;
     }
 
-    public static MessageDetails getInstance(JSONObject detailsObject){
+    /**
+     * Returns an instance of MessageDetails object
+     *
+     * @param detailsObject An object of type &lt;? extends JSONObject&gt;
+     * @return An instance of MessageDetails class
+     */
+    protected static MessageDetails getInstance(JSONObject detailsObject){
         //TODO : Use proper error handling to implement fetching of MessageDetails object
         return null;
     }

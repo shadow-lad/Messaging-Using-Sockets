@@ -1,5 +1,7 @@
 package org.shardav.server.comms.messages;
 
+import org.json.JSONObject;
+
 public class GlobalMessageDetails extends MessageDetails {
 
     /**
@@ -10,7 +12,7 @@ public class GlobalMessageDetails extends MessageDetails {
      * @param timeStamp the time at which the message was sent
      * @param sender the person who sent the message
      */
-    public GlobalMessageDetails(String id, String message, long timeStamp, String sender) {
+    private GlobalMessageDetails(String id, String message, long timeStamp, String sender) {
         super(id, message, timeStamp, sender);
     }
 
@@ -22,7 +24,20 @@ public class GlobalMessageDetails extends MessageDetails {
      * @param timeStamp the time at which the message was sent
      * @param sender the person who sent the message
      */
-    public GlobalMessageDetails(String id, String message, String media, long timeStamp, String sender) {
+    private GlobalMessageDetails(String id, String message, String media, long timeStamp, String sender) {
         super(id, message, media, timeStamp, sender);
     }
+
+    /**
+     * Returns an instance of GlobalMessageDetails object
+     *
+     * @param detailsObject An object of type &lt;? extends JSONObject&gt;
+     * @return An instance of GlobalMessageDetails class
+     */
+    public static GlobalMessageDetails getInstance(JSONObject detailsObject){
+        return (GlobalMessageDetails) MessageDetails.getInstance(detailsObject);
+    }
+
+
+
 }

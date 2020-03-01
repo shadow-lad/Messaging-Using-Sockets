@@ -43,9 +43,18 @@ public class LoginDetails implements Details {
      * @param detailsObject An object of type &lt;? extends JSONObject&gt;
      * @return An instance of LoginDetails class
      */
-    public static LoginDetails getInstance(JSONObject detailsObject){
-        //TODO : Use proper error handling to implement fetching of LoginDetails object
-        return null;
+    public static LoginDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
+
+        if(detailsObject.has("username") && detailsObject.getString("username")!=null
+                && detailsObject.has("password") && detailsObject.get("password")!=null) {
+
+            String username = detailsObject.getString("username");
+            String password = detailsObject.getString("password");
+
+            return new LoginDetails(username, password);
+
+        } else
+            throw new IllegalArgumentException("The JSONObject passed should contain keys username and password");
     }
 
 }

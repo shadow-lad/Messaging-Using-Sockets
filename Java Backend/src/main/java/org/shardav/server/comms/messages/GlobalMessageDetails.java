@@ -34,10 +34,8 @@ public class GlobalMessageDetails extends MessageDetails {
      * @param detailsObject An object of type &lt;? extends JSONObject&gt;
      * @return An instance of GlobalMessageDetails class
      */
-    public static GlobalMessageDetails getInstance(JSONObject detailsObject){
+    public static GlobalMessageDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
         return (GlobalMessageDetails) MessageDetails.getInstance(detailsObject);
     }
-
-
 
 }

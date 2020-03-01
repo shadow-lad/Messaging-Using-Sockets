@@ -12,6 +12,7 @@ public class Response {
 
     public Response(Status status) {
         this.status = status;
+        this.message = null;
     }
 
     public Response(Status status, String message) {

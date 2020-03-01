@@ -61,7 +61,5 @@ public abstract class Request {
      *
      * @return Returns the details of the object
      */
-    public Details getDetails(){
-        return this.details;
-    }
+    public abstract Details getDetails();
 }

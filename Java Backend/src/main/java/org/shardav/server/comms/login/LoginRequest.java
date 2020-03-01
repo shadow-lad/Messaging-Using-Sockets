@@ -13,4 +13,13 @@ public class LoginRequest extends Request {
         super(RequestType.LOGIN, details);
     }
 
+    /**
+     * Fetches the details of the current LoginRequest
+     *
+     * @return An instance of LoginDetails object
+     */
+    @Override
+    public LoginDetails getDetails() {
+        return (LoginDetails) this.details;
+    }
 }

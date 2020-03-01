@@ -6,7 +6,7 @@ import org.shardav.server.comms.Details;
 import java.util.HashMap;
 import java.util.Map;
 
-abstract class MessageDetails implements Details {
+class MessageDetails implements Details {
 
     private String id, message, media, sender;
 
@@ -106,9 +106,28 @@ abstract class MessageDetails implements Details {
      * @param detailsObject An object of type &lt;? extends JSONObject&gt;
      * @return An instance of MessageDetails class
      */
-    protected static MessageDetails getInstance(JSONObject detailsObject){
-        //TODO : Use proper error handling to implement fetching of MessageDetails object
-        return null;
+    protected static MessageDetails getInstance(JSONObject detailsObject)throws IllegalArgumentException {
+
+        if(detailsObject.has("id") && detailsObject.getString("id")!=null
+                && detailsObject.has("message")
+                && detailsObject.has("time") && detailsObject.getLong("time")!=0
+                && detailsObject.has("from")) {
+
+            String id = detailsObject.getString("id");
+            String message = detailsObject.getString("message");
+            long timestamp = detailsObject.getLong("time");
+            String sender = detailsObject.getString("sender");
+
+            if(detailsObject.has("media")){
+                String media = detailsObject.getString("media");
+                return new MessageDetails(id,message,media,timestamp,sender);
+            } else if (message!=null)
+                return new MessageDetails(id,message,timestamp,sender);
+            else
+                throw new IllegalArgumentException("Message cannot be null");
+        } else
+            throw new IllegalArgumentException("JSONObject should contain 'id', 'message', 'time' and 'from' keys");
+
     }
 
 }

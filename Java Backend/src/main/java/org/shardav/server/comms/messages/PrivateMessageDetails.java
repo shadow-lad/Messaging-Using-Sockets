@@ -64,13 +64,16 @@ public class PrivateMessageDetails extends MessageDetails {
      * @param detailsObject An object of type &lt;? extends JSONObject&gt;
      * @return An instance of PrivateMessageDetails class
      */
-    public static PrivateMessageDetails getInstance(JSONObject detailsObject){
+    public static PrivateMessageDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
 
         PrivateMessageDetails messageDetails = (PrivateMessageDetails) MessageDetails.getInstance(detailsObject);
 
-        //TODO : Use proper error handling to implement fetching of PrivateMessageDetails object
+        if(detailsObject.has("to") && detailsObject.getString("to")!=null){
+            messageDetails.recipient = detailsObject.getString("to");
+            return messageDetails;
+        } else
+            throw new IllegalArgumentException("private messages should contain the key 'to'");
 
-        return null;
     }
 
 }

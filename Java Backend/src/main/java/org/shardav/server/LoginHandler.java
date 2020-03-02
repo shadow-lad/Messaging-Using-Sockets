@@ -5,9 +5,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import shardav.utils.Log;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class LoginHandler implements Runnable {
@@ -24,12 +22,12 @@ public class LoginHandler implements Runnable {
     public void run() {
 
         try{
-            DataInputStream in = new DataInputStream(client.getInputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(new DataInputStream(client.getInputStream())));
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
 
             Log.i(LOG_TAG, "New login request received from : " + client.getInetAddress());
 
-            String json = in.readUTF();
+            String json = in.readLine();
 
             JSONTokener jsonParser = new JSONTokener(json);
             JSONObject root = new JSONObject(jsonParser);

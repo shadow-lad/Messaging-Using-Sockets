@@ -2,6 +2,7 @@ package org.shardav.server;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.comms.login.LoginRequest;
 import shardav.utils.Log;
 
 import java.io.*;
@@ -16,11 +17,11 @@ public class ClientHandler implements Runnable {
 
     private String name;
     final BufferedReader in;
-    final DataOutputStream out;
+    final BufferedWriter out;
     Socket socket;
     boolean isLoggedIn;
 
-    public ClientHandler(Socket s, String name, BufferedReader in, DataOutputStream out) {
+    public ClientHandler(Socket s, String name, BufferedReader in, BufferedWriter out) {
 
         this.socket = s;
         this.name = name;
@@ -43,6 +44,7 @@ public class ClientHandler implements Runnable {
 
                 JSONTokener jsonTokenizer = new JSONTokener(received);
                 JSONObject object = new JSONObject(jsonTokenizer);
+
                 object.put("from", this.name);
                 String message = object.getString("message");
                 String to = object.getString("to");
@@ -101,7 +103,7 @@ public class ClientHandler implements Runnable {
 
         for (ClientHandler client : Server.clients) {
             if (client.name.equals(to) && client.isLoggedIn) {
-                client.out.writeUTF(object.toString());
+                client.out.write(object.toString()+"\n");
                 if (message.equals("logout") && to.equals(this.name))
                     disconnect(false);
                 break;
@@ -113,7 +115,7 @@ public class ClientHandler implements Runnable {
     private void sendToEverybody(JSONObject object) throws IOException {
         for (ClientHandler client : Server.clients) {
             if (!client.getName().equals(name) && client.isLoggedIn)
-                client.out.writeUTF(object.toString());
+                client.out.write(object.toString()+"\n");
 
         }
     }

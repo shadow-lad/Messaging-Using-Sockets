@@ -1,30 +1,62 @@
 package org.shardav.server.comms;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+//TODO: Add doc string
 public class Response {
 
-    enum Status {
-        SUCCESS,
-        INVALID
+    public enum ResponseStatus {
+        SUCCESS("success"),
+        INVALID("invalid");
+
+        private String status;
+
+        ResponseStatus(String status){
+            this.status = status;
+        }
+
+        public String getValue() {
+            return status;
+        }
     }
 
-    Status status;
+    ResponseStatus responseStatus;
     String message;
 
-    public Response(Status status) {
-        this.status = status;
+    public Response(ResponseStatus responseStatus) {
+        this.responseStatus = responseStatus;
         this.message = null;
     }
 
-    public Response(Status status, String message) {
-        this.status = status;
+    public Response(ResponseStatus responseStatus, String message) {
+        this.responseStatus = responseStatus;
         this.message = message;
     }
 
-    public Status getStatus() {
-        return status;
+    public ResponseStatus getResponseStatus() {
+        return responseStatus;
     }
 
     public String getMessage() {
         return message;
     }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String toJSON(){
+        return new JSONObject(this.toMap()).toString();
+    }
+
+    private Map<String, Object> toMap(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("status",this.responseStatus.getValue());
+        map.put("message",this.getMessage());
+        return map;
+    }
+
 }

@@ -21,6 +21,10 @@ public class LoginDetails implements Details {
         this.password = password;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     /**
      * Converts the attributes of the current object to a map and returns it.
      *
@@ -45,13 +49,12 @@ public class LoginDetails implements Details {
      */
     public static LoginDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
 
-        if(detailsObject.has("username") && detailsObject.getString("username")!=null
-                && detailsObject.has("password") && detailsObject.get("password")!=null) {
+        if(detailsObject.has("username") && detailsObject.getString("username")!=null) {
 
             String username = detailsObject.getString("username");
-            String password = detailsObject.getString("password");
+            //String password = detailsObject.getString("password");
 
-            return new LoginDetails(username, password);
+            return new LoginDetails(username, null);
 
         } else
             throw new IllegalArgumentException("The JSONObject passed should contain keys username and password");

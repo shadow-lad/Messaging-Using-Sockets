@@ -1,5 +1,6 @@
 package org.shardav.server.comms.login;
 
+import org.json.JSONObject;
 import org.shardav.server.comms.Request;
 
 public class LoginRequest extends Request {
@@ -23,11 +24,26 @@ public class LoginRequest extends Request {
         return (LoginDetails) this.details;
     }
 
-    public static LoginRequest getInstance(){
+    /**
+     * Fetches an instance of LoginRequest from the JSONObject provided
+     *
+     * @param loginObject A object of type JSONObject that represents a login request
+     * @return An instance of class login request with all the fields satisfied
+     * @throws IllegalArgumentException Thrown if the request is invalid
+     */
+    public static LoginRequest getInstance(JSONObject loginObject)throws IllegalArgumentException {
 
-        //TODO : Use proper error handling to return a valid LoginDetails object be it global or private
+        if(loginObject.has("request") && loginObject.getString("request")!=null
+                && loginObject.has("details") && loginObject.getJSONObject("details")!=null){
+            RequestType request = RequestType.getRequestType(loginObject.getString("request"));
+            if(request == RequestType.LOGIN){
+                return new LoginRequest(LoginDetails.getInstance(loginObject.getJSONObject("details")));
+            } else {
+                throw new IllegalArgumentException("Invalid request type. First request should be login");
+            }
+        } else
+            throw new IllegalArgumentException("Keys 'request' or 'details' is either not present or is null");
 
-        return null;
     }
 
 }

@@ -15,12 +15,12 @@ public class ClientHandler implements Runnable {
     private static final String LOG_TAG = ClientHandler.class.getSimpleName();
 
     private String name;
-    final DataInputStream in;
+    final BufferedReader in;
     final DataOutputStream out;
     Socket socket;
     boolean isLoggedIn;
 
-    public ClientHandler(Socket s, String name, DataInputStream in, DataOutputStream out) {
+    public ClientHandler(Socket s, String name, BufferedReader in, DataOutputStream out) {
 
         this.socket = s;
         this.name = name;
@@ -36,7 +36,10 @@ public class ClientHandler implements Runnable {
 
             try {
 
-                String received = in.readUTF();
+                String received = in.readLine();
+
+                if(received == null)
+                    continue;
 
                 JSONTokener jsonTokenizer = new JSONTokener(received);
                 JSONObject object = new JSONObject(jsonTokenizer);

@@ -2,7 +2,6 @@ package org.shardav.server;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.shardav.server.comms.login.LoginRequest;
 import shardav.utils.Log;
 
 import java.io.*;

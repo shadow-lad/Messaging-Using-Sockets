@@ -185,16 +185,15 @@ public class Server {
         if (RUNNING.get()) {
             try {
                 RUNNING.set(false);
-                messageServerSocket.close();
                 for (ClientHandler currentClient : clients) {
                     if (currentClient.isLoggedIn)
                         currentClient.disconnect(true);
                 }
+                messageServerSocket.close();
             } catch (IOException ex) {
                 Log.e(LOG_TAG, "Server force closed: " + ex.getMessage(), ex);
             } finally {
                 Log.i(LOG_TAG, "Server Shutdown, EXITING...");
-                goToSleep(2000);
             }
         }
     }

@@ -17,7 +17,7 @@ public class ClientHandler implements Runnable {
     private String name;
     final BufferedReader in;
     final BufferedWriter out;
-    Socket socket;
+    private Socket socket;
     boolean isLoggedIn;
 
     public ClientHandler(Socket s, String name, BufferedReader in, BufferedWriter out) {

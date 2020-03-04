@@ -8,6 +8,8 @@
     - [Server Response](#server-response)
       - [if credentials found](#if-credentials-found)
       - [if credentials not found](#if-credentials-not-found)
+  - [Log-Out](#log-out)
+    - [Client Request](#client-request-1)
   - [Messages](#messages)
     - [Global Message](#global-message)
       - [Sending Message](#sending-message)
@@ -56,6 +58,18 @@ The first message sent must be a login request to the server when making a socke
     "message" : "Reason why user was not logged in"
 }
 ```
+
+## Log-Out
+After sending a logout request,the server will close all the connections and hence the client must close all the I/O Streams and close the socket. Failure to do so can result in an exception.
+
+### Client Request
+
+```json
+{
+    "request":"logout"
+}
+```
+
 ## Messages
 
 This is the basic message conversation format. It is to be assummed that every message is sent when you have an active connection to the server. The message layout of all messages are similar with some minor important changes.

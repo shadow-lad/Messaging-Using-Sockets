@@ -2,17 +2,21 @@ package org.shardav.server;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.comms.Request.RequestType;
+import org.shardav.server.comms.Response;
+import org.shardav.server.comms.Response.ResponseStatus;
+import org.shardav.server.comms.messages.GlobalMessageDetails;
+import org.shardav.server.comms.messages.Message;
+import org.shardav.server.comms.messages.PrivateMessageDetails;
 import shardav.utils.Log;
 
 import java.io.*;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class ClientHandler implements Runnable {
 
     //TODO: Use the classes created in com.shardav.server.comms to make the code more readable
-    private static final String LOG_TAG = ClientHandler.class.getSimpleName();
+    private static final String LOG_TAG = Server.class.getSimpleName()+": "+ClientHandler.class.getSimpleName();
 
     private String name;
     final BufferedReader in;
@@ -36,29 +40,48 @@ public class ClientHandler implements Runnable {
 
             try {
 
-                String received = in.readLine();
+                String requestData = in.readLine();
 
-                if(received == null)
+                if(requestData == null)
                     continue;
 
-                JSONTokener jsonTokenizer = new JSONTokener(received);
-                JSONObject object = new JSONObject(jsonTokenizer);
+                JSONTokener jsonTokenizer = new JSONTokener(requestData);
+                JSONObject requestObject = new JSONObject(jsonTokenizer);
 
-                object.put("from", this.name);
-                String message = object.getString("message");
-                String to = object.getString("to");
-                long time = object.getLong("time");
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss aa");
-                String timestamp = dateFormat.format(new Date(time));
-                Log.i(LOG_TAG, String.format("To: %s, From: %s, Message: %s, Timestamp: %s",
-                        to, this.name, message, timestamp));
-                if (to.equals("server") && message.equals("logout"))
-                    to = this.name;
-                object.put("to", to);
-                if (to.equals("everybody")) {
-                    sendToEverybody(object);
-                } else
-                    sendPrivate(to, message, object);
+                Response errorResponse = new Response(ResponseStatus.INVALID);
+
+                try {
+
+                    RequestType requestType = RequestType.valueOf(requestObject.getString("request"));
+
+                    if (requestType == RequestType.MESSAGE) {
+
+                        Message message = Message.getInstance(requestObject);
+
+                        switch (message.getMessageType()) {
+                            case GLOBAL:
+                                GlobalMessageDetails globalMessageDetails = (GlobalMessageDetails) message.getDetails();
+                                globalMessageDetails.setSender(this.name);
+                                JSONObject globalMessageObject = new JSONObject(globalMessageDetails.toMap());
+                                sendGlobalMessage(globalMessageObject);
+                                break;
+                            case PRIVATE:
+                                PrivateMessageDetails privateMessageDetails = (PrivateMessageDetails) message.getDetails();
+                                privateMessageDetails.setSender(this.name);
+                                String recipient = privateMessageDetails.getRecipient();
+                                JSONObject privateMessageObject = new JSONObject(privateMessageDetails.toMap());
+                                sendPrivate(recipient, privateMessageObject);
+                                break;
+                        }
+
+                    } else if(requestType == RequestType.LOGOUT)
+                        disconnect(false);
+
+                } catch (IllegalArgumentException ex){
+                    Log.e(LOG_TAG, "Error occurred", ex);
+                    errorResponse.setMessage("Request type not recognised by server.");
+                    out.write(errorResponse.toJSON()+"\n");
+                }
 
             } catch (IOException ex) {
                 if (ex instanceof EOFException)
@@ -98,20 +121,18 @@ public class ClientHandler implements Runnable {
     }
 
 
-    private void sendPrivate(String to, String message, JSONObject object) throws IOException {
+    private void sendPrivate(String recipient, JSONObject object) throws IOException {
 
         for (ClientHandler client : Server.clients) {
-            if (client.name.equals(to) && client.isLoggedIn) {
+            if (client.name.equals(recipient) && client.isLoggedIn) {
                 client.out.write(object.toString()+"\n");
-                if (message.equals("logout") && to.equals(this.name))
-                    disconnect(false);
                 break;
             }
         }
 
     }
 
-    private void sendToEverybody(JSONObject object) throws IOException {
+    private void sendGlobalMessage(JSONObject object) throws IOException {
         for (ClientHandler client : Server.clients) {
             if (!client.getName().equals(name) && client.isLoggedIn)
                 client.out.write(object.toString()+"\n");

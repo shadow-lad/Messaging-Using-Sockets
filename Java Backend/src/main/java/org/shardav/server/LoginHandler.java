@@ -3,6 +3,7 @@ package org.shardav.server;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
 import org.shardav.server.comms.login.LoginDetails;
@@ -40,25 +41,42 @@ public class LoginHandler implements Runnable {
 
             try {
 
-                LoginRequest loginRequest = LoginRequest.getInstance(root);
 
-                LoginDetails details = loginRequest.getDetails();
+                RequestType request = RequestType.valueOf(root.getString("request"));
 
-                Log.v(LOG_TAG, "Client username: "+details.getUsername());
+                if (request == RequestType.LOGIN) {
 
-                ClientHandler clientHandler = new ClientHandler(client,details.getUsername(),in, out);
-                Thread t = new Thread(clientHandler);
-                Log.i(LOG_TAG, String.format("Adding %s to active clients list",details.getUsername()));
-                Server.clients.add(clientHandler);
-                //TODO : Handle this to only add clients if they aren't already registered
-                t.start();
+                    try {
 
-                out.write(new Response(ResponseStatus.SUCCESS).toJSON());
+                        LoginRequest loginRequest = LoginRequest.getInstance(root);
 
-            } catch (IllegalArgumentException | JSONException ex){
-                Log.e(LOG_TAG,"Error parsing json",ex);
-                errorResponse.setMessage(ex.getMessage());
+                        LoginDetails details = loginRequest.getDetails();
+
+                        Log.v(LOG_TAG, "Client username: " + details.getUsername());
+
+                        ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
+                        Thread t = new Thread(clientHandler);
+                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", details.getUsername()));
+                        Server.clients.add(clientHandler);
+                        //TODO : Handle this to only add new users to the list.
+                        t.start();
+
+                        out.write(new Response(ResponseStatus.SUCCESS).toJSON());
+
+                    } catch (IllegalArgumentException | JSONException ex) {
+                        Log.e(LOG_TAG, "Error parsing json", ex);
+                        errorResponse.setMessage(ex.getMessage());
+                        out.write(errorResponse.toJSON() + "\n");
+                    }
+                } else {
+                    errorResponse.setMessage("The first request should always be a login request.");
+                    out.write(errorResponse.toJSON() + "\n");
+                }
+            } catch (IllegalArgumentException ex){
+                Log.e(LOG_TAG, "IllegalArgumentException occurred",ex);
+                errorResponse.setMessage("The first request should always be a login request.");
                 out.write(errorResponse.toJSON()+"\n");
+
             }
 
         } catch (IOException ex){

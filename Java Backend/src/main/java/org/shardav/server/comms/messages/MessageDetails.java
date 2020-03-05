@@ -101,6 +101,14 @@ class MessageDetails implements Details {
     }
 
     /**
+     * Set the sender username
+     * @param sender username of the sender
+     */
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    /**
      * Returns an instance of MessageDetails object
      *
      * @param detailsObject An object of type &lt;? extends JSONObject&gt;

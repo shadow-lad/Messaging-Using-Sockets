@@ -7,6 +7,7 @@ public abstract class Request {
 
     public enum RequestType {
         LOGIN("login"),
+        LOGOUT("logout"),
         MESSAGE("message");
 
         private final String requestType;
@@ -16,15 +17,6 @@ public abstract class Request {
         }
 
         public String getValue(){return requestType;}
-
-        public static RequestType getRequestType(String value){
-            if(value.equalsIgnoreCase("login"))
-                return RequestType.LOGIN;
-            else if(value.equalsIgnoreCase("message"))
-                return RequestType.MESSAGE;
-            else
-                return null;
-        }
 
     }
 

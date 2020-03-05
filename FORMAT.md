@@ -1,4 +1,5 @@
 # Communicating with the Server
+This file contains the guidelines to communicate with the server. Proper response, when possible, is sent by the server.
 
 ## Table of Contents
 - [Communicating with the Server](#communicating-with-the-server)

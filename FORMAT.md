@@ -26,7 +26,7 @@ This file contains the guidelines to communicate with the server. Proper respons
       - [Receiving Message](#receiving-message-1)
         - [Without media](#without-media-3)
         - [With media](#with-media-3)
-  - [Error](#error)
+  - [Error (Will be classified in the future.)](#error-will-be-classified-in-the-future)
 
 ## Login
 - The first message sent must be a login request to the server when making a socket connection. 
@@ -217,8 +217,8 @@ This file contains the guidelines to communicate with the server. Proper respons
 }
 ```
 
-## Error
-- Whenever any error occurs, a response in this format will be sent by the server to the person requesting the service. (Will be classified in the future.)
+## Error (Will be classified in the future.)
+- Whenever any error occurs, a response in this format will be sent by the server to the person requesting the service.
 ```json
 {
     "request" : "invalid",

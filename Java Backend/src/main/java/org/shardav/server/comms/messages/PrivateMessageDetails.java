@@ -55,6 +55,7 @@ public class PrivateMessageDetails extends MessageDetails {
     public Map<String, Object> toMap() {
         Map<String, Object> object = super.toMap();
         object.put("to",this.recipient);
+        object.remove("from");
         return object;
     }
 

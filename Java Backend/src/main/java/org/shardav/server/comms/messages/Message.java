@@ -1,11 +1,15 @@
 package org.shardav.server.comms.messages;
 
 import org.json.JSONObject;
+import org.shardav.server.Server;
 import org.shardav.server.comms.Request;
+import shardav.utils.Log;
 
 import java.util.Map;
 
 public class Message extends Request {
+
+    private static final String LOG_TAG = Server.class.getSimpleName()+": "+Message.class.getSimpleName();
 
     /**
      * A custom data type created to support the types of messages that can be sent
@@ -82,9 +86,38 @@ public class Message extends Request {
         return (MessageDetails) this.details;
     }
 
-    public static Message getInstance(JSONObject messageObject){
-        //TODO: Use proper error handling to return a valid Message object be it global or private
-        return null;
+    public static Message getInstance(JSONObject messageObject)throws IllegalArgumentException {
+
+        if(messageObject.has("type") && messageObject.getString("type")!=null
+                && messageObject.has("details") && messageObject.getJSONObject("details")!=null){
+
+            JSONObject details = messageObject.getJSONObject("details");
+
+            try {
+
+                MessageType messageType = MessageType.valueOf(messageObject.getString("type"));
+                MessageDetails messageDetails;
+
+                switch (messageType){
+                    case PRIVATE: messageDetails = PrivateMessageDetails.getInstance(details);
+                        break;
+                    case GLOBAL: messageDetails = GlobalMessageDetails.getInstance(details);
+                        break;
+                    default: throw new IllegalArgumentException("Message type not recognised.");
+
+                }
+
+                return new Message(messageDetails);
+
+            } catch (IllegalArgumentException ex){
+
+                Log.e(LOG_TAG, ex.getMessage(), ex);
+                throw new IllegalArgumentException("Message type not recognised.");
+
+            }
+
+        } else
+            throw new IllegalArgumentException("Illegal message format, please refer to the documentation.");
     }
 
 }

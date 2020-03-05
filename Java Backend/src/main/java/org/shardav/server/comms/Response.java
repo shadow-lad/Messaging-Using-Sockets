@@ -10,6 +10,7 @@ public class Response {
 
     public enum ResponseStatus {
         SUCCESS("success"),
+        FAILED("failed"),
         INVALID("invalid");
 
         private String status;
@@ -48,15 +49,19 @@ public class Response {
         this.message = message;
     }
 
+    public void setResponseStatus(ResponseStatus status){this.responseStatus = status;}
+
     public String toJSON(){
         return new JSONObject(this.toMap()).toString();
     }
 
     private Map<String, Object> toMap(){
+
         Map<String,Object> map = new HashMap<>();
         map.put("status",this.responseStatus.getValue());
         map.put("message",this.getMessage());
         return map;
+
     }
 
 }

@@ -10,7 +10,10 @@ import org.shardav.server.comms.messages.Message;
 import org.shardav.server.comms.messages.PrivateMessageDetails;
 import shardav.utils.Log;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.io.EOFException;
+import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler implements Runnable {
@@ -20,11 +23,11 @@ public class ClientHandler implements Runnable {
 
     private String name;
     final BufferedReader in;
-    final BufferedWriter out;
+    final PrintWriter out;
     private Socket socket;
     boolean isLoggedIn;
 
-    public ClientHandler(Socket s, String name, BufferedReader in, BufferedWriter out) {
+    public ClientHandler(Socket s, String name, BufferedReader in, PrintWriter out) {
 
         this.socket = s;
         this.name = name;
@@ -52,7 +55,7 @@ public class ClientHandler implements Runnable {
 
                 try {
 
-                    RequestType requestType = RequestType.valueOf(requestObject.getString("request"));
+                    RequestType requestType = RequestType.getRequestType(requestObject.getString("request"));
 
                     if (requestType == RequestType.MESSAGE) {
 
@@ -80,7 +83,7 @@ public class ClientHandler implements Runnable {
                 } catch (IllegalArgumentException ex){
                     Log.e(LOG_TAG, "Error occurred", ex);
                     errorResponse.setMessage("Request type not recognised by server.");
-                    out.write(errorResponse.toJSON()+"\n");
+                    out.println(errorResponse.toJSON());
                 }
 
             } catch (IOException ex) {
@@ -121,21 +124,21 @@ public class ClientHandler implements Runnable {
     }
 
 
-    private void sendPrivate(String recipient, JSONObject object) throws IOException {
+    private void sendPrivate(String recipient, JSONObject object) {
 
         for (ClientHandler client : Server.clients) {
             if (client.name.equals(recipient) && client.isLoggedIn) {
-                client.out.write(object.toString()+"\n");
+                client.out.println(object.toString());
                 break;
             }
         }
 
     }
 
-    private void sendGlobalMessage(JSONObject object) throws IOException {
+    private void sendGlobalMessage(JSONObject object) {
         for (ClientHandler client : Server.clients) {
             if (!client.getName().equals(name) && client.isLoggedIn)
-                client.out.write(object.toString()+"\n");
+                client.out.println(object.toString());
 
         }
     }

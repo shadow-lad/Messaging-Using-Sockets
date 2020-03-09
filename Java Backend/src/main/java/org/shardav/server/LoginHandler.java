@@ -10,13 +10,19 @@ import org.shardav.server.comms.login.LoginDetails;
 import org.shardav.server.comms.login.LoginRequest;
 import shardav.utils.Log;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LoginHandler implements Runnable {
 
     private Socket client;
     private static final String LOG_TAG = LoginHandler.class.getSimpleName();
+
+    private static final AtomicBoolean loggedIn = new AtomicBoolean(false);
 
     LoginHandler(Socket client){
         this.client = client;
@@ -29,58 +35,70 @@ public class LoginHandler implements Runnable {
 
             Response errorResponse = new Response(ResponseStatus.INVALID);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(new DataInputStream(client.getInputStream())));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(client.getOutputStream())));
+            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 
             Log.i(LOG_TAG, "New login request received from : " + client.getInetAddress());
 
-            String json = in.readLine();
+            while(!loggedIn.get()) {
 
-            JSONTokener jsonParser = new JSONTokener(json);
-            JSONObject root = new JSONObject(jsonParser);
+                String json = in.readLine();
 
-            try {
+                System.out.println(json);
 
+                if(json == null)
+                    continue;
 
-                RequestType request = RequestType.valueOf(root.getString("request"));
+                JSONTokener jsonParser = new JSONTokener(json);
+                JSONObject root = new JSONObject(jsonParser);
 
-                if (request == RequestType.LOGIN) {
+                try {
 
-                    try {
+                    RequestType request = RequestType.getRequestType(root.getString("request"));
 
-                        LoginRequest loginRequest = LoginRequest.getInstance(root);
+                    if (request == RequestType.LOGIN) {
 
-                        LoginDetails details = loginRequest.getDetails();
+                        try {
 
-                        Log.v(LOG_TAG, "Client username: " + details.getUsername());
+                            LoginRequest loginRequest = LoginRequest.getInstance(root);
 
-                        ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
-                        Thread t = new Thread(clientHandler);
-                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", details.getUsername()));
-                        Server.clients.add(clientHandler);
-                        //TODO : Handle this to only add new users to the list.
-                        t.start();
+                            LoginDetails details = loginRequest.getDetails();
 
-                        out.write(new Response(ResponseStatus.SUCCESS).toJSON());
+                            Log.v(LOG_TAG, "Client username: " + details.getUsername());
 
-                    } catch (IllegalArgumentException | JSONException ex) {
-                        Log.e(LOG_TAG, "Error parsing json", ex);
-                        errorResponse.setMessage(ex.getMessage());
-                        out.write(errorResponse.toJSON() + "\n");
+                            ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
+                            Thread t = new Thread(clientHandler);
+                            Log.i(LOG_TAG, String.format("Adding %s to active clients list", details.getUsername()));
+                            Server.clients.add(clientHandler);
+                            //TODO : Handle this to only add new users to the list.
+                            t.start();
+
+                            out.println(new Response(ResponseStatus.SUCCESS).toJSON());
+                            loggedIn.set(true);
+
+                        } catch (IllegalArgumentException | JSONException ex) {
+                            Log.e(LOG_TAG, "Error parsing json", ex);
+                            errorResponse.setMessage(ex.getMessage());
+                            out.println(errorResponse.toJSON());
+                            loggedIn.set(true);
+                        }
+                    } else {
+                        errorResponse.setMessage("The first request should always be a login request.");
+                        out.println(errorResponse.toJSON());
+                        loggedIn.set(true);
                     }
-                } else {
+                } catch (IllegalArgumentException ex) {
+                    Log.e(LOG_TAG, "IllegalArgumentException occurred", ex);
                     errorResponse.setMessage("The first request should always be a login request.");
-                    out.write(errorResponse.toJSON() + "\n");
-                }
-            } catch (IllegalArgumentException ex){
-                Log.e(LOG_TAG, "IllegalArgumentException occurred",ex);
-                errorResponse.setMessage("The first request should always be a login request.");
-                out.write(errorResponse.toJSON()+"\n");
+                    out.println(errorResponse.toJSON());
+                    loggedIn.set(true);
 
+                }
             }
 
         } catch (IOException ex){
             Log.e(LOG_TAG, "IOException occurred: "+ex.getMessage(), ex);
+            loggedIn.set(true);
         }
     }
 }

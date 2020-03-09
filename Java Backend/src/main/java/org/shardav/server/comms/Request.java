@@ -18,6 +18,15 @@ public abstract class Request {
 
         public String getValue(){return requestType;}
 
+        public static RequestType getRequestType(String requestType) throws IllegalArgumentException {
+            switch (requestType){
+                case "login": return LOGIN;
+                case "logout": return LOGOUT;
+                case "message": return MESSAGE;
+                default: throw new IllegalArgumentException("Illegal Request Type: " + requestType);
+            }
+        }
+
     }
 
     protected RequestType requestType;

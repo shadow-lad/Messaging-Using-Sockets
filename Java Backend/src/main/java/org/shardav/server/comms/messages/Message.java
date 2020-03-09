@@ -33,6 +33,14 @@ public class Message extends Request {
             return this.messageType;
         }
 
+        public static MessageType getMessageType(String messageType) throws IllegalArgumentException {
+            switch (messageType){
+                case "global": return GLOBAL;
+                case "private": return PRIVATE;
+                default: throw new IllegalArgumentException("Illegal Message Type: " + messageType);
+            }
+        }
+
     }
 
     /**
@@ -95,7 +103,7 @@ public class Message extends Request {
 
             try {
 
-                MessageType messageType = MessageType.valueOf(messageObject.getString("type"));
+                MessageType messageType = MessageType.getMessageType(messageObject.getString("type"));
                 MessageDetails messageDetails;
 
                 switch (messageType){

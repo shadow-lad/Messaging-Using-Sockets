@@ -35,7 +35,7 @@ public class LoginRequest extends Request {
 
         if(loginObject.has("request") && loginObject.getString("request")!=null
                 && loginObject.has("details") && loginObject.getJSONObject("details")!=null){
-            RequestType request = RequestType.valueOf(loginObject.getString("request"));
+            RequestType request = RequestType.getRequestType(loginObject.getString("request"));
             if(request == RequestType.LOGIN){
                 return new LoginRequest(LoginDetails.getInstance(loginObject.getJSONObject("details")));
             } else {

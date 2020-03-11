@@ -17,3 +17,18 @@ dependencies {
     compile group: 'org.json', name: 'json', version: '20190722'
 
 }
+
+jar {
+    manifest{
+        attributes(
+                "Implementation-Title": "Server",
+                "Implemenation-Version": 1.0,
+                "Main-Class":"org.shardav.server.Server",
+        )
+    }
+
+    from {
+        configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
+    }
+
+}

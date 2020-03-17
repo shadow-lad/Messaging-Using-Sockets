@@ -1,12 +1,19 @@
 package org.shardav.server;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import shardav.utils.Log;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: PRIORITY 1:  Keep a track of the registered users in a database
@@ -15,27 +22,61 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
 
-    //TODO: Use the classes created in org.shardav.server.comms to make the code more readable
-
     //TODO: Implement HashMap to find clients faster.
     // static HashMap<String,Integer> clientMap;
     static List<ClientHandler> clients = new ArrayList<>(); // List of clients
 
     //Log tag
     private static final String LOG_TAG = Server.class.getSimpleName();
+
+    //State of server
     private static final AtomicBoolean RUNNING = new AtomicBoolean(true);
-    private static final BufferedReader INPUT = new BufferedReader(new InputStreamReader(System.in));
+
+    //Reading input from the user.
+    private static final BufferedReader STDIN = new BufferedReader(new InputStreamReader(System.in));
+
+    final String SETTINGS_JSON_PATH;
 
     //ServerSocket, should be on at all times.
     private static ServerSocket messageServerSocket;
 
-    private Server(){}
+    //Class Variables
+    private int serverPort;
+    private String mySQLUsername, mySQLPassword;
+    private boolean verboseLogging;
+
+    //Default constructor
+    private Server() throws URISyntaxException {
+        serverPort = 6969;
+        mySQLUsername = "root";
+        mySQLPassword = "toor";
+        verboseLogging = false;
+
+        final URI PATH = Server.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+
+        String directoryPath = Paths.get(PATH).toString();
+        directoryPath = directoryPath.substring(0,directoryPath.lastIndexOf(File.separatorChar)+1);
+
+        SETTINGS_JSON_PATH = directoryPath+"settings.json";
+
+    }
+
     //Driver method to call the member functions
     public static void main(String[] args) {
-        Server server = new Server();
-        server.getServerConfig(); // Load the configuration from the server-config.json file
-        server.loadExistingUsers(); // Load the existing users from the SQLite database
-        server.startServer(); // Start the server once setup is done
+
+        try {
+
+            Server server = new Server();
+            server.getServerConfig(); // Load the configuration from the server-config.json file
+            server.loadExistingUsers(); // Load the existing users from the MySQL database
+            server.startServer(); // Start the server once setup is done
+
+        } catch (URISyntaxException | IOException ex) {
+
+            Log.e(LOG_TAG, "An error occurred while setting up the server", ex);
+
+        }
+
     }
 
     //Displays the help menu
@@ -87,15 +128,80 @@ public class Server {
         }
     }
 
-    private void getServerConfig(){
-        //TODO: Get server config from JSON file
-        // NOTE: Use System.get("user.dir") to get current directory
+    private void getServerConfig() throws IOException {
+
+        File settingsJSON = new File(SETTINGS_JSON_PATH);
+
+        if(settingsJSON.exists()){
+
+            String line;
+            StringBuilder json = new StringBuilder();
+            //Reader to read from settings.json
+            BufferedReader br = new BufferedReader(new FileReader(settingsJSON));
+
+            while((line=br.readLine())!=null)
+                json.append(line);
+
+            Log.i(LOG_TAG, "settings.json read: "+json);
+
+            try {
+
+                JSONTokener tokenizer = new JSONTokener(json.toString());
+                JSONObject settings = new JSONObject(tokenizer);
+
+                Log.i(LOG_TAG, "JSON parsed: "+settings.toString(2));
+
+                serverPort = settings.getInt("port");
+                verboseLogging = settings.getBoolean("verbose-logging");
+                JSONObject mySQL = settings.getJSONObject("my-sql");
+                mySQLUsername = mySQL.getString("username");
+                mySQLPassword = mySQL.getString("password");
+
+                Log.showVerbose(verboseLogging);
+
+            } catch (JSONException ex){
+                Log.e(LOG_TAG, "Error reading settings.json. Falling back to default settings :"+ex.getMessage());
+                writeSettingsJSON(settingsJSON);
+            }
+
+
+        } else {
+            boolean created = settingsJSON.createNewFile();
+            if(!created)
+                throw new IOException("There was a problem creating settings.json. " +
+                        "Make sure you have permissions to create files in the current directory.");
+            Log.i(LOG_TAG, "Server started for the first time, creating settings.json...");
+            writeSettingsJSON(settingsJSON);
+
+        }
+
     }
 
+    private void writeSettingsJSON(File settingsJSON)throws IOException {
+
+        if(settingsJSON.delete())
+            Log.v(LOG_TAG, "Deleted settings.json");
+        if(settingsJSON.createNewFile())
+            Log.v(LOG_TAG, "Created settings.json");
+
+        JSONObject settings = new JSONObject();
+        JSONObject mySQL = new JSONObject();
+        mySQL.put("username",mySQLUsername);
+        mySQL.put("password",mySQLPassword);
+        settings.put("port",serverPort);
+        settings.put("my-sql",mySQL);
+        settings.put("verbose-logging",verboseLogging);
+
+        PrintWriter pw = new PrintWriter(settingsJSON);
+        pw.println(settings.toString(2));
+        pw.flush();
+        pw.close();
+
+    }
 
     private void loadExistingUsers(){
         //TODO: Get users already registered to the server
-        // NOTE: This means loading users from the SQL database.
+        // NOTE: This means loading users from the MySQL database.
     }
 
     private void startServer() {
@@ -139,7 +245,7 @@ public class Server {
                     login.start();
 
                 } catch (IOException ex) {
-                    if(!ex.getMessage().equals("socket closed"))
+                    if(!ex.getMessage().equalsIgnoreCase("socket closed"))
                         Log.e(LOG_TAG, "An error occurred: " + ex.getMessage(), ex);
                 }
             }
@@ -152,7 +258,7 @@ public class Server {
         new Thread(() -> {
             while (RUNNING.get()) {
                 try {
-                    String operation = INPUT.readLine();
+                    String operation = STDIN.readLine();
                     if (operation.length() == 1)
                         switch (operation.charAt(0)) {
                             case 'l': // List active clients
@@ -169,6 +275,7 @@ public class Server {
                             case '?': // Display help menu
                                 displayHelpMenu();
                                 break;
+                            default: Log.e(LOG_TAG, "Operation not recognised, enter ? for possible operations.");
                         }
                     else
                         Log.e(LOG_TAG, "Operation not recognised, enter ? for possible operations.");
@@ -180,8 +287,15 @@ public class Server {
         }).start();
     }
 
-    //Cleans up and closes the server
-    private void quitServer() {
+    //Cleans up and closes the server ;
+    private void quitServer() throws IOException {
+
+        verboseLogging = Log.getVerbose();
+        Log.showVerbose(false);
+        File settingsJSON = new File(SETTINGS_JSON_PATH);
+        writeSettingsJSON(settingsJSON);
+        Log.showVerbose(verboseLogging);
+
         Log.i(LOG_TAG, "Shutting down server...");
         goToSleep(2000);
         if (RUNNING.get()) {

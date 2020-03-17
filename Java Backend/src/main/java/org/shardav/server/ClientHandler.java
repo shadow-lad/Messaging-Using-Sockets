@@ -19,7 +19,7 @@ import java.net.Socket;
 public class ClientHandler implements Runnable {
 
     //TODO: Use the classes created in com.shardav.server.comms to make the code more readable
-    private static final String LOG_TAG = Server.class.getSimpleName()+": "+ClientHandler.class.getSimpleName();
+    private static final String LOG_TAG = Server.class.getSimpleName() + ": " + ClientHandler.class.getSimpleName();
 
     private String name;
     final BufferedReader in;
@@ -28,24 +28,20 @@ public class ClientHandler implements Runnable {
     boolean isLoggedIn;
 
     public ClientHandler(Socket s, String name, BufferedReader in, PrintWriter out) {
-
         this.socket = s;
         this.name = name;
         this.in = in;
         this.out = out;
         this.isLoggedIn = true;
-
     }
 
     @Override
     public void run() {
         while (isLoggedIn) {
-
             try {
-
                 String requestData = in.readLine();
 
-                if(requestData == null)
+                if (requestData == null)
                     continue;
 
                 JSONTokener jsonTokenizer = new JSONTokener(requestData);
@@ -54,11 +50,9 @@ public class ClientHandler implements Runnable {
                 Response errorResponse = new Response(ResponseStatus.INVALID);
 
                 try {
-
                     RequestType requestType = RequestType.getRequestType(requestObject.getString("request"));
 
                     if (requestType == RequestType.MESSAGE) {
-
                         Message message = Message.getInstance(requestObject);
 
                         switch (message.getMessageType()) {
@@ -68,6 +62,7 @@ public class ClientHandler implements Runnable {
                                 JSONObject globalMessageObject = new JSONObject(globalMessageDetails.toMap());
                                 sendGlobalMessage(globalMessageObject);
                                 break;
+
                             case PRIVATE:
                                 PrivateMessageDetails privateMessageDetails = (PrivateMessageDetails) message.getDetails();
                                 privateMessageDetails.setSender(this.name);
@@ -76,25 +71,22 @@ public class ClientHandler implements Runnable {
                                 sendPrivate(recipient, privateMessageObject);
                                 break;
                         }
-
-                    } else if(requestType == RequestType.LOGOUT)
+                    } else if (requestType == RequestType.LOGOUT)
                         disconnect(false);
-
-                } catch (IllegalArgumentException ex){
+                } catch (IllegalArgumentException ex) {
                     Log.e(LOG_TAG, "Error occurred", ex);
                     errorResponse.setMessage("Request type not recognised by server.");
                     out.println(errorResponse.toJSON());
                 }
-
             } catch (IOException ex) {
                 if (ex instanceof EOFException)
                     disconnect(false);
                 else {
                     Log.e(LOG_TAG, "Error occurred", ex);
+
                     System.exit(0);
                 }
             }
-
         }
     }
 
@@ -103,7 +95,7 @@ public class ClientHandler implements Runnable {
     }
 
     synchronized protected void disconnect(boolean kicked) {
-        if(socket != null && socket.isConnected()) {
+        if (socket != null && socket.isConnected()) {
             try {
                 isLoggedIn = false;
 
@@ -123,16 +115,13 @@ public class ClientHandler implements Runnable {
         }
     }
 
-
     private void sendPrivate(String recipient, JSONObject object) {
-
         for (ClientHandler client : Server.clients) {
             if (client.name.equals(recipient) && client.isLoggedIn) {
                 client.out.println(object.toString());
                 break;
             }
         }
-
     }
 
     private void sendGlobalMessage(JSONObject object) {

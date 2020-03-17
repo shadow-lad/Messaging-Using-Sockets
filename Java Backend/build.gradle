@@ -13,12 +13,20 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    //Include all libraries in the lib folder.
     compile fileTree(dir:'libs', include:['*.jar'])
+    //Include the json parsing library from maven
     compile group: 'org.json', name: 'json', version: '20190722'
+<<<<<<< Updated upstream
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     compile 'com.google.apis:google-api-services-gmail:v1-rev83-1.23.0'
 	compile group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+=======
+    //Include the mysql-connector from maven
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.19'
+
+>>>>>>> Stashed changes
 
 }
 

@@ -14,3 +14,4 @@
 .vscode
 .classpath
 .settings
+/src/main/resources/credentials.json

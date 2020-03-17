@@ -29,11 +29,10 @@ import com.google.api.client.util.Base64;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.api.services.gmail.model.ListLabelsResponse;
 import com.google.api.services.gmail.model.Message;
 
 //TODO: Convert this into an API to be used in the server.
-public class GmailService {
+public class GMailService {
     
     private static final String APPLICATION_NAME = "Chat Server";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -43,7 +42,7 @@ public class GmailService {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
 
-    private GmailService(){}
+    private GMailService(){}
 
     /**
      * Creates an authorized Credential Object.
@@ -54,7 +53,7 @@ public class GmailService {
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
        
         //Load client secrets.
-        InputStream in = GmailService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        InputStream in = GMailService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null){
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
@@ -69,7 +68,7 @@ public class GmailService {
                                                 .setAccessType("offline")
                                                 .build();
         
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build()
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 
     }

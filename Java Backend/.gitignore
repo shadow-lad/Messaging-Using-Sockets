@@ -15,3 +15,5 @@
 .classpath
 .settings
 /src/main/resources/credentials.json
+tokens
+bin

@@ -8,7 +8,8 @@ public abstract class Request {
     public enum RequestType {
         LOGIN("login"),
         LOGOUT("logout"),
-        MESSAGE("message");
+        MESSAGE("message"),
+        REGISTRATION("registration");
 
         private final String requestType;
 
@@ -23,6 +24,7 @@ public abstract class Request {
                 case "login": return LOGIN;
                 case "logout": return LOGOUT;
                 case "message": return MESSAGE;
+                case "registration": return REGISTRATION;
                 default: throw new IllegalArgumentException("Illegal Request Type: " + requestType);
             }
         }

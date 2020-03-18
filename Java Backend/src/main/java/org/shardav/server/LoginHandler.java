@@ -38,7 +38,7 @@ public class LoginHandler implements Runnable {
             BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 
-            Log.i(LOG_TAG, "New login request received from : " + client.getInetAddress());
+            Log.i(LOG_TAG, "New client connected : " + client.getInetAddress());
 
             while(!loggedIn.get()) {
 
@@ -56,19 +56,25 @@ public class LoginHandler implements Runnable {
 
                     RequestType request = RequestType.getRequestType(root.getString("request"));
 
-                    if (request == RequestType.LOGIN) {
+                    if (request == RequestType.LOGIN || request == RequestType.REGISTRATION ) {
 
                         try {
+
+                            Log.i(LOG_TAG, "Handling "+request.getValue()+" request.");
 
                             LoginRequest loginRequest = LoginRequest.getInstance(root);
 
                             LoginDetails details = loginRequest.getDetails();
 
-                            Log.v(LOG_TAG, "Client username: " + details.getUsername());
+                            String username = details.getUsername();
+                            String password = details.getPassword();
+                            String email = details.getEmail();
+
+                            Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
 
                             ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
                             Thread t = new Thread(clientHandler);
-                            Log.i(LOG_TAG, String.format("Adding %s to active clients list", details.getUsername()));
+                            Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
                             Server.clients.add(clientHandler);
                             //TODO : Handle this to only add new users to the list.
                             t.start();

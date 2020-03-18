@@ -10,19 +10,41 @@ public class LoginDetails implements Details {
 
     private String username;
     private String password;
+    private String email;
 
     /**
      * Constructor used to create an instance of login details
      * @param username username of the user
      * @param password md5 hashed password cause security (duh!)
      */
-    private LoginDetails(String username, String password) {
+    private LoginDetails(String username, String password, String email) {
         this.username = username;
         this.password = password;
+        this.email = email;
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public String getPassword () {
+        return this.password;
+    }
+
+    public boolean hasUsername() {
+        return this.username != null;
+    }
+
+    public boolean hasEmail() {
+        return this.email != null;
+    }
+
+    public boolean hasPassword() {
+        return this.password != null;
     }
 
     /**
@@ -37,6 +59,7 @@ public class LoginDetails implements Details {
 
         map.put("username",this.username);
         map.put("password",this.password);
+        map.put("email",this.email);
 
         return map;
     }
@@ -49,15 +72,20 @@ public class LoginDetails implements Details {
      */
     public static LoginDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
 
-        if(detailsObject.has("username") && detailsObject.getString("username")!=null) {
+        if(detailsObject.has("username")
+                && detailsObject.has("email")
+                && detailsObject.has("password")
+                && detailsObject.getString("password") != null
+                && ( detailsObject.getString("username")!=null || detailsObject.getString("email")!=null)) {
 
             String username = detailsObject.getString("username");
-            //String password = detailsObject.getString("password");
+            String password = detailsObject.getString("password");
+            String email = detailsObject.getString("email");
 
-            return new LoginDetails(username, null);
+            return new LoginDetails(username, password, email);
 
         } else
-            throw new IllegalArgumentException("The JSONObject passed should contain keys username and password");
+            throw new IllegalArgumentException("The JSONObject passed should contain keys username, password and email.");
     }
 
 }

@@ -38,6 +38,12 @@ public class LoginRequest extends Request {
             RequestType request = RequestType.getRequestType(loginObject.getString("request"));
             if(request == RequestType.LOGIN){
                 return new LoginRequest(LoginDetails.getInstance(loginObject.getJSONObject("details")));
+            } else if (request == RequestType.REGISTRATION){
+                LoginDetails details = LoginDetails.getInstance(loginObject.getJSONObject("details"));
+                if(details.hasPassword() && details.getEmail() != null && details.getUsername()!=null)
+                    return new LoginRequest(details);
+                else
+                    throw new IllegalArgumentException("Invalid registration request, email, username and password should be present.");
             } else {
                 throw new IllegalArgumentException("Invalid request type. First request should be login");
             }

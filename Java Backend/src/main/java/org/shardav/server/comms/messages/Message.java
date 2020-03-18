@@ -53,7 +53,7 @@ public class Message extends Request {
      *
      * @param details The details of the message of type &lt;? extends MessageDetails&gt;
      */
-    private Message( MessageDetails details ) {
+    public Message( MessageDetails details ) {
         super(RequestType.MESSAGE, details);
         if(details instanceof PrivateMessageDetails)
             this.messageType = MessageType.PRIVATE;

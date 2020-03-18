@@ -6,7 +6,7 @@ import org.shardav.server.comms.Details;
 import java.util.HashMap;
 import java.util.Map;
 
-class MessageDetails implements Details {
+public class MessageDetails implements Details {
 
     private String id, message, media, sender;
 

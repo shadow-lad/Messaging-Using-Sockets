@@ -33,7 +33,7 @@ public class PrivateMessageDetails extends MessageDetails {
      * @param sender the sender of the message
      * @param recipient the recipient of the message
      */
-    private PrivateMessageDetails(String id, String message, String media, long timeStamp, String sender,String recipient) {
+    public PrivateMessageDetails(String id, String message, String media, long timeStamp, String sender,String recipient) {
         super(id, message, media, timeStamp, sender);
         this.recipient = recipient;
     }

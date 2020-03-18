@@ -129,7 +129,7 @@ public class GMailService {
         System.out.println(message.toPrettyString());
     }
 
-    public static void sendOTP(final String TO, final String OTP) throws IOException, GeneralSecurityException, MessagingException {
+    public static void sendRegistrationOTP(final String TO, final String OTP) throws IOException, GeneralSecurityException, MessagingException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
         .setApplicationName(APPLICATION_NAME)
@@ -137,7 +137,8 @@ public class GMailService {
 
         String user = "me";
 
-        String message = "<div style=\"font-family:helvetica; font-size:200%\">" +
+        String message = "" +
+                "<div style=\"font-family:helvetica; font-size:200%\">" +
                 "<p>" +
                 "Welcome!" +
                 "<br><br>" +
@@ -155,5 +156,7 @@ public class GMailService {
         sendMessage(service,user,createEmail(TO,user,"One Time Password",message));
 
     }
+
+    //TODO: Add OTP message for password change.
 
 }

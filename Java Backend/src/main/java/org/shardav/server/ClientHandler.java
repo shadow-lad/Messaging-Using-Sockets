@@ -18,7 +18,7 @@ import java.net.Socket;
 
 public class ClientHandler implements Runnable {
 
-    //TODO: Use the classes created in com.shardav.server.comms to make the code more readable
+    //TODO: Implement this to handle, socket disconnection.
     private static final String LOG_TAG = Server.class.getSimpleName() + ": " + ClientHandler.class.getSimpleName();
 
     private String email;

@@ -10,7 +10,7 @@ public class LoginRequest extends Request {
      *
      * @param details An instance of login details containing the username and password
      */
-    private LoginRequest(LoginDetails details) {
+    private LoginRequest(UserDetails details) {
         super(RequestType.LOGIN, details);
     }
 
@@ -20,8 +20,8 @@ public class LoginRequest extends Request {
      * @return An instance of LoginDetails object
      */
     @Override
-    public LoginDetails getDetails() {
-        return (LoginDetails) this.details;
+    public UserDetails getDetails() {
+        return (UserDetails) this.details;
     }
 
     /**
@@ -37,10 +37,10 @@ public class LoginRequest extends Request {
                 && loginObject.has("details") && loginObject.getJSONObject("details")!=null){
             RequestType request = RequestType.getRequestType(loginObject.getString("request"));
             if(request == RequestType.LOGIN){
-                return new LoginRequest(LoginDetails.getInstance(loginObject.getJSONObject("details")));
+                return new LoginRequest(UserDetails.getInstance(loginObject.getJSONObject("details")));
             } else if (request == RequestType.REGISTRATION){
-                LoginDetails details = LoginDetails.getInstance(loginObject.getJSONObject("details"));
-                if(details.hasPassword() && details.getEmail() != null && details.getUsername()!=null)
+                UserDetails details = UserDetails.getInstance(loginObject.getJSONObject("details"));
+                if(details.hasEmail() && details.hasUsername() && details.hasPassword())
                     return new LoginRequest(details);
                 else
                     throw new IllegalArgumentException("Invalid registration request, email, username and password should be present.");

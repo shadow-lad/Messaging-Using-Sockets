@@ -3,6 +3,8 @@ package org.shardav.server;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.comms.login.UserDetails;
+import org.shardav.server.sql.DatabaseHandler;
 import shardav.utils.Log;
 
 import java.io.*;
@@ -11,9 +13,9 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: PRIORITY 1:  Keep a track of the registered users in a database
@@ -24,7 +26,9 @@ public class Server {
 
     //TODO: Implement HashMap to find clients faster.
     // static HashMap<String,Integer> clientMap;
-    static List<ClientHandler> clients = new ArrayList<>(); // List of clients
+    static List<ClientHandler> activeClients = new ArrayList<>(); // List of active clients
+
+    static List<UserDetails> clients = new ArrayList<>();//List of all registered users.
 
     //Log tag
     private static final String LOG_TAG = Server.class.getSimpleName();
@@ -45,8 +49,11 @@ public class Server {
     private String mySQLUsername, mySQLPassword;
     private boolean verboseLogging;
 
+    private final DatabaseHandler database;
+
     //Default constructor
-    private Server() throws URISyntaxException {
+    private Server() throws URISyntaxException, IOException, SQLException {
+
         serverPort = 6969;
         mySQLUsername = "root";
         mySQLPassword = "toor";
@@ -59,6 +66,9 @@ public class Server {
 
         SETTINGS_JSON_PATH = directoryPath+"settings.json";
 
+        getServerConfig(); // Load the configuration from the settings.json file
+        database = DatabaseHandler.getInstance(mySQLUsername,mySQLPassword);
+
     }
 
     //Driver method to call the member functions
@@ -67,13 +77,12 @@ public class Server {
         try {
 
             Server server = new Server();
-            server.getServerConfig(); // Load the configuration from the server-config.json file
             server.loadExistingUsers(); // Load the existing users from the MySQL database
             server.startServer(); // Start the server once setup is done
 
-        } catch (URISyntaxException | IOException ex) {
+        } catch (URISyntaxException | IOException | SQLException ex) {
 
-            Log.e(LOG_TAG, "An error occurred while setting up the server", ex);
+            Log.e(LOG_TAG, "An error occurred while setting up the server : "+ex.getMessage(), ex);
 
         }
 
@@ -95,15 +104,15 @@ public class Server {
     //Returns a list of currently active clients
     private List<String> getActiveClients(){
         List<String> clientList = new ArrayList<>();
-        for(ClientHandler currentClient: clients){
-            clientList.add(currentClient.getName());
+        for(ClientHandler currentClient: activeClients){
+            clientList.add(currentClient.getEmail());
         }
         return clientList;
     }
 
     //Prints the active clients
     private void printActiveClients() {
-        Log.i(LOG_TAG, "Active Clients: " + (clients.size() == 0 ? "No Active Clients" : ""));
+        Log.i(LOG_TAG, "Active Clients: " + (activeClients.size() == 0 ? "No Active Clients" : ""));
         for (String currentClient : getActiveClients()) {
             Log.i(LOG_TAG, currentClient);
         }
@@ -199,9 +208,8 @@ public class Server {
 
     }
 
-    private void loadExistingUsers(){
-        //TODO: Get users already registered to the server
-        // NOTE: This means loading users from the MySQL database.
+    private void loadExistingUsers()throws SQLException {
+        clients = database.fetchUserList();
     }
 
     private void startServer() {
@@ -301,7 +309,7 @@ public class Server {
         if (RUNNING.get()) {
             try {
                 RUNNING.set(false);
-                for (ClientHandler currentClient : clients) {
+                for (ClientHandler currentClient : activeClients) {
                     if (currentClient.isLoggedIn)
                         currentClient.disconnect(true);
                 }

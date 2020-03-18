@@ -6,7 +6,7 @@ import org.json.JSONTokener;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
-import org.shardav.server.comms.login.LoginDetails;
+import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.comms.login.LoginRequest;
 import shardav.utils.Log;
 
@@ -64,7 +64,7 @@ public class LoginHandler implements Runnable {
 
                             LoginRequest loginRequest = LoginRequest.getInstance(root);
 
-                            LoginDetails details = loginRequest.getDetails();
+                            UserDetails details = loginRequest.getDetails();
 
                             String username = details.getUsername();
                             String password = details.getPassword();
@@ -75,7 +75,7 @@ public class LoginHandler implements Runnable {
                             ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
                             Thread t = new Thread(clientHandler);
                             Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
-                            Server.clients.add(clientHandler);
+                            Server.activeClients.add(clientHandler);
                             //TODO : Handle this to only add new users to the list.
                             t.start();
 

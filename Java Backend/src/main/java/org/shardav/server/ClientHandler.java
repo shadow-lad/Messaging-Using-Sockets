@@ -21,15 +21,15 @@ public class ClientHandler implements Runnable {
     //TODO: Use the classes created in com.shardav.server.comms to make the code more readable
     private static final String LOG_TAG = Server.class.getSimpleName() + ": " + ClientHandler.class.getSimpleName();
 
-    private String name;
+    private String email;
     final BufferedReader in;
     final PrintWriter out;
-    private Socket socket;
+    private final Socket socket;
     boolean isLoggedIn;
 
-    public ClientHandler(Socket s, String name, BufferedReader in, PrintWriter out) {
-        this.socket = s;
-        this.name = name;
+    public ClientHandler(Socket socket, String email, BufferedReader in, PrintWriter out) {
+        this.socket = socket;
+        this.email = email;
         this.in = in;
         this.out = out;
         this.isLoggedIn = true;
@@ -58,14 +58,14 @@ public class ClientHandler implements Runnable {
                         switch (message.getMessageType()) {
                             case GLOBAL:
                                 GlobalMessageDetails globalMessageDetails = (GlobalMessageDetails) message.getDetails();
-                                globalMessageDetails.setSender(this.name);
+                                globalMessageDetails.setSender(this.email);
                                 JSONObject globalMessageObject = new JSONObject(globalMessageDetails.toMap());
                                 sendGlobalMessage(globalMessageObject);
                                 break;
 
                             case PRIVATE:
                                 PrivateMessageDetails privateMessageDetails = (PrivateMessageDetails) message.getDetails();
-                                privateMessageDetails.setSender(this.name);
+                                privateMessageDetails.setSender(this.email);
                                 String recipient = privateMessageDetails.getRecipient();
                                 JSONObject privateMessageObject = new JSONObject(privateMessageDetails.toMap());
                                 sendPrivate(recipient, privateMessageObject);
@@ -90,8 +90,8 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    String getName() {
-        return name;
+    String getEmail() {
+        return email;
     }
 
     synchronized protected void disconnect(boolean kicked) {
@@ -107,8 +107,8 @@ public class ClientHandler implements Runnable {
                 out.close();
                 socket.close();
 
-                Server.clients.remove(this);
-                Log.i(LOG_TAG, name + (kicked ? " was kicked from the server." : " left the session."));
+                Server.activeClients.remove(this);
+                Log.i(LOG_TAG, email + (kicked ? " was kicked from the server." : " left the session."));
             } catch (IOException ex) {
                 Log.e(LOG_TAG, "Error occurred", ex);
             }
@@ -116,8 +116,8 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendPrivate(String recipient, JSONObject object) {
-        for (ClientHandler client : Server.clients) {
-            if (client.name.equals(recipient) && client.isLoggedIn) {
+        for (ClientHandler client : Server.activeClients) {
+            if (client.email.equals(recipient) && client.isLoggedIn) {
                 client.out.println(object.toString());
                 break;
             }
@@ -125,8 +125,8 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendGlobalMessage(JSONObject object) {
-        for (ClientHandler client : Server.clients) {
-            if (!client.getName().equals(name) && client.isLoggedIn)
+        for (ClientHandler client : Server.activeClients) {
+            if (!client.getEmail().equals(email) && client.isLoggedIn)
                 client.out.println(object.toString());
 
         }

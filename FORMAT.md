@@ -4,13 +4,18 @@ This file contains the guidelines to communicate with the server. Proper respons
 ## Table of Contents
 - [Communicating with the Server](#communicating-with-the-server)
   - [Table of Contents](#table-of-contents)
-  - [Login](#login)
+  - [Registration](#registration)
     - [Client Request](#client-request)
     - [Server Response](#server-response)
-      - [if credentials found / User is successfully registered.](#if-credentials-found--user-is-successfully-registered)
-      - [if credentials not found / Error why the registration failed](#if-credentials-not-found--error-why-the-registration-failed)
-  - [Log-Out](#log-out)
+      - [User is successfully registered.](#user-is-successfully-registered)
+      - [Error why the registration failed](#error-why-the-registration-failed)
+  - [Login](#login)
     - [Client Request](#client-request-1)
+    - [Server Response](#server-response-1)
+      - [if credentials found](#if-credentials-found)
+      - [if credentials not found](#if-credentials-not-found)
+  - [Log-Out](#log-out)
+    - [Client Request](#client-request-2)
   - [Messages](#messages)
     - [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
       - [Sending Message](#sending-message)
@@ -28,15 +33,51 @@ This file contains the guidelines to communicate with the server. Proper respons
         - [With media](#with-media-3)
   - [Error (Will be classified in the future.)](#error-will-be-classified-in-the-future)
 
-## Login
-- The first message sent must be a login request to the server when making a socket connection. 
-- Failure to do so will result in error. 
+## Registration
+- The first message sent must be a [login](#login)/registration request to the server when making a socket connection.
+- Failure to do so will result in error.
 - It should be a valid JSON message.
-- Password can be null at this stage in the build.
-- Currently, every login request also acts as a registration request and hence is not viable for commercial use.
 
 ### Client Request
-Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, both cannot be null. If the user is registering for the first time, email and username, both should be present.
+When registering, the <em>"email"</em>&nbsp; and <em>"password"</em>&nbsp; keys cannot be null.
+
+```json
+{
+    "request":"registration",
+    "details": {
+        "email":"xyz@abc.com",
+        "password":"md5-hashed-password",
+        "username":"xyz"
+    }
+}
+```
+
+### Server Response
+
+#### User is successfully registered.
+```json
+{
+    "status" : "success"
+}
+```
+
+#### Error why the registration failed
+```json
+{
+    "status" : "failed",
+    "message" : "Reason why the user was not registered"
+}
+```
+
+<strong style="font-size:125%;"><em>NOTE: User will be logged in once the registration is complete.</em></strong>
+
+## Login
+- The first message sent must be a login/[registration](#registration) request to the server when making a socket connection. 
+- Failure to do so will result in error. 
+- It should be a valid JSON message.
+
+### Client Request
+Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, both cannot be null.
 
 ```json
 {
@@ -53,22 +94,20 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 
 ### Server Response
 
-#### if credentials found / User is successfully registered.
+#### if credentials found
 ```json
 {
     "status" : "success"
 }
 ```
 
-#### if credentials not found / Error why the registration failed
+#### if credentials not found
 ```json
 {
     "status" : "failed",
     "message" : "Reason why user was not logged in"
 }
 ```
-
-<strong style="font-size:125%;"><em>User will be logged in once the registration is complete.</em></strong>
 
 ## Log-Out
 - After sending a logout request,the server will close all the connections and hence the client must close all the I/O Streams and close the socket.

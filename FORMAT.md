@@ -7,8 +7,8 @@ This file contains the guidelines to communicate with the server. Proper respons
   - [Login](#login)
     - [Client Request](#client-request)
     - [Server Response](#server-response)
-      - [if credentials found](#if-credentials-found)
-      - [if credentials not found](#if-credentials-not-found)
+      - [if credentials found / User is successfully registered.](#if-credentials-found--user-is-successfully-registered)
+      - [if credentials not found / Error why the registration failed](#if-credentials-not-found--error-why-the-registration-failed)
   - [Log-Out](#log-out)
     - [Client Request](#client-request-1)
   - [Messages](#messages)
@@ -36,12 +36,15 @@ This file contains the guidelines to communicate with the server. Proper respons
 - Currently, every login request also acts as a registration request and hence is not viable for commercial use.
 
 ### Client Request
+Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, both cannot be null. If the user is registering for the first time, email and username, both should be present.
+
 ```json
 {
     "request" : "login",
     "details" : {
 
-        "user_name": "xyz or xyz@abc.com",
+        "username": "xyz",
+        "email" : "xyz@abc.com",
         "password" : "md5-hashed-password"    
     }
 
@@ -50,20 +53,22 @@ This file contains the guidelines to communicate with the server. Proper respons
 
 ### Server Response
 
-#### if credentials found
+#### if credentials found / User is successfully registered.
 ```json
 {
     "status" : "success"
 }
 ```
 
-#### if credentials not found
+#### if credentials not found / Error why the registration failed
 ```json
 {
     "status" : "failed",
     "message" : "Reason why user was not logged in"
 }
 ```
+
+<strong style="font-size:125%;"><em>User will be logged in once the registration is complete.</em></strong>
 
 ## Log-Out
 - After sending a logout request,the server will close all the connections and hence the client must close all the I/O Streams and close the socket.

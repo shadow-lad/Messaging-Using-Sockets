@@ -132,7 +132,7 @@ public class Server {
 
         File settingsJSON = new File(SETTINGS_JSON_PATH);
 
-        if(settingsJSON.exists()){
+        if(settingsJSON.exists()) {
 
             String line;
             StringBuilder json = new StringBuilder();
@@ -140,7 +140,7 @@ public class Server {
             BufferedReader br = new BufferedReader(new FileReader(settingsJSON));
 
             while((line=br.readLine())!=null)
-                json.append(line);
+                json.append(line.trim());
 
             Log.i(LOG_TAG, "settings.json read: "+json);
 
@@ -208,17 +208,17 @@ public class Server {
 
         try {
 
-            Log.i(LOG_TAG, "Starting server on port 6969...");
+            Log.i(LOG_TAG, String.format("Starting server on port %d...",serverPort));
             goToSleep(5000);
 
-            //Creating a new server on port 6969
-            messageServerSocket = new ServerSocket(6969);
-            Log.i(LOG_TAG, "Server started on port 6969");
+            //Creating a new server on port serverPort
+            messageServerSocket = new ServerSocket(serverPort);
+            Log.i(LOG_TAG, String.format("Server started on port %d",serverPort));
             goToSleep(2000);
 
             initializeServerOperations();
             startAcceptingClients();
-            Log.i(LOG_TAG, "Accepting clients on port 6969");
+            Log.i(LOG_TAG, String.format("Accepting clients on port %d",serverPort));
             displayHelpMenu();
 
         } catch (IOException ex) {

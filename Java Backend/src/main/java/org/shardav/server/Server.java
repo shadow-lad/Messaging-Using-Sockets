@@ -6,7 +6,7 @@ import org.json.JSONTokener;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.handler.ClientHandler;
 import org.shardav.server.handler.VerificationHandler;
-import org.shardav.server.sql.DatabaseHandler;
+import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
 
 import java.io.*;
@@ -51,7 +51,7 @@ public class Server {
     private String mySQLUsername, mySQLPassword;
     private boolean verboseLogging;
 
-    private final DatabaseHandler database;
+    private final Database database;
 
     //Default constructor
     private Server() throws URISyntaxException, IOException, SQLException {
@@ -69,7 +69,7 @@ public class Server {
         SETTINGS_JSON_PATH = directoryPath+"settings.json";
 
         getServerConfig(); // Load the configuration from the settings.json file
-        database = DatabaseHandler.getInstance(mySQLUsername,mySQLPassword);
+        database = Database.getInstance(mySQLUsername,mySQLPassword);
 
     }
 

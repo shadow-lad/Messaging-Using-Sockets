@@ -28,7 +28,7 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     public boolean isLoggedIn;
 
-    public ClientHandler(Socket socket, String email, BufferedReader in, PrintWriter out) {
+    public ClientHandler(Socket socket, String email, final BufferedReader in, final PrintWriter out) {
         this.socket = socket;
         this.email = email;
         this.in = in;

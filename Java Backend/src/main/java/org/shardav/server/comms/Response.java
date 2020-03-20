@@ -9,9 +9,10 @@ import java.util.Map;
 public class Response {
 
     public enum ResponseStatus {
-        SUCCESS("success"),
         FAILED("failed"),
-        INVALID("invalid");
+        INVALID("invalid"),
+        SENT("sent"),
+        SUCCESS("success");
 
         private String status;
 

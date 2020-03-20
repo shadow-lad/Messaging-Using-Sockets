@@ -36,77 +36,70 @@ public class VerificationHandler implements Runnable {
 
             Response errorResponse = new Response(ResponseStatus.INVALID);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+            final BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            final PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 
             Log.i(LOG_TAG, "New client connected : " + client.getInetAddress());
 
-            while(!loggedIn.get()) {
+            String json = in.readLine();
 
-                String json = in.readLine();
+            System.out.println(json);
 
-                System.out.println(json);
+            JSONTokener jsonParser = new JSONTokener(json);
+            JSONObject root = new JSONObject(jsonParser);
 
-                if(json == null)
-                    continue;
+            try {
 
-                JSONTokener jsonParser = new JSONTokener(json);
-                JSONObject root = new JSONObject(jsonParser);
+                RequestType request = RequestType.getRequestType(root.getString("request"));
 
-                try {
+                if (request == RequestType.LOGIN || request == RequestType.REGISTRATION ) {
 
-                    RequestType request = RequestType.getRequestType(root.getString("request"));
+                    try {
 
-                    if (request == RequestType.LOGIN || request == RequestType.REGISTRATION ) {
+                        Log.i(LOG_TAG, "Handling "+request.getValue()+" request.");
 
-                        try {
+                        LoginRequest loginRequest = LoginRequest.getInstance(root);
 
-                            Log.i(LOG_TAG, "Handling "+request.getValue()+" request.");
+                        UserDetails details = loginRequest.getDetails();
 
-                            LoginRequest loginRequest = LoginRequest.getInstance(root);
+                        String username = details.getUsername();
+                        String email = details.getEmail();
 
-                            UserDetails details = loginRequest.getDetails();
-
-                            String username = details.getUsername();
-                            String password = details.getPassword();
-                            String email = details.getEmail();
-
-                            if(request == RequestType.REGISTRATION){
-                                //TODO: Start Registration Handler
-                            } else {
-                                //TODO: Start Login Handler
-                            }
-
-                            Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
-
-                            ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
-                            Thread t = new Thread(clientHandler);
-                            Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
-                            Server.activeClients.add(clientHandler);
-                            //TODO : Handle this to only add new users to the list.
-                            t.start();
-
-                            out.println(new Response(ResponseStatus.SUCCESS).toJSON());
-                            loggedIn.set(true);
-
-                        } catch (IllegalArgumentException | JSONException ex) {
-                            Log.e(LOG_TAG, "Error parsing json", ex);
-                            errorResponse.setMessage(ex.getMessage());
-                            out.println(errorResponse.toJSON());
-                            loggedIn.set(true);
+                        if(request == RequestType.REGISTRATION)
+                            new Thread(new RegistrationHandler(client, in, out, details)).start();
+                        else {
+                            //TODO: Start Login Handler
                         }
-                    } else {
-                        errorResponse.setMessage("The first request should always be a login request.");
+
+                        Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
+
+                        ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
+                        Thread t = new Thread(clientHandler);
+                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
+                        Server.activeClients.add(clientHandler);
+                        //TODO : Handle this to only add new users to the list.
+                        t.start();
+
+                        out.println(new Response(ResponseStatus.SUCCESS).toJSON());
+                        loggedIn.set(true);
+
+                    } catch (IllegalArgumentException | JSONException ex) {
+                        Log.e(LOG_TAG, "Error parsing json", ex);
+                        errorResponse.setMessage(ex.getMessage());
                         out.println(errorResponse.toJSON());
                         loggedIn.set(true);
                     }
-                } catch (IllegalArgumentException ex) {
-                    Log.e(LOG_TAG, "IllegalArgumentException occurred", ex);
+                } else {
                     errorResponse.setMessage("The first request should always be a login request.");
                     out.println(errorResponse.toJSON());
                     loggedIn.set(true);
-
                 }
+            } catch (IllegalArgumentException ex) {
+                Log.e(LOG_TAG, "IllegalArgumentException occurred", ex);
+                errorResponse.setMessage("The first request should always be a login request.");
+                out.println(errorResponse.toJSON());
+                loggedIn.set(true);
+
             }
 
         } catch (IOException ex){

@@ -8,6 +8,8 @@ This file contains the guidelines to communicate with the server. Proper respons
   - [Table of Contents](#table-of-contents)
   - [Registration](#registration)
     - [Client Request](#client-request)
+      - [Begin Registration Process](#begin-registration-process)
+      - [Verify OTP](#verify-otp)
     - [Server Response](#server-response)
       - [OTP Sent](#otp-sent)
       - [User is successfully registered](#user-is-successfully-registered)
@@ -44,6 +46,8 @@ This file contains the guidelines to communicate with the server. Proper respons
 
 ### Client Request
 
+#### Begin Registration Process
+
 When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
@@ -54,6 +58,15 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
         "password":"md5-hashed-password",
         "username":"xyz"
     }
+}
+```
+
+#### Verify OTP
+
+```json
+{
+    "request":"verify",
+    "otp":"1234"
 }
 ```
 

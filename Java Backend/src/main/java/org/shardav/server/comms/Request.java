@@ -9,7 +9,8 @@ public abstract class Request {
         LOGIN("login"),
         LOGOUT("logout"),
         MESSAGE("message"),
-        REGISTRATION("registration");
+        REGISTRATION("registration"),
+        VERIFY("verify");
 
         private final String requestType;
 

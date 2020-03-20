@@ -10,10 +10,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseHandler {
+public class Database {
 
     private final Connection connection;
-    private static DatabaseHandler instance;
+    private static Database instance;
 
     private final PreparedStatement VIEW_MESSAGES_BY_EMAIL;
     private final PreparedStatement FETCH_USER_DETAILS_BY_EMAIL;
@@ -21,9 +21,9 @@ public class DatabaseHandler {
 
     private static final Object LOCK = new Object();
 
-    private static final String LOG_TAG = Server.class.getSimpleName() + ": " + DatabaseHandler.class.getSimpleName();
+    private static final String LOG_TAG = Server.class.getSimpleName() + ": " + Database.class.getSimpleName();
 
-    private DatabaseHandler(String host, String port, String username, String password) throws SQLException {
+    private Database(String host, String port, String username, String password) throws SQLException {
 
         final String MYSQL_BASE_URL_FORMAT = "jdbc:mysql://%s:%s";
 
@@ -44,18 +44,18 @@ public class DatabaseHandler {
 
     }
 
-    public static DatabaseHandler getInstance(String username, String password)throws SQLException{
+    public static Database getInstance(String username, String password)throws SQLException{
         return getInstance("localhost",username, password);
     }
 
-    public static DatabaseHandler getInstance(String host, String username, String password)throws SQLException {
+    public static Database getInstance(String host, String username, String password)throws SQLException {
         return getInstance(host,"3306",username,password);
     }
 
-    public static DatabaseHandler getInstance(String host, String port, String username, String password)throws SQLException {
+    public static Database getInstance(String host, String port, String username, String password)throws SQLException {
         synchronized (LOCK) {
             if (instance == null)
-                instance = new DatabaseHandler(host,port,username,password);
+                instance = new Database(host,port,username,password);
         }
         return instance;
     }

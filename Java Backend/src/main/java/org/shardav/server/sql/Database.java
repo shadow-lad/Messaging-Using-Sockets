@@ -60,6 +60,66 @@ public class Database {
         return instance;
     }
 
+    public boolean addMessage (Message message)throws SQLException {
+
+        if(!(message.getDetails() instanceof PrivateMessageDetails))
+            return false;
+
+        else {
+
+            PrivateMessageDetails details = (PrivateMessageDetails) message.getDetails();
+            String statement;
+
+            if(details.getMedia() == null )
+                statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA,
+                        details.getId(),
+                        details.getRecipient(),
+                        details.getSender(),
+                        details.getMessage(),
+                        details.getTimeStamp());
+
+            else if(details.getMessage() == null)
+                statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MESSAGES,
+                        details.getId(),
+                        details.getRecipient(),
+                        details.getSender(),
+                        details.getMedia(),
+                        details.getTimeStamp());
+
+            else
+                statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITH_MEDIA,
+                        details.getId(),
+                        details.getRecipient(),
+                        details.getSender(),
+                        details.getMedia(),
+                        details.getMessage(),
+                        details.getTimeStamp());
+
+            Statement insertMessage = connection.createStatement();
+            int rows = insertMessage.executeUpdate(statement);
+
+            Log.v(LOG_TAG, "Message "+details.getId()+" inserted into database, "+rows+" affected.");
+            return true;
+
+        }
+
+    }
+
+    public boolean insertUser(UserDetails details) throws SQLException {
+
+        String statement = String.format(SQLStatements.INSERT_USER,
+                details.getEmail(),
+                details.getUsername(),
+                details.getPassword());
+
+        Statement insertUser = connection.createStatement();
+        int rows = insertUser.executeUpdate(statement);
+
+        Log.v(LOG_TAG, "User "+details.getUsername()+" inserted into database, "+rows+" affected.");
+        return true;
+
+    }
+
     public List<Message> fetchMessagesByEmail (String email) throws SQLException {
         List<Message> messages = new ArrayList<>();
 
@@ -128,51 +188,6 @@ public class Database {
             throw new IllegalArgumentException("User not found.");
         else
             return userDetails;
-
-    }
-
-    public boolean addMessage (Message message)throws SQLException {
-
-        if(!(message.getDetails() instanceof PrivateMessageDetails))
-            return false;
-
-        else {
-
-            PrivateMessageDetails details = (PrivateMessageDetails) message.getDetails();
-            String statement;
-
-            if(details.getMedia() == null )
-                statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA,
-                        details.getId(),
-                        details.getRecipient(),
-                        details.getSender(),
-                        details.getMessage(),
-                        details.getTimeStamp());
-
-            else if(details.getMessage() == null)
-                statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MESSAGES,
-                        details.getId(),
-                        details.getRecipient(),
-                        details.getSender(),
-                        details.getMedia(),
-                        details.getTimeStamp());
-
-            else
-                statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITH_MEDIA,
-                        details.getId(),
-                        details.getRecipient(),
-                        details.getSender(),
-                        details.getMedia(),
-                        details.getMessage(),
-                        details.getTimeStamp());
-
-            Statement insertMessage = connection.createStatement();
-            int rows = insertMessage.executeUpdate(statement);
-
-            Log.v(LOG_TAG, "Message "+details.getId()+" inserted into database, "+rows+" affected.");
-            return true;
-
-        }
 
     }
 

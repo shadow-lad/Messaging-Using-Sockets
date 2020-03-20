@@ -38,4 +38,8 @@ public class SQLStatements {
             "%s,%s,%s,%s,%s,%d" +
             ");";
 
+    public static final String INSERT_USER = "INSERT INTO users VALUES (" +
+            "%s,%s,%s" +
+            ");";
+
 }

@@ -4,7 +4,7 @@ import org.shardav.server.Server;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.comms.messages.Message;
 import org.shardav.server.comms.messages.PrivateMessageDetails;
-import shardav.utils.Log;
+import org.shardav.utils.Log;
 
 import java.sql.*;
 import java.util.ArrayList;

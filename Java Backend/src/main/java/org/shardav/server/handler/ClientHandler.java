@@ -1,14 +1,15 @@
-package org.shardav.server;
+package org.shardav.server.handler;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.Server;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
 import org.shardav.server.comms.messages.GlobalMessageDetails;
 import org.shardav.server.comms.messages.Message;
 import org.shardav.server.comms.messages.PrivateMessageDetails;
-import shardav.utils.Log;
+import org.shardav.utils.Log;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -22,10 +23,10 @@ public class ClientHandler implements Runnable {
     private static final String LOG_TAG = Server.class.getSimpleName() + ": " + ClientHandler.class.getSimpleName();
 
     private String email;
-    final BufferedReader in;
-    final PrintWriter out;
+    private final BufferedReader in;
+    private final PrintWriter out;
     private final Socket socket;
-    boolean isLoggedIn;
+    public boolean isLoggedIn;
 
     public ClientHandler(Socket socket, String email, BufferedReader in, PrintWriter out) {
         this.socket = socket;
@@ -90,11 +91,12 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    synchronized protected void disconnect(boolean kicked) {
+    synchronized public void disconnect(boolean kicked) {
+
         if (socket != null && socket.isConnected()) {
             try {
                 isLoggedIn = false;
@@ -113,23 +115,28 @@ public class ClientHandler implements Runnable {
                 Log.e(LOG_TAG, "Error occurred", ex);
             }
         }
+
     }
 
     private void sendPrivate(String recipient, JSONObject object) {
+
         for (ClientHandler client : Server.activeClients) {
             if (client.email.equals(recipient) && client.isLoggedIn) {
                 client.out.println(object.toString());
                 break;
             }
         }
+
     }
 
     private void sendGlobalMessage(JSONObject object) {
+
         for (ClientHandler client : Server.activeClients) {
             if (!client.getEmail().equals(email) && client.isLoggedIn)
                 client.out.println(object.toString());
 
         }
+
     }
 
 }

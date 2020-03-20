@@ -1,45 +1,49 @@
 # Communicating with the Server
+
 This file contains the guidelines to communicate with the server. Proper response, when possible, is sent by the server.
 
 ## Table of Contents
+
 - [Communicating with the Server](#communicating-with-the-server)
   - [Table of Contents](#table-of-contents)
   - [Registration](#registration)
     - [Client Request](#client-request)
     - [Server Response](#server-response)
-      - [User is successfully registered.](#user-is-successfully-registered)
+      - [User is successfully registered](#user-is-successfully-registered)
       - [Error why the registration failed](#error-why-the-registration-failed)
   - [Login](#login)
-    - [Client Request](#client-request-1)
-    - [Server Response](#server-response-1)
+    - [Client Login Request](#client-login-request)
+    - [Server Login Response](#server-login-response)
       - [if credentials found](#if-credentials-found)
       - [if credentials not found](#if-credentials-not-found)
   - [Log-Out](#log-out)
-    - [Client Request](#client-request-2)
+    - [Client Log-Out Request](#client-log-out-request)
   - [Messages](#messages)
     - [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
       - [Sending Message](#sending-message)
         - [Without media](#without-media)
         - [With media](#with-media)
       - [Receiving Message](#receiving-message)
-        - [Without media](#without-media-1)
-        - [With media](#with-media-1)
+        - [Receiving Messages without Media](#receiving-messages-without-media)
+        - [Receiving Messages with Media](#receiving-messages-with-media)
     - [Private Message](#private-message)
-      - [Sending Message](#sending-message-1)
-        - [Without media](#without-media-2)
-        - [With media](#with-media-2)
-      - [Receiving Message](#receiving-message-1)
-        - [Without media](#without-media-3)
-        - [With media](#with-media-3)
+      - [Sending Private Message](#sending-private-message)
+        - [Sending Private Message without Media](#sending-private-message-without-media)
+        - [Sending Private Message with Media](#sending-private-message-with-media)
+      - [Receiving Private Message](#receiving-private-message)
+        - [Receving Private Message without Media](#receving-private-message-without-media)
+        - [Receiving Private Message with Media](#receiving-private-message-with-media)
   - [Error (Will be classified in the future.)](#error-will-be-classified-in-the-future)
 
 ## Registration
+
 - The first message sent must be a [login](#login)/registration request to the server when making a socket connection.
 - Failure to do so will result in error.
 - It should be a valid JSON message.
 
 ### Client Request
-When registering, the <em>"email"</em>&nbsp; and <em>"password"</em>&nbsp; keys cannot be null.
+
+When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
@@ -54,7 +58,8 @@ When registering, the <em>"email"</em>&nbsp; and <em>"password"</em>&nbsp; keys 
 
 ### Server Response
 
-#### User is successfully registered.
+#### User is successfully registered
+
 ```json
 {
     "status" : "success"
@@ -62,6 +67,7 @@ When registering, the <em>"email"</em>&nbsp; and <em>"password"</em>&nbsp; keys 
 ```
 
 #### Error why the registration failed
+
 ```json
 {
     "status" : "failed",
@@ -69,15 +75,17 @@ When registering, the <em>"email"</em>&nbsp; and <em>"password"</em>&nbsp; keys 
 }
 ```
 
-<strong style="font-size:125%;"><em>NOTE: User will be logged in once the registration is complete.</em></strong>
+>***NOTE: User will be logged in once the registration is complete.***
 
 ## Login
-- The first message sent must be a login/[registration](#registration) request to the server when making a socket connection. 
-- Failure to do so will result in error. 
+
+- The first message sent must be a login/[registration](#registration) request to the server when making a socket connection.
+- Failure to do so will result in error.
 - It should be a valid JSON message.
 
-### Client Request
-Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, both cannot be null.
+### Client Login Request
+
+Either the *"username"* or the *"email"*&nbsp; key can be null, both cannot be null.
 
 ```json
 {
@@ -86,15 +94,16 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 
         "username": "xyz",
         "email" : "xyz@abc.com",
-        "password" : "md5-hashed-password"    
+        "password" : "md5-hashed-password"
     }
 
 }
 ```
 
-### Server Response
+### Server Login Response
 
 #### if credentials found
+
 ```json
 {
     "status" : "success"
@@ -102,6 +111,7 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 ```
 
 #### if credentials not found
+
 ```json
 {
     "status" : "failed",
@@ -110,10 +120,11 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 ```
 
 ## Log-Out
+
 - After sending a logout request,the server will close all the connections and hence the client must close all the I/O Streams and close the socket.
 - Failure to do so can result in an exception.
 
-### Client Request
+### Client Log-Out Request
 
 ```json
 {
@@ -123,7 +134,7 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 
 ## Messages
 
-- This is the basic message conversation format. 
+- This is the basic message conversation format.
 - It is to be assummed that every message is sent when you have an active connection to the server.
 - The message layout of all messages are similar with some minor but important changes.
 
@@ -134,6 +145,7 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 #### Sending Message
 
 ##### Without media
+
 ```json
 {
     "request" : "message",
@@ -148,6 +160,7 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 ```
 
 ##### With media
+
 ```json
 {
     "request" : "message",
@@ -163,7 +176,8 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 
 #### Receiving Message
 
-##### Without media
+##### Receiving Messages without Media
+
 ```json
 {
     "request" : "message",
@@ -178,7 +192,8 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 }
 ```
 
-##### With media
+##### Receiving Messages with Media
+
 ```json
 {
     "request" : "message",
@@ -197,9 +212,10 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 
 - Also known as direct messages, these messages are to be sent when the user wants to send the message to only one specific user.
 
-#### Sending Message
+#### Sending Private Message
 
-##### Without media
+##### Sending Private Message without Media
+
 ```json
 {
     "request" : "message",
@@ -214,7 +230,8 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 }
 ```
 
-##### With media
+##### Sending Private Message with Media
+
 ```json
 {
     "request" : "message",
@@ -229,9 +246,10 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 }
 ```
 
-#### Receiving Message
+#### Receiving Private Message
 
-##### Without media
+##### Receving Private Message without Media
+
 ```json
 {
     "request" : "message",
@@ -246,7 +264,8 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 }
 ```
 
-##### With media
+##### Receiving Private Message with Media
+
 ```json
 {
     "request" : "message",
@@ -262,7 +281,9 @@ Either the <em>"username"</em> or the <em>"email"</em>&nbsp; key can be null, bo
 ```
 
 ## Error (Will be classified in the future.)
+
 - Whenever any error occurs, a response in this format will be sent by the server to the person requesting the service.
+
 ```json
 {
     "request" : "invalid",

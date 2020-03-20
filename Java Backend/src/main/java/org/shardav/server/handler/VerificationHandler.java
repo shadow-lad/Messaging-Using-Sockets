@@ -1,14 +1,15 @@
-package org.shardav.server;
+package org.shardav.server.handler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.Server;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.comms.login.LoginRequest;
-import shardav.utils.Log;
+import org.shardav.utils.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -17,14 +18,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class LoginHandler implements Runnable {
+public class VerificationHandler implements Runnable {
 
     private Socket client;
-    private static final String LOG_TAG = LoginHandler.class.getSimpleName();
+    private static final String LOG_TAG = VerificationHandler.class.getSimpleName();
 
     private static final AtomicBoolean loggedIn = new AtomicBoolean(false);
 
-    LoginHandler(Socket client){
+    public VerificationHandler(Socket client){
         this.client = client;
     }
 
@@ -69,6 +70,12 @@ public class LoginHandler implements Runnable {
                             String username = details.getUsername();
                             String password = details.getPassword();
                             String email = details.getEmail();
+
+                            if(request == RequestType.REGISTRATION){
+                                //TODO: Start Registration Handler
+                            } else {
+                                //TODO: Start Login Handler
+                            }
 
                             Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
 

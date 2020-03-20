@@ -4,8 +4,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.shardav.server.comms.login.UserDetails;
+import org.shardav.server.handler.ClientHandler;
+import org.shardav.server.handler.VerificationHandler;
 import org.shardav.server.sql.DatabaseHandler;
-import shardav.utils.Log;
+import org.shardav.utils.Log;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -26,7 +28,7 @@ public class Server {
 
     //TODO: Implement HashMap to find clients faster.
     // static HashMap<String,Integer> clientMap;
-    static List<ClientHandler> activeClients = new ArrayList<>(); // List of active clients
+    public static List<ClientHandler> activeClients = new ArrayList<>(); // List of active clients
 
     static List<UserDetails> clients = new ArrayList<>();//List of all registered users.
 
@@ -103,38 +105,45 @@ public class Server {
 
     //Returns a list of currently active clients
     private List<String> getActiveClients(){
+
         List<String> clientList = new ArrayList<>();
-        for(ClientHandler currentClient: activeClients){
+        for(ClientHandler currentClient: activeClients)
             clientList.add(currentClient.getEmail());
-        }
         return clientList;
+
     }
 
     //Prints the active clients
     private void printActiveClients() {
+
         Log.i(LOG_TAG, "Active Clients: " + (activeClients.size() == 0 ? "No Active Clients" : ""));
         for (String currentClient : getActiveClients()) {
             Log.i(LOG_TAG, currentClient);
         }
+
     }
 
     //Toggles verbose output
     private void toggleVerbose() {
-        boolean previous = Log.getVerbose();
+
+        boolean previous = Log.verboseIsShown();
         if (previous)
             Log.i(LOG_TAG, "Disabling verbose output.");
         else
             Log.i(LOG_TAG, "Enabling verbose output.");
         Log.showVerbose(!previous);
+
     }
 
     //Sends the calling thread to sleep
     private void goToSleep(long millis) {
+
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ex) {
             Log.e(LOG_TAG, ex.getMessage() == null ? "Thread Interrupted" : ex.getMessage(), ex);
         }
+
     }
 
     private void getServerConfig() throws IOException {
@@ -237,6 +246,7 @@ public class Server {
 
     //Start the thread that lets clients connect to the server
     private void startAcceptingClients() {
+
         new Thread(() -> {
 
             while (RUNNING.get()) {
@@ -249,8 +259,8 @@ public class Server {
 
                     //Creating a new thread to handle logging in
                     // so that client requests are not queued
-                    Thread login = new Thread(new LoginHandler(client));
-                    login.start();
+                    Thread verify = new Thread(new VerificationHandler(client));
+                    verify.start();
 
                 } catch (IOException ex) {
                     if(!ex.getMessage().equalsIgnoreCase("socket closed"))
@@ -259,10 +269,12 @@ public class Server {
             }
 
         }).start();
+
     }
 
     // Enable operating on the server while it is running
     private void initializeServerOperations() {
+
         new Thread(() -> {
             while (RUNNING.get()) {
                 try {
@@ -293,12 +305,13 @@ public class Server {
                 }
             }
         }).start();
+
     }
 
     //Cleans up and closes the server ;
     private void quitServer() throws IOException {
 
-        verboseLogging = Log.getVerbose();
+        verboseLogging = Log.verboseIsShown();
         Log.showVerbose(false);
         File settingsJSON = new File(SETTINGS_JSON_PATH);
         writeSettingsJSON(settingsJSON);

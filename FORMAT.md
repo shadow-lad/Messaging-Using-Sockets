@@ -9,6 +9,7 @@ This file contains the guidelines to communicate with the server. Proper respons
   - [Registration](#registration)
     - [Client Request](#client-request)
     - [Server Response](#server-response)
+      - [OTP Sent](#otp-sent)
       - [User is successfully registered](#user-is-successfully-registered)
       - [Error why the registration failed](#error-why-the-registration-failed)
   - [Login](#login)
@@ -57,6 +58,15 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 ```
 
 ### Server Response
+
+#### OTP Sent
+
+```json
+{
+    "status": "sent",
+    "message": "OTP sent to xyz@abc.com"
+}
+```
 
 #### User is successfully registered
 

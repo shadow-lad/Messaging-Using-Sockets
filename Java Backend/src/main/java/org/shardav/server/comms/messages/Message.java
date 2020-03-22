@@ -3,7 +3,7 @@ package org.shardav.server.comms.messages;
 import org.json.JSONObject;
 import org.shardav.server.Server;
 import org.shardav.server.comms.Request;
-import shardav.utils.Log;
+import org.shardav.utils.Log;
 
 import java.util.Map;
 

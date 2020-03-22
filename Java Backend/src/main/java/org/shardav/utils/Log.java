@@ -1,8 +1,5 @@
 package org.shardav.utils;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
-
 import java.io.*;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -40,11 +37,9 @@ public class Log {
 
     /**
      * Output a log of level INFO.
-     *
-     * @param TAG     Nullable TAG for the log message
      * @param message LOG message
      */
-    public static void i(@Nullable String TAG, @NotNull String message) {
+    public static void i(String TAG, String message) {
         TAG = TAG == null ? "" : TAG;
         String currentTime = getCurrentTime();
         String output = String.format(MESSAGE_FORMAT, currentTime, "INFO",
@@ -60,7 +55,7 @@ public class Log {
      * @param message   LOG message
      * @param throwable (Optional) any object of type {@link Throwable}
      */
-    public static void i(@Nullable String TAG, @NotNull String message, @Nullable Throwable throwable) {
+    public static void i(String TAG, String message, Throwable throwable) {
         i(TAG, message);
         if (throwable != null) {
             throwable.printStackTrace();
@@ -74,7 +69,7 @@ public class Log {
      * @param TAG     Nullable TAG for the log message
      * @param message LOG message
      */
-    public static void d(@Nullable String TAG, @NotNull String message) {
+    public static void d(String TAG, String message) {
         TAG = TAG == null ? "" : TAG;
         String currentTime = getCurrentTime();
         String output = String.format(MESSAGE_FORMAT, currentTime, "DEBUG",
@@ -90,7 +85,7 @@ public class Log {
      * @param message   LOG message
      * @param throwable (Optional) any object of type {@link Throwable}
      */
-    public static void d(@Nullable String TAG, @NotNull String message, @Nullable Throwable throwable) {
+    public static void d(String TAG, String message, Throwable throwable) {
 
         d(TAG, message);
         if (throwable != null) {
@@ -106,7 +101,7 @@ public class Log {
      * @param TAG     Nullable TAG for the log message
      * @param message LOG message
      */
-    public static void v(@Nullable String TAG, @NotNull String message) {
+    public static void v(String TAG, String message) {
 
         String currentTime = getCurrentTime();
         String output = String.format(MESSAGE_FORMAT, currentTime, "VERBOSE",
@@ -126,7 +121,7 @@ public class Log {
      * @param message   LOG message
      * @param throwable (Optional) any object of type {@link Throwable}
      */
-    public static void v(@Nullable String TAG, @NotNull String message, @Nullable Throwable throwable) {
+    public static void v(String TAG, String message, Throwable throwable) {
         v(TAG, message);
         if (throwable != null) {
             if (LOG_VERBOSE)
@@ -142,7 +137,7 @@ public class Log {
      * @param TAG     Nullable TAG for the log message
      * @param message LOG message
      */
-    public static void e(@Nullable String TAG, @NotNull String message) {
+    public static void e(String TAG, String message) {
         TAG = TAG == null ? "" : TAG;
         String currentTime = getCurrentTime();
         System.err.println(String.format(MESSAGE_FORMAT, currentTime, "ERROR",
@@ -156,7 +151,7 @@ public class Log {
      * @param message   LOG message
      * @param throwable (Optional) any object of type {@link Throwable}
      */
-    public static void e(@Nullable String TAG, @NotNull String message, @Nullable Throwable throwable) {
+    public static void e(String TAG, String message, Throwable throwable) {
         e(TAG, message);
         if (throwable != null) {
             throwable.printStackTrace();

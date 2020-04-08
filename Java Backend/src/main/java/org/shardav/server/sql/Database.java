@@ -18,6 +18,7 @@ public class Database {
     private final PreparedStatement VIEW_MESSAGES_BY_EMAIL;
     private final PreparedStatement FETCH_USER_DETAILS_BY_EMAIL;
     private final PreparedStatement FETCH_USER_DETAILS_BY_USERNAME;
+    private final PreparedStatement DELETE_USER_BY_EMAIL;
 
     private static final Object LOCK = new Object();
 
@@ -41,6 +42,7 @@ public class Database {
         VIEW_MESSAGES_BY_EMAIL = connection.prepareStatement(SQLStatements.VIEW_MESSAGES_BY_EMAIL);
         FETCH_USER_DETAILS_BY_EMAIL = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_EMAIL);
         FETCH_USER_DETAILS_BY_USERNAME = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_USERNAME);
+        DELETE_USER_BY_EMAIL = connection.prepareStatement(SQLStatements.DELETE_USER_BY_EMAIL);
 
     }
 
@@ -62,31 +64,28 @@ public class Database {
 
     public boolean addMessage (Message message)throws SQLException {
 
-        if(!(message.getDetails() instanceof PrivateMessageDetails))
+        if (!(message.getDetails() instanceof PrivateMessageDetails)) {
             return false;
-
-        else {
+        } else {
 
             PrivateMessageDetails details = (PrivateMessageDetails) message.getDetails();
             String statement;
 
-            if(details.getMedia() == null )
+            if (details.getMedia() == null ) {
                 statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA,
                         details.getId(),
                         details.getRecipient(),
                         details.getSender(),
                         details.getMessage(),
                         details.getTimeStamp());
-
-            else if(details.getMessage() == null)
+            } else if(details.getMessage() == null) {
                 statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MESSAGES,
                         details.getId(),
                         details.getRecipient(),
                         details.getSender(),
                         details.getMedia(),
                         details.getTimeStamp());
-
-            else
+            } else {
                 statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITH_MEDIA,
                         details.getId(),
                         details.getRecipient(),
@@ -94,6 +93,7 @@ public class Database {
                         details.getMedia(),
                         details.getMessage(),
                         details.getTimeStamp());
+            }
 
             Statement insertMessage = connection.createStatement();
             int rows = insertMessage.executeUpdate(statement);
@@ -105,7 +105,19 @@ public class Database {
 
     }
 
-    public boolean insertUser(UserDetails details) throws SQLException {
+    public void deleteUserByEmail(String email) throws SQLException {
+        DELETE_USER_BY_EMAIL.clearParameters();
+        DELETE_USER_BY_EMAIL.setString(1, email);
+
+        DELETE_USER_BY_EMAIL.execute();
+    }
+
+    public static void main(String[] args) throws SQLException {
+        Database database = getInstance("root", "toor");
+        database.deleteUserByEmail("shardav.lad21@gmail.com");
+    }
+
+    public void insertUser(UserDetails details) throws SQLException {
 
         String statement = String.format(SQLStatements.INSERT_USER,
                 details.getEmail(),
@@ -116,7 +128,6 @@ public class Database {
         int rows = insertUser.executeUpdate(statement);
 
         Log.v(LOG_TAG, "User "+details.getUsername()+" inserted into database, "+rows+" affected.");
-        return true;
 
     }
 
@@ -124,7 +135,7 @@ public class Database {
         List<Message> messages = new ArrayList<>();
 
         VIEW_MESSAGES_BY_EMAIL.clearParameters();
-        VIEW_MESSAGES_BY_EMAIL.setString(1,email);
+        VIEW_MESSAGES_BY_EMAIL.setString(1, email);
 
         ResultSet result = VIEW_MESSAGES_BY_EMAIL.executeQuery();
 

@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-//TODO: Add doc string
 public class Response {
 
     public enum ResponseStatus {

@@ -121,8 +121,17 @@ public class RegistrationHandler implements Runnable {
                             }
                         }  catch (InterruptedException | ExecutionException ex) {
                             Log.e(LOG_TAG, "An error occurred while checking if user was inserted into the database. Rolling back", ex);
-                            //TODO: Error registering user status report
-                            //  Delete user too.
+                            //TODO: Delete user too.
+                            Response failed = new Response(ResponseStatus.FAILED, "An error occurred while trying to register user details. Try again later.");
+                            out.println(failed.toJSON());
+                            out.flush();
+                            ServerExecutors.getDatabaseExecutor().submit(()->{
+                                try {
+                                    database.deleteUserByEmail(details.getEmail());
+                                } catch (SQLException ignore) {
+
+                                }
+                            });
                         }
 
                     } else {

@@ -85,7 +85,7 @@ public class UserDetails implements Details {
             String password = detailsObject.getString("password");
             String email = detailsObject.getString("email");
 
-            return new UserDetails(username, password, email);
+            return new UserDetails(email, username, password);
 
         } else
             throw new IllegalArgumentException("The JSONObject passed should contain keys username, password and email.");

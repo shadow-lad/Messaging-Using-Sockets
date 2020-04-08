@@ -15,22 +15,81 @@ import java.util.Date;
  */
 public class Log {
 
+    enum LOG {
+
+        DEBUG("DEBUG"),
+        ERROR("ERROR"),
+        INFO("INFO"),
+        VERBOSE("VERBOSE");
+
+        private String level;
+        LOG(String level){
+            this.level = level;
+        }
+
+        public String getLevel(){return this.level;}
+
+    }
+
     private static boolean LOG_VERBOSE = false;
 
     private static final String MESSAGE_FORMAT = "[%s %s] %s | %s : %s";
 
-    private static PrintWriter out;
+    private static final Object LOCK = new Object();
 
-    static {
+    private static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss aa");
 
-        try {
-            String path = Paths.get(Log.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
-            path = path.substring(0, path.lastIndexOf(File.separatorChar) + 1) + "log.txt";
-            out = new PrintWriter(new FileOutputStream(path, false));
-        } catch (Exception ex) {
+    private static void printLogMessage(LOG level, String className, String TAG, String message, Throwable throwable ) {
 
-            System.err.println("Error creating log.txt: " + ex.getMessage());
+        synchronized (LOCK) {
 
+            PrintWriter out = null;
+
+            try {
+                String path = Paths.get(Log.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
+                path = path.substring(0, path.lastIndexOf(File.separatorChar) + 1) + "server.log";
+                out = new PrintWriter(new FileOutputStream(path));
+
+                if (TAG == null) {
+                    TAG = "";
+                }
+
+                String output = String.format(MESSAGE_FORMAT,
+                        getCurrentTime(),
+                        level.getLevel(),
+                        className,
+                        TAG,
+                        message);
+
+                out.println(output);
+                out.flush();
+                if(throwable !=null) {
+                    throwable.printStackTrace(out);
+                    out.flush();
+                }
+
+                if(level == LOG.VERBOSE & !LOG_VERBOSE) {
+                    return;
+                }
+
+                if(level == LOG.ERROR) {
+                    System.err.println(output);
+                } else {
+                    System.out.println(output);
+                }
+
+                if (throwable!=null) {
+                    throwable.printStackTrace();
+                }
+
+            } catch (Exception ex) {
+                System.err.println("Error creating log.txt: " + ex.getMessage());
+            } finally {
+                if(out!=null) {
+                    out.flush();
+                    out.close();
+                }
+            }
         }
 
     }
@@ -40,12 +99,7 @@ public class Log {
      * @param message LOG message
      */
     public static void i(String TAG, String message) {
-        TAG = TAG == null ? "" : TAG;
-        String currentTime = getCurrentTime();
-        String output = String.format(MESSAGE_FORMAT, currentTime, "INFO",
-                Thread.currentThread().getStackTrace()[2].getClassName(), TAG, message);
-        System.out.println(output);
-        out.println(output);
+        i(TAG, message, null);
     }
 
     /**
@@ -56,11 +110,13 @@ public class Log {
      * @param throwable (Optional) any object of type {@link Throwable}
      */
     public static void i(String TAG, String message, Throwable throwable) {
-        i(TAG, message);
-        if (throwable != null) {
-            throwable.printStackTrace();
-            throwable.printStackTrace(out);
-        }
+
+        printLogMessage(LOG.INFO,
+                Thread.currentThread().getStackTrace()[2].getClassName(),
+                TAG,
+                message,
+                throwable);
+
     }
 
     /**
@@ -70,12 +126,7 @@ public class Log {
      * @param message LOG message
      */
     public static void d(String TAG, String message) {
-        TAG = TAG == null ? "" : TAG;
-        String currentTime = getCurrentTime();
-        String output = String.format(MESSAGE_FORMAT, currentTime, "DEBUG",
-                Thread.currentThread().getStackTrace()[2].getClassName(), TAG, message);
-        System.out.println(output);
-        out.println(output);
+        d(TAG, message, null);
     }
 
     /**
@@ -87,11 +138,11 @@ public class Log {
      */
     public static void d(String TAG, String message, Throwable throwable) {
 
-        d(TAG, message);
-        if (throwable != null) {
-            throwable.printStackTrace();
-            throwable.printStackTrace(out);
-        }
+        printLogMessage(LOG.DEBUG,
+                Thread.currentThread().getStackTrace()[2].getClassName(),
+                TAG,
+                message,
+                throwable);
 
     }
 
@@ -102,16 +153,7 @@ public class Log {
      * @param message LOG message
      */
     public static void v(String TAG, String message) {
-
-        String currentTime = getCurrentTime();
-        String output = String.format(MESSAGE_FORMAT, currentTime, "VERBOSE",
-                Thread.currentThread().getStackTrace()[2].getClassName(), TAG, message);
-        if (LOG_VERBOSE) {
-            TAG = TAG == null ? "" : TAG;
-            System.out.println(output);
-        }
-        out.println(output);
-
+        v(TAG, message, null);
     }
 
     /**
@@ -122,12 +164,12 @@ public class Log {
      * @param throwable (Optional) any object of type {@link Throwable}
      */
     public static void v(String TAG, String message, Throwable throwable) {
-        v(TAG, message);
-        if (throwable != null) {
-            if (LOG_VERBOSE)
-                throwable.printStackTrace();
-            throwable.printStackTrace(out);
-        }
+
+        printLogMessage(LOG.VERBOSE,
+                Thread.currentThread().getStackTrace()[2].getClassName(),
+                TAG,
+                message,
+                throwable);
 
     }
 
@@ -138,10 +180,7 @@ public class Log {
      * @param message LOG message
      */
     public static void e(String TAG, String message) {
-        TAG = TAG == null ? "" : TAG;
-        String currentTime = getCurrentTime();
-        System.err.println(String.format(MESSAGE_FORMAT, currentTime, "ERROR",
-                Thread.currentThread().getStackTrace()[2].getClassName(), TAG, message));
+        e(TAG, message, null);
     }
 
     /**
@@ -152,18 +191,15 @@ public class Log {
      * @param throwable (Optional) any object of type {@link Throwable}
      */
     public static void e(String TAG, String message, Throwable throwable) {
-        e(TAG, message);
-        if (throwable != null) {
-            throwable.printStackTrace();
-            throwable.printStackTrace(out);
-        }
+        printLogMessage(LOG.ERROR,
+                Thread.currentThread().getStackTrace()[2].getClassName(),
+                TAG,
+                message,
+                throwable);
     }
 
     private static String getCurrentTime() {
-
-        SimpleDateFormat time = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss aa");
-        return time.format(new Date());
-
+        return timeFormat.format(new Date());
     }
 
     /**
@@ -175,6 +211,11 @@ public class Log {
         LOG_VERBOSE = show;
     }
 
+    /**
+     * Returns true if verbose logging is being shown
+     *
+     * @return boolean value that indicates if verbose logging is shown.
+     */
     public static boolean verboseIsShown() {
         return LOG_VERBOSE;
     }

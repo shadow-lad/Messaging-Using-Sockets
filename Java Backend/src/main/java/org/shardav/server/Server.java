@@ -6,6 +6,7 @@ import org.json.JSONTokener;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.handler.ClientHandler;
 import org.shardav.server.handler.VerificationHandler;
+import org.shardav.server.mail.GMailService;
 import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
 
@@ -15,9 +16,11 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: PRIORITY 1:  Keep a track of the registered users in a database
@@ -53,6 +56,8 @@ public class Server {
 
     private final Database database;
 
+    private final GMailService gMailService;
+
     //Default constructor
     private Server() throws URISyntaxException, IOException, SQLException {
 
@@ -60,6 +65,12 @@ public class Server {
         mySQLUsername = "root";
         mySQLPassword = "toor";
         verboseLogging = false;
+
+        try {
+            this.gMailService = GMailService.getInstance();
+        } catch (GeneralSecurityException | IOException ex) {
+            throw new RuntimeException("Error getting an instance of GMail Service", ex);
+        }
 
         final URI PATH = Server.class.getProtectionDomain().getCodeSource().getLocation().toURI();
 
@@ -81,6 +92,7 @@ public class Server {
             Server server = new Server();
             server.loadExistingUsers(); // Load the existing users from the MySQL database
             server.startServer(); // Start the server once setup is done
+            Log.i(LOG_TAG, "A detailed output is available in the server.log file");
 
         } catch (URISyntaxException | IOException | SQLException ex) {
 
@@ -127,10 +139,11 @@ public class Server {
     private void toggleVerbose() {
 
         boolean previous = Log.verboseIsShown();
-        if (previous)
+        if (previous) {
             Log.i(LOG_TAG, "Disabling verbose output.");
-        else
+        } else {
             Log.i(LOG_TAG, "Enabling verbose output.");
+        }
         Log.showVerbose(!previous);
 
     }
@@ -150,7 +163,9 @@ public class Server {
 
         File settingsJSON = new File(SETTINGS_JSON_PATH);
 
-        if(settingsJSON.exists()) {
+        Log.i(LOG_TAG, "Loading settings if exists...");
+
+        if (settingsJSON.exists()) {
 
             String line;
             StringBuilder json = new StringBuilder();
@@ -159,8 +174,6 @@ public class Server {
 
             while((line=br.readLine())!=null)
                 json.append(line.trim());
-
-            Log.i(LOG_TAG, "settings.json read: "+json);
 
             try {
 
@@ -177,6 +190,8 @@ public class Server {
 
                 Log.showVerbose(verboseLogging);
 
+                Log.i(LOG_TAG, "Settings loaded");
+
             } catch (JSONException ex){
                 Log.e(LOG_TAG, "Error reading settings.json. Falling back to default settings :"+ex.getMessage());
                 writeSettingsJSON(settingsJSON);
@@ -185,10 +200,11 @@ public class Server {
 
         } else {
             boolean created = settingsJSON.createNewFile();
-            if(!created)
+            if (!created) {
                 throw new IOException("There was a problem creating settings.json. " +
                         "Make sure you have permissions to create files in the current directory.");
-            Log.i(LOG_TAG, "Server started for the first time, creating settings.json...");
+            }
+            Log.i(LOG_TAG, "Server started for the first time, creating settings.json in the server directory.");
             writeSettingsJSON(settingsJSON);
 
         }
@@ -197,10 +213,12 @@ public class Server {
 
     private void writeSettingsJSON(File settingsJSON)throws IOException {
 
-        if(settingsJSON.delete())
+        if (settingsJSON.delete()) {
             Log.v(LOG_TAG, "Deleted settings.json");
-        if(settingsJSON.createNewFile())
+        }
+        if (settingsJSON.createNewFile()) {
             Log.v(LOG_TAG, "Created settings.json");
+        }
 
         JSONObject settings = new JSONObject();
         JSONObject mySQL = new JSONObject();
@@ -225,7 +243,7 @@ public class Server {
 
         try {
 
-            Log.i(LOG_TAG, String.format("Starting server on port %d...",serverPort));
+            Log.i(LOG_TAG, "Setting up and starting server...");
             goToSleep(5000);
 
             //Creating a new server on port serverPort
@@ -247,7 +265,7 @@ public class Server {
     //Start the thread that lets clients connect to the server
     private void startAcceptingClients() {
 
-        new Thread(() -> {
+        ServerExecutors.getServerExecutor().submit(() -> {
 
             while (RUNNING.get()) {
 
@@ -259,27 +277,27 @@ public class Server {
 
                     //Creating a new thread to handle logging in
                     // so that client requests are not queued
-                    Thread verify = new Thread(new VerificationHandler(client));
-                    verify.start();
+                    ServerExecutors.getVerificationHandlerExecutor().submit(new VerificationHandler(client, gMailService));
 
                 } catch (IOException ex) {
-                    if(!ex.getMessage().equalsIgnoreCase("socket closed"))
+                    if (!ex.getMessage().equalsIgnoreCase("socket closed")) {
                         Log.e(LOG_TAG, "An error occurred: " + ex.getMessage(), ex);
+                    }
                 }
             }
 
-        }).start();
+        });
 
     }
 
     // Enable operating on the server while it is running
     private void initializeServerOperations() {
 
-        new Thread(() -> {
+        ServerExecutors.getServerExecutor().submit(() -> {
             while (RUNNING.get()) {
                 try {
                     String operation = STDIN.readLine();
-                    if (operation.length() == 1)
+                    if (operation.length() == 1) {
                         switch (operation.charAt(0)) {
                             case 'l': // List active clients
                                 printActiveClients();
@@ -295,16 +313,17 @@ public class Server {
                             case '?': // Display help menu
                                 displayHelpMenu();
                                 break;
-                            default: Log.e(LOG_TAG, "Operation not recognised, enter ? for possible operations.");
+                            default:
+                                Log.e(LOG_TAG, "Operation not recognised, enter ? for possible operations.");
                         }
-                    else
+                    } else
                         Log.e(LOG_TAG, "Operation not recognised, enter ? for possible operations.");
 
                 } catch (IOException ex) {
                     Log.e(LOG_TAG, "An error occurred while trying to read from System.in", ex);
                 }
             }
-        }).start();
+        });
 
     }
 
@@ -323,9 +342,11 @@ public class Server {
             try {
                 RUNNING.set(false);
                 for (ClientHandler currentClient : activeClients) {
-                    if (currentClient.isLoggedIn)
+                    if (currentClient.isLoggedIn) {
                         currentClient.disconnect(true);
+                    }
                 }
+                ServerExecutors.close();
                 messageServerSocket.close();
             } catch (IOException ex) {
                 Log.e(LOG_TAG, "Server force closed: " + ex.getMessage(), ex);

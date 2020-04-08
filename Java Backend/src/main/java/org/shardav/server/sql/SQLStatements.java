@@ -21,6 +21,8 @@ public class SQLStatements {
 
     public static final String VIEW_USER_LIST = "SELECT email, username from users;";
 
+    public static final String DELETE_USER_BY_EMAIL = "DELETE FROM users WHERE email = ?;";
+
     public static final String VIEW_MESSAGES_BY_EMAIL = "SELECT * FROM private_messages WHERE receiver = ?;";
 
     public static final String FETCH_USER_DETAILS_BY_EMAIL = "SELECT username, password FROM users WHERE email = ?";

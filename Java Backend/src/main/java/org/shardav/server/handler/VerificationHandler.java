@@ -3,6 +3,7 @@ package org.shardav.server.handler;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.shardav.server.Server;
 import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
@@ -19,9 +20,10 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//TODO: Put in controlled infinite loop
 public class VerificationHandler implements Runnable {
 
     private Socket client;
@@ -88,21 +90,52 @@ public class VerificationHandler implements Runnable {
                                 out.flush();
                             }
                         } else {
-                            //TODO: Log the user in.
+                            Future<UserDetails> databaseUser = ServerExecutors.getDatabaseExecutor().submit(()->{
+                                try {
+                                    return email == null ? database.fetchUserDetailsByUsername(username) : database.fetchUserDetailsByMail(email);
+                                } catch (SQLException ex) {
+                                    Log.e(LOG_TAG, "Error fetching user details", ex);
+                                    Response failed = new Response(ResponseStatus.FAILED, ex.getMessage());
+                                    out.println(failed.toJSON());
+                                    out.flush();
+                                    return null;
+                                }
+                            });
+
+                            try {
+                                UserDetails registeredDetails = databaseUser.get();
+                                if (registeredDetails != null) {
+
+                                    boolean sameUsername = email == null ? username.equals(registeredDetails.getUsername())
+                                            : email.equals(registeredDetails.getEmail());
+
+                                    boolean samePassword = details.getPassword().equals(registeredDetails.getPassword());
+
+                                    if(sameUsername && samePassword) {
+
+                                        Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
+
+                                        ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
+                                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
+                                        Server.activeClients.add(clientHandler);
+                                        ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
+
+                                        out.println(new Response(ResponseStatus.SUCCESS).toJSON());
+                                        out.flush();
+                                        loggedIn.set(true);
+                                    } else {
+                                        Response failed = new Response(ResponseStatus.FAILED, "Wrong credentials");
+                                        out.println(failed.toJSON());
+                                        out.flush();
+                                    }
+                                }
+                            } catch (InterruptedException | ExecutionException ex) {
+                                Log.e(LOG_TAG, "An error occurred while trying to retrieve user details", ex);
+                                Response error = new Response(ResponseStatus.FAILED, "An error occurred, try again later.");
+                                out.println(error.toJSON());
+                                out.flush();
+                            }
                         }
-
-                        /*Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
-
-                        ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
-                        Thread t = new Thread(clientHandler);
-                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
-                        Server.activeClients.add(clientHandler);
-                        //TODO : Handle this to only add new users to the list.
-                        t.start();
-
-                        out.println(new Response(ResponseStatus.SUCCESS).toJSON());
-                        out.flush();
-                        loggedIn.set(true);*/
 
                     } catch (IllegalArgumentException | JSONException ex) {
                         Log.e(LOG_TAG, "An error occurred while trying to handle the JSON", ex);
@@ -134,7 +167,6 @@ public class VerificationHandler implements Runnable {
 
         } catch (IOException ex) {
             Log.e(LOG_TAG, "IOException occurred: " + ex.getMessage(), ex);
-            loggedIn.set(true);
         }
 
     }

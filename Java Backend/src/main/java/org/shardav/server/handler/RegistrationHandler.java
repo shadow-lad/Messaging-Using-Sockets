@@ -102,8 +102,7 @@ public class RegistrationHandler implements Runnable {
                             database = Database.getInstance("root", "toor");
                             inserted = ServerExecutors.getDatabaseExecutor().submit(()->{
                                 try {
-                                    database.insertUser(details);
-                                    return true;
+                                    return database.insertUser(details);
                                 } catch (SQLException ex) {
                                     Log.e(LOG_TAG, "Error inserting user", ex);
                                     return false;

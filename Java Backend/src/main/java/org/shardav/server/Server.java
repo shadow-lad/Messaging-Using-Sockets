@@ -272,9 +272,7 @@ public class Server {
                 try {
 
                     Socket client = messageServerSocket.accept(); //Accept connections to the server
-
-                    //TODO: Create a proper user database
-
+                        
                     //Creating a new thread to handle logging in
                     // so that client requests are not queued
                     ServerExecutors.getVerificationHandlerExecutor().submit(new VerificationHandler(client, gMailService));

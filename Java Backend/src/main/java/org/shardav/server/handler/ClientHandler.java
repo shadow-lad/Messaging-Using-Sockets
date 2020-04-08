@@ -13,13 +13,12 @@ import org.shardav.utils.Log;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler implements Runnable {
 
-    //TODO: Implement this to handle, socket disconnection.
     private static final String LOG_TAG = Server.class.getSimpleName() + ": " + ClientHandler.class.getSimpleName();
 
     private String email;
@@ -78,9 +77,10 @@ public class ClientHandler implements Runnable {
                     Log.e(LOG_TAG, "Error occurred", ex);
                     errorResponse.setMessage("Request type not recognised by server.");
                     out.println(errorResponse.toJSON());
+                    out.flush();
                 }
             } catch (IOException ex) {
-                if (ex instanceof EOFException)
+                if (ex instanceof SocketException)
                     disconnect(false);
                 else {
                     Log.e(LOG_TAG, "Error occurred", ex);
@@ -123,6 +123,7 @@ public class ClientHandler implements Runnable {
         for (ClientHandler client : Server.activeClients) {
             if (client.email.equals(recipient) && client.isLoggedIn) {
                 client.out.println(object.toString());
+                client.out.flush();
                 break;
             }
         }
@@ -134,6 +135,7 @@ public class ClientHandler implements Runnable {
         for (ClientHandler client : Server.activeClients) {
             if (!client.getEmail().equals(email) && client.isLoggedIn)
                 client.out.println(object.toString());
+                client.out.flush();
 
         }
 

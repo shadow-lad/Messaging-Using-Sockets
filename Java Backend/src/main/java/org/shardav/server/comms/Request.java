@@ -26,6 +26,7 @@ public abstract class Request {
                 case "logout": return LOGOUT;
                 case "message": return MESSAGE;
                 case "registration": return REGISTRATION;
+                case "verify": return VERIFY;
                 default: throw new IllegalArgumentException("Illegal Request Type: " + requestType);
             }
         }

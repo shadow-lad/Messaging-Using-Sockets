@@ -28,18 +28,18 @@ public class SQLStatements {
     public static final String FETCH_USER_DETAILS_BY_USERNAME = "SELECT email, password FROM users WHERE username = ?";
 
     public static final String INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA = "INSERT INTO private_messages(id, receiver, sender, message, time) VALUES (" +
-            "%s,%s,%s,%s,%d" +
+            "\"%s\", \"%s\", \"%s\", \"%s\", \"%d\"" +
             ");";
     public static final String INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MESSAGES = "INSERT INTO private_messages(id, receiver, sender, media, time) VALUES (" +
-            "%s,%s,%s,%s,%d" +
+            "\"%s\", \"%s\", \"%s\", \"%s\", \"%d\"" +
             ");";
 
     public static final String INSERT_INTO_PRIVATE_MESSAGES_WITH_MEDIA = "INSERT INTO private_messages(id, receiver, sender, media, message, time) VALUES (" +
-            "%s,%s,%s,%s,%s,%d" +
+            "\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%d\"" +
             ");";
 
     public static final String INSERT_USER = "INSERT INTO users VALUES (" +
-            "%s,%s,%s" +
+            " \"%s\", \"%s\", \"%s\"" +
             ");";
 
 }

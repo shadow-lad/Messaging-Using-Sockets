@@ -3,6 +3,7 @@ package org.shardav.server.handler;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.shardav.server.Server;
+import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
@@ -12,13 +13,15 @@ import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
 
 import javax.mail.MessagingException;
+import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class RegistrationHandler implements Runnable {
 
@@ -28,15 +31,17 @@ public class RegistrationHandler implements Runnable {
     final private BufferedReader in;
     final private PrintWriter out;
     final private UserDetails details;
+    final private GMailService gMailService;
 
     private String OTP;
 
-    public RegistrationHandler(final Socket client, final BufferedReader in, final PrintWriter out, final UserDetails details){
+    public RegistrationHandler(final Socket client, final BufferedReader in, final PrintWriter out, final UserDetails details, GMailService gMailService) {
 
         this.client = client;
         this.in = in;
         this.out = out;
         this.details = details;
+        this.gMailService = gMailService;
 
     }
 
@@ -46,84 +51,102 @@ public class RegistrationHandler implements Runnable {
         Response response = new Response(ResponseStatus.FAILED);
 
         StringBuilder OTP = new StringBuilder(String.valueOf(new Random().nextInt(10000)));
-        while(OTP.length() < 4)
+        while (OTP.length() < 4)
             OTP.append("0");
 
         try {
-            GMailService.sendRegistrationOTP(details.getEmail(), OTP.toString());
+            gMailService.sendRegistrationOTP(details.getEmail(), OTP.toString());
+
             response.setResponseStatus(ResponseStatus.SENT);
-            response.setMessage("OTP sent to "+details.getEmail());
+
+            response.setMessage("OTP sent to " + details.getEmail());
+
             this.OTP = OTP.toString();
-        } catch (GeneralSecurityException | MessagingException | IOException ex){
-            Log.e(LOG_TAG, "An error occurred while trying to send OTP "+ex.getMessage());
+        } catch (MessagingException | IOException ex) {
+            Log.e(LOG_TAG, "An error occurred while trying to send OTP " + ex.getMessage());
             response.setMessage(ex.getMessage());
         }
 
         out.println(response.toJSON());
+        out.flush();
 
-        if(response.getResponseStatus() == ResponseStatus.FAILED)
-            disconnect();
-        else
+        if (response.getResponseStatus() == ResponseStatus.SUCCESS) {
             login();
-
-    }
-
-    private void disconnect(){
-        try {
-            client.close();
-            in.close();
-            out.close();
-        } catch (IOException ex){
-            Log.e(LOG_TAG, "An error occurred while trying to disconnect "+client.getInetAddress()+": "+ex.getMessage());
         }
+
     }
 
-    private void login(){
+    private void login() {
 
         try {
             String json = in.readLine();
 
+            if(json == null) {
+                return;
+            }
+
             JSONObject verify = new JSONObject(new JSONTokener(json));
 
-            if(verify.has("request")
-                    && RequestType.getRequestType(verify.getString("request")) == RequestType.VERIFY){
+            if (verify.has("request")
+                    && RequestType.getRequestType(verify.getString("request")) == RequestType.VERIFY) {
 
-                if(verify.has("otp")
-                    && verify.getString("otp")!=null){
+                if (verify.has("otp")
+                        && verify.getString("otp") != null) {
 
-                    if(this.OTP.equals(verify.getString("otp"))) {
+                    if (this.OTP.equals(verify.getString("otp"))) {
 
+                        Future<Boolean> inserted;
+                        Database database;
                         try {
                             //TODO: Ponder upon how to properly handle this and then do it
-                            Database database = Database.getInstance("root", "toor");
-                            database.insertUser(details);
-                        } catch (SQLException ex){
+                            database = Database.getInstance("root", "toor");
+                            inserted = ServerExecutors.getDatabaseExecutor().submit(()->{
+                                try {
+                                    database.insertUser(details);
+                                    return true;
+                                } catch (SQLException ex) {
+                                    Log.e(LOG_TAG, "Error inserting user", ex);
+                                    return false;
+                                }
+                            });
+                        } catch (SQLException ex) {
                             ex.printStackTrace();
                             return;
                         }
-
-                        ClientHandler clientHandler = new ClientHandler(client, details.getEmail(), in, out);
-                        Server.activeClients.add(clientHandler);
-                        new Thread(clientHandler).start();
+                        try {
+                            if (inserted.get()) {
+                                ClientHandler clientHandler = new ClientHandler(client, details.getEmail(), in, out);
+                                Server.activeClients.add(clientHandler);
+                                ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
+                            }
+                        }  catch (InterruptedException | ExecutionException ex) {
+                            Log.e(LOG_TAG, "An error occurred while checking if user was inserted into the database. Rolling back", ex);
+                            //TODO: Error registering user status report
+                            //  Delete user too.
+                        }
 
                     } else {
                         Response failed = new Response(ResponseStatus.FAILED, "Invalid OTP");
                         out.println(failed.toJSON());
+                        out.flush();
+
                     }
 
                 } else {
                     Response errorResponse = new Response(ResponseStatus.INVALID, "Key OTP should be present");
                     out.println(errorResponse.toJSON());
+                    out.flush();
                 }
 
             } else {
                 Response errorResponse = new Response(ResponseStatus.INVALID, "Excepted an request of type verify");
                 out.println(errorResponse.toJSON());
+                out.flush();
 
             }
 
-        } catch (IOException ex){
-            Log.e(LOG_TAG, "Error Reading from "+details.getEmail()+"'s input stream",ex);
+        } catch (IOException ex) {
+            Log.e(LOG_TAG, "Error Reading from " + details.getEmail() + "'s input stream", ex);
         }
 
     }

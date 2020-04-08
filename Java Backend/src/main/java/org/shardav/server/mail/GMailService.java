@@ -30,6 +30,8 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
+import org.mortbay.util.IO;
+import org.shardav.utils.Log;
 
 public class GMailService {
     
@@ -40,16 +42,23 @@ public class GMailService {
     private static List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
+    private static final String LOG_TAG = GMailService.class.getCanonicalName() + " : " + GMailService.class.getSimpleName();
 
-    private GMailService(){}
+    private static final Object LOCK = new Object();
+    private static GMailService instance = null;
 
-    /**
-     * Creates an authorized Credential Object.
-     * @param HTTP_TRANSPORT The network HTTP Transport.
-     * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private final NetHttpTransport HTTP_TRANSPORT;
+    private final Gmail SERVICE;
+
+
+    private GMailService() throws IOException, GeneralSecurityException {
+        HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        SERVICE = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
+            .setApplicationName(APPLICATION_NAME)
+            .build();
+    }
+
+    private Credential getCredentials() throws IOException {
        
         //Load client secrets.
         InputStream in = GMailService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
@@ -71,69 +80,41 @@ public class GMailService {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 
     }
-
-    /**
-     * Create a MimeMessage using the parameters provided.
-     *
-     * @param to email address of the receiver
-     * @param from email address of the sender, the mailbox account
-     * @param subject subject of the email
-     * @param bodyText body text of the email
-     * @return the MimeMessage to be used to send email
-     * @throws MessagingException
-     */
-    private static MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
+    private MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
         Properties properties = new Properties();
         Session session = Session.getDefaultInstance(properties, null);
 
         MimeMessage email = new MimeMessage(session);
+
         email.setFrom(new InternetAddress(from));
         email.addRecipient(RecipientType.TO, new InternetAddress(to));
         email.setSubject(subject);
         email.setContent(bodyText,"text/html");
+
         return email;
     }
 
-    /**
-     * Create a message from an email.
-     *
-     * @param emailContent Email to be set to raw of message
-     * @return a message containing a base64url encoded email
-     * @throws IOException
-     * @throws MessagingException
-     */
-    private static Message createMessageWithEmail(MimeMessage emailContent)throws IOException, MessagingException{
+    private Message createMessageWithEmail(MimeMessage emailContent)throws IOException, MessagingException{
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         emailContent.writeTo(buffer);
+
         byte[] bytes = buffer.toByteArray();
         String encodedEmail = Base64.encodeBase64URLSafeString(bytes);
+
         Message message = new Message();
         message.setRaw(encodedEmail);
+
         return message;
     }
 
-    /**
-     * Send an email from the user's mailbox to its recipient.
-     *
-     * @param service Authorized Gmail API instance.
-     * @param userId User's email address. The special value "me" can be used to indicate the authenticated user.
-     * @param emailContent Email to be sent.
-     * @throws MessagingException
-     * @throws IOException
-     */
-    private static void sendMessage(Gmail service, String userId, MimeMessage emailContent) throws MessagingException, IOException {
+    private void sendMessage(String userId, MimeMessage emailContent) throws MessagingException, IOException {
         Message message = createMessageWithEmail(emailContent);
-        message = service.users().messages().send(userId, message).execute();
+        message = SERVICE.users().messages().send(userId, message).execute();
 
-        System.out.println("Message id: " + message.getId());
-        System.out.println(message.toPrettyString());
+        Log.v(LOG_TAG, "Email sent with id: " + message.getId());
     }
 
-    public static void sendRegistrationOTP(final String TO, final String OTP) throws IOException, GeneralSecurityException, MessagingException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-        .setApplicationName(APPLICATION_NAME)
-        .build();
+    public void sendRegistrationOTP(String to, String OTP) throws IOException, MessagingException {
 
         String user = "me";
 
@@ -144,19 +125,28 @@ public class GMailService {
                 "<br><br>" +
                 "Here is your one time registration password" +
                 "<br><br><br><br>" +
-                "<span style=\"font-size:300%;background-color: blue; padding: 5px; color: white;\">"+OTP+"</span>" +
+                "<span style=\"font-size:200%;background-color: blue; padding: 5px; color: white;\">"+OTP+"</span>" +
                 "<br><br><br><br>" +
                 "Regards,<br><br>" +
                 "Team SocketChat" +
                 "<br><br><br><br><br><br>" +
-                "<span style=\"font-size:50%;\">PS: This mail was auto generated by the system. Please do not reply.</span>" +
+                "<span style=\"font-size:25%;\"><em>PS: This mail was auto generated by the system. Please do not reply.</em></span>" +
                 "</p>" +
                 "</div>";
 
-        sendMessage(service,user,createEmail(TO,user,"One Time Password",message));
+        sendMessage(user, createEmail(to, user, "One Time Password", message));
 
     }
 
-    //TODO: Add OTP message for password change.
+    public static GMailService getInstance() throws GeneralSecurityException, IOException {
+        synchronized (LOCK) {
+            if(instance == null) {
+                instance = new GMailService();
+            }
+            return instance;
+        }
+    }
+
+    //TODO (After doing everything else!!!): Add OTP message for password change.
 
 }

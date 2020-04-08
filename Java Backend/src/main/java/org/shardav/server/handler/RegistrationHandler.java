@@ -118,10 +118,12 @@ public class RegistrationHandler implements Runnable {
                                 ClientHandler clientHandler = new ClientHandler(client, details.getEmail(), in, out);
                                 Server.activeClients.add(clientHandler);
                                 ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
+                                Response success = new Response(ResponseStatus.SUCCESS);
+                                out.println(success.toJSON());
+                                out.flush();
                             }
                         }  catch (InterruptedException | ExecutionException ex) {
                             Log.e(LOG_TAG, "An error occurred while checking if user was inserted into the database. Rolling back", ex);
-                            //TODO: Delete user too.
                             Response failed = new Response(ResponseStatus.FAILED, "An error occurred while trying to register user details. Try again later.");
                             out.println(failed.toJSON());
                             out.flush();

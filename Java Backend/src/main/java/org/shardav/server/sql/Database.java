@@ -117,7 +117,7 @@ public class Database {
         database.deleteUserByEmail("shardav.lad21@gmail.com");
     }
 
-    public void insertUser(UserDetails details) throws SQLException {
+    public Boolean insertUser(UserDetails details) throws SQLException {
 
         String statement = String.format(SQLStatements.INSERT_USER,
                 details.getEmail(),
@@ -128,6 +128,8 @@ public class Database {
         int rows = insertUser.executeUpdate(statement);
 
         Log.v(LOG_TAG, "User "+details.getUsername()+" inserted into database, "+rows+" affected.");
+
+        return Boolean.TRUE;
 
     }
 

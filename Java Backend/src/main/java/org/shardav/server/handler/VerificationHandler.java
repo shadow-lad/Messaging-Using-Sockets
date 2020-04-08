@@ -22,14 +22,11 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VerificationHandler implements Runnable {
 
     private Socket client;
     private static final String LOG_TAG = VerificationHandler.class.getSimpleName();
-
-    private static final AtomicBoolean loggedIn = new AtomicBoolean(false);
 
     private final GMailService gMailService;
 
@@ -122,7 +119,6 @@ public class VerificationHandler implements Runnable {
 
                                         out.println(new Response(ResponseStatus.SUCCESS).toJSON());
                                         out.flush();
-                                        loggedIn.set(true);
                                     } else {
                                         Response failed = new Response(ResponseStatus.FAILED, "Wrong credentials");
                                         out.println(failed.toJSON());
@@ -142,27 +138,22 @@ public class VerificationHandler implements Runnable {
                         errorResponse.setMessage(ex.getMessage());
                         out.println(errorResponse.toJSON());
                         out.flush();
-                        loggedIn.set(true);
                     } catch (SQLException ex) {
                         Log.e(LOG_TAG, "An error occurred while trying to access the database", ex);
                         errorResponse.setMessage("Internal server error. Please try again later.");
                         out.println(errorResponse.toJSON());
                         out.flush();
-                        loggedIn.set(true);
                     }
                 } else {
                     errorResponse.setMessage("The first request should always be a login request.");
                     out.println(errorResponse.toJSON());
                     out.flush();
-                    loggedIn.set(true);
                 }
             } catch (IllegalArgumentException ex) {
                 Log.e(LOG_TAG, "IllegalArgumentException occurred", ex);
                 errorResponse.setMessage("The first request should always be a login request.");
                 out.println(errorResponse.toJSON());
                 out.flush();
-                loggedIn.set(true);
-
             }
 
         } catch (IOException ex) {

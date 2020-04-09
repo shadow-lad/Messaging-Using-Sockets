@@ -108,7 +108,7 @@ public class VerificationHandler implements Runnable {
 
                                     boolean samePassword = details.getPassword().equals(registeredDetails.getPassword());
 
-                                    if(sameUsername && samePassword) {
+                                    if (sameUsername && samePassword) {
 
                                         Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
 
@@ -118,16 +118,15 @@ public class VerificationHandler implements Runnable {
                                         ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
 
                                         out.println(new Response(ResponseStatus.SUCCESS).toJSON());
-                                        out.flush();
                                     } else {
                                         Response failed = new Response(ResponseStatus.FAILED, "Wrong credentials");
                                         out.println(failed.toJSON());
-                                        out.flush();
                                     }
+                                    out.flush();
                                 }
                             } catch (InterruptedException | ExecutionException ex) {
                                 Log.e(LOG_TAG, "An error occurred while trying to retrieve user details", ex);
-                                Response error = new Response(ResponseStatus.FAILED, "An error occurred, try again later.");
+                                Response error = new Response(ResponseStatus.FAILED, ex.getCause().getMessage());
                                 out.println(error.toJSON());
                                 out.flush();
                             }

@@ -309,7 +309,7 @@ Either the *"username"* or the *"email"*&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request" : "invalid",
+    "status" : "invalid",
     "message" : "A message regarding the event."
 }
 ```

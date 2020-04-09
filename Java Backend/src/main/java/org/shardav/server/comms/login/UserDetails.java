@@ -75,15 +75,14 @@ public class UserDetails implements Details {
      */
     public static UserDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
 
-        if(detailsObject.has("email")
-                && detailsObject.has("username")
+        if((detailsObject.has("email") || detailsObject.has("username"))
                 && detailsObject.has("password")
                 && detailsObject.getString("password") != null
                 && ( detailsObject.getString("email")!=null || detailsObject.getString("username")!=null)) {
 
-            String username = detailsObject.getString("username");
+            String username = detailsObject.has("username") ? detailsObject.getString("username") : null;
             String password = detailsObject.getString("password");
-            String email = detailsObject.getString("email");
+            String email = detailsObject.has("email") ? detailsObject.getString("email") : null;
 
             return new UserDetails(email, username, password);
 

@@ -13,7 +13,6 @@ import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
 
 import javax.mail.MessagingException;
-import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;

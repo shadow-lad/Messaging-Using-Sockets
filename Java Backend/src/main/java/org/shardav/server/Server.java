@@ -138,7 +138,7 @@ public class Server {
     private void toggleVerbose() {
 
         boolean previous = Log.verboseIsShown();
-        Log.i(LOG_TAG, previous ? "Disabling verbose output." : "Enabling verbose output.");    
+        Log.i(LOG_TAG, previous ? "Disabling verbose output." : "Enabling verbose output.");
         Log.showVerbose(!previous);
         Log.d(LOG_TAG, clients.toString());
 

@@ -71,7 +71,7 @@ public class VerificationHandler implements Runnable {
                         String username = details.getUsername();
                         String email = details.getEmail();
 
-                        Database database = Database.getInstance("root", "toor");
+                        Database database = Database.getInstance();
                         UserDetails existingUser = null;
                         try {
                             existingUser = database.fetchUserDetailsByMail(email);
@@ -114,7 +114,7 @@ public class VerificationHandler implements Runnable {
 
                                         ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
                                         Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
-                                        Server.activeClients.add(clientHandler);
+                                        Server.activeClientMap.put(clientHandler.getEmail(), clientHandler);
                                         ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
 
                                         out.println(new Response(ResponseStatus.SUCCESS).toJSON());
@@ -137,7 +137,7 @@ public class VerificationHandler implements Runnable {
                         errorResponse.setMessage(ex.getMessage());
                         out.println(errorResponse.toJSON());
                         out.flush();
-                    } catch (SQLException ex) {
+                    } catch (InstantiationException | SQLException ex) {
                         Log.e(LOG_TAG, "An error occurred while trying to access the database", ex);
                         errorResponse.setMessage("Internal server error. Please try again later.");
                         out.println(errorResponse.toJSON());

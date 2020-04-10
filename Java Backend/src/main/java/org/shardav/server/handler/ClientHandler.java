@@ -109,7 +109,7 @@ public class ClientHandler implements Runnable {
                 out.close();
                 socket.close();
 
-                Server.activeClients.remove(this);
+                Server.activeClientMap.remove(this.email);
                 Log.i(LOG_TAG, email + (kicked ? " was kicked from the server." : " left the session."));
             } catch (IOException ex) {
                 Log.e(LOG_TAG, "Error occurred", ex);
@@ -119,26 +119,20 @@ public class ClientHandler implements Runnable {
     }
 
     private void sendPrivate(String recipient, JSONObject object) {
-
-        for (ClientHandler client : Server.activeClients) {
-            if (client.email.equals(recipient) && client.isLoggedIn) {
-                client.out.println(object.toString());
-                client.out.flush();
-                break;
-            }
+        ClientHandler recipientClient = Server.activeClientMap.get(recipient);
+        if (recipientClient.isLoggedIn) {
+            recipientClient.out.println(object.toString());
+            recipientClient.out.flush();
         }
-
     }
 
     private void sendGlobalMessage(JSONObject object) {
-
-        for (ClientHandler client : Server.activeClients) {
-            if (!client.getEmail().equals(email) && client.isLoggedIn)
+        for (ClientHandler client : Server.activeClientMap.values()) {
+            if (!client.getEmail().equals(email) && client.isLoggedIn) {
                 client.out.println(object.toString());
                 client.out.flush();
-
+            }
         }
-
     }
 
 }

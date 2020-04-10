@@ -26,6 +26,10 @@ public class UserDetails implements Details {
         this.password = password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getEmail() {
         return this.email;
     }

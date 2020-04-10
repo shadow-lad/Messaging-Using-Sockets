@@ -98,7 +98,7 @@ public class RegistrationHandler implements Runnable {
                         Database database;
                         try {
                             //TODO: Ponder upon how to properly handle this and then do it
-                            database = Database.getInstance("root", "toor");
+                            database = Database.getInstance();
                             inserted = ServerExecutors.getDatabaseExecutor().submit(()->{
                                 try {
                                     return database.insertUser(details);
@@ -107,14 +107,16 @@ public class RegistrationHandler implements Runnable {
                                     return false;
                                 }
                             });
-                        } catch (SQLException ex) {
+                        } catch (InstantiationException ex) {
                             ex.printStackTrace();
                             return;
                         }
                         try {
                             if (inserted.get()) {
+                                details.setPassword(null);
                                 ClientHandler clientHandler = new ClientHandler(client, details.getEmail(), in, out);
-                                Server.activeClients.add(clientHandler);
+                                Server.activeClientMap.put(clientHandler.getEmail(), clientHandler);
+                                Server.clients.add(details);
                                 ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
                                 Response success = new Response(ResponseStatus.SUCCESS);
                                 out.println(success.toJSON());

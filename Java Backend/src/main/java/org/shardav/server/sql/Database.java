@@ -47,20 +47,33 @@ public class Database {
 
     }
 
-    public static Database getInstance(String username, String password)throws SQLException{
+    public static Database getInstance(String username, String password)throws SQLException, InstantiationException {
         return getInstance("localhost",username, password);
     }
 
-    public static Database getInstance(String host, String username, String password)throws SQLException {
+    public static Database getInstance(String host, String username, String password)throws SQLException, InstantiationException {
         return getInstance(host,"3306",username,password);
     }
 
-    public static Database getInstance(String host, String port, String username, String password)throws SQLException {
+    public static Database getInstance(String host, String port, String username, String password)throws SQLException, InstantiationException {
         synchronized (LOCK) {
-            if (instance == null)
-                instance = new Database(host,port,username,password);
+            if (instance == null) {
+                instance = new Database(host, port, username, password);
+                return instance;
+            } else {
+                throw new InstantiationException("An instance of the database already exists");
+            }
         }
-        return instance;
+    }
+
+    public static Database getInstance()throws InstantiationException {
+        synchronized (LOCK) {
+            if (instance != null) {
+                return instance;
+            } else {
+                throw new InstantiationException("An instance of the database already exists");
+            }
+        }
     }
 
     public boolean addMessage (Message message)throws SQLException {
@@ -111,11 +124,6 @@ public class Database {
         DELETE_USER_BY_EMAIL.setString(1, email);
 
         DELETE_USER_BY_EMAIL.execute();
-    }
-
-    public static void main(String[] args) throws SQLException {
-        Database database = getInstance("root", "toor");
-        database.deleteUserByEmail("shardav.lad21@gmail.com");
     }
 
     public Boolean insertUser(UserDetails details) throws SQLException {

@@ -19,21 +19,20 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//TODO: PRIORITY 1:  Keep a track of the registered users in a database
-// - PRIORITY 2: Save messages that are not delivered to the database
-// - PRIORITY 3: Create a way to authenticate people
+//TODO: PRIORITY 1: Save messages that are not delivered to the database
 
 public class Server {
 
-    //TODO: Implement HashMap to find clients faster.
-    // static HashMap<String,Integer> clientMap;
-    public static List<ClientHandler> activeClients = new ArrayList<>(); // List of active clients
+    public static Map<String, ClientHandler> activeClientMap = new HashMap<>(); // Map of active clients
 
-    static List<UserDetails> clients = new ArrayList<>();//List of all registered users.
+    public static List<UserDetails> clients = new ArrayList<>();//List of all registered users.
 
     //Log tag
     private static final String LOG_TAG = Server.class.getSimpleName();
@@ -59,7 +58,7 @@ public class Server {
     private final GMailService gMailService;
 
     //Default constructor
-    private Server() throws URISyntaxException, IOException, SQLException {
+    private Server() throws URISyntaxException, IOException, SQLException, InstantiationException {
 
         serverPort = 6969;
         mySQLUsername = "root";
@@ -80,7 +79,7 @@ public class Server {
         SETTINGS_JSON_PATH = directoryPath+"settings.json";
 
         getServerConfig(); // Load the configuration from the settings.json file
-        database = Database.getInstance(mySQLUsername,mySQLPassword);
+        database = Database.getInstance(mySQLUsername, mySQLPassword);
 
     }
 
@@ -94,9 +93,9 @@ public class Server {
             server.startServer(); // Start the server once setup is done
             Log.i(LOG_TAG, "A detailed output is available in the server.log file");
 
-        } catch (URISyntaxException | IOException | SQLException ex) {
+        } catch (URISyntaxException | IOException | SQLException | InstantiationException ex) {
 
-            Log.e(LOG_TAG, "An error occurred while setting up the server : "+ex.getMessage(), ex);
+            Log.e(LOG_TAG, "An error occurred while setting up the server : " + ex.getMessage(), ex);
 
         }
 
@@ -119,7 +118,7 @@ public class Server {
     private List<String> getActiveClients(){
 
         List<String> clientList = new ArrayList<>();
-        for(ClientHandler currentClient: activeClients)
+        for(ClientHandler currentClient: activeClientMap.values())
             clientList.add(currentClient.getEmail());
         return clientList;
 
@@ -128,7 +127,7 @@ public class Server {
     //Prints the active clients
     private void printActiveClients() {
 
-        Log.i(LOG_TAG, "Active Clients: " + (activeClients.size() == 0 ? "No Active Clients" : ""));
+        Log.i(LOG_TAG, "Active Clients: " + (activeClientMap.values().size() == 0 ? "No Active Clients" : ""));
         for (String currentClient : getActiveClients()) {
             Log.i(LOG_TAG, currentClient);
         }
@@ -139,12 +138,9 @@ public class Server {
     private void toggleVerbose() {
 
         boolean previous = Log.verboseIsShown();
-        if (previous) {
-            Log.i(LOG_TAG, "Disabling verbose output.");
-        } else {
-            Log.i(LOG_TAG, "Enabling verbose output.");
-        }
+        Log.i(LOG_TAG, previous ? "Disabling verbose output." : "Enabling verbose output.");    
         Log.showVerbose(!previous);
+        Log.d(LOG_TAG, clients.toString());
 
     }
 
@@ -180,7 +176,7 @@ public class Server {
                 JSONTokener tokenizer = new JSONTokener(json.toString());
                 JSONObject settings = new JSONObject(tokenizer);
 
-                Log.i(LOG_TAG, "JSON parsed: "+settings.toString(2));
+                Log.d(LOG_TAG, "JSON parsed: "+settings.toString(2));
 
                 serverPort = settings.getInt("port");
                 verboseLogging = settings.getBoolean("verbose-logging");
@@ -235,8 +231,10 @@ public class Server {
 
     }
 
-    private void loadExistingUsers()throws SQLException {
-        clients = database.fetchUserList();
+    private void loadExistingUsers() {
+        CompletableFuture<List<UserDetails>> future = new CompletableFuture<>();
+        ServerExecutors.getDatabaseExecutor().submit(()->future.complete(database.fetchUserList()));
+        future.thenApply(clients::addAll);
     }
 
     private void startServer() {
@@ -339,7 +337,7 @@ public class Server {
         if (RUNNING.get()) {
             try {
                 RUNNING.set(false);
-                for (ClientHandler currentClient : activeClients) {
+                for (ClientHandler currentClient : activeClientMap.values()) {
                     if (currentClient.isLoggedIn) {
                         currentClient.disconnect(true);
                     }

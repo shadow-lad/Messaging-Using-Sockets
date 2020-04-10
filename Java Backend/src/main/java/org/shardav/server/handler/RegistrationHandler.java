@@ -97,7 +97,6 @@ public class RegistrationHandler implements Runnable {
                         Future<Boolean> inserted;
                         Database database;
                         try {
-                            //TODO: Ponder upon how to properly handle this and then do it
                             database = Database.getInstance();
                             inserted = ServerExecutors.getDatabaseExecutor().submit(()->{
                                 try {

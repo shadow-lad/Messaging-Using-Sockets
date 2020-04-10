@@ -10,7 +10,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: Handle database access like a pro.
 public class Database {
 
     private final Connection connection;

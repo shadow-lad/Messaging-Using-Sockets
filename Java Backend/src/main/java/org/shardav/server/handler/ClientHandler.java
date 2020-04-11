@@ -71,8 +71,12 @@ public class ClientHandler implements Runnable {
                                 sendPrivate(recipient, privateMessageObject);
                                 break;
                         }
-                    } else if (requestType == RequestType.LOGOUT)
+                    } else if (requestType == RequestType.LOGOUT) {
                         disconnect(false);
+                    } else {
+                        Log.d(LOG_TAG, "Made a request of type: " + requestType.getValue());
+                        errorResponse.setMessage("Invalid request");
+                    }
                 } catch (IllegalArgumentException ex) {
                     Log.e(LOG_TAG, "Error occurred", ex);
                     errorResponse.setMessage("Request type not recognised by server.");

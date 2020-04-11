@@ -76,6 +76,8 @@ public class ClientHandler implements Runnable {
                     } else {
                         Log.d(LOG_TAG, "Made a request of type: " + requestType.getValue());
                         errorResponse.setMessage("Invalid request");
+                        out.println(errorResponse.toJSON());
+                        out.flush();
                     }
                 } catch (IllegalArgumentException ex) {
                     Log.e(LOG_TAG, "Error occurred", ex);

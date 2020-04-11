@@ -30,7 +30,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
-import org.mortbay.util.IO;
 import org.shardav.utils.Log;
 
 public class GMailService {
@@ -73,7 +72,7 @@ public class GMailService {
                                                 clientSecrets, 
                                                 SCOPES)
                                                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                                                .setAccessType("offline")
+                                                .setAccessType("online")
                                                 .build();
         
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();

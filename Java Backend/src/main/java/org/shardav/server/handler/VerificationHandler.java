@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -114,8 +115,10 @@ public class VerificationHandler implements Runnable {
 
                                         ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
                                         Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
-                                        Server.activeClientMap.put(clientHandler.getEmail(), clientHandler);
+                                        Server.ACTIVE_CLIENT_MAP.put(clientHandler.getEmail(), clientHandler);
                                         ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
+
+                                        Server.NON_CLIENT_SOCKETS.remove(this.client);
 
                                         out.println(new Response(ResponseStatus.SUCCESS).toJSON());
                                     } else {
@@ -156,7 +159,7 @@ public class VerificationHandler implements Runnable {
             }
 
         } catch (IOException ex) {
-            Log.e(LOG_TAG, "IOException occurred: " + ex.getMessage(), ex);
+            Log.v(LOG_TAG, "IOException occurred: " + ex.getMessage());
         }
 
     }

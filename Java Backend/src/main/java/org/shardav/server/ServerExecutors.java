@@ -3,6 +3,7 @@ package org.shardav.server;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ServerExecutors {
 
@@ -31,10 +32,14 @@ public class ServerExecutors {
     }
 
     public static void close() {
-        clientHandlerService.shutdown();
-        verificationHandlerService.shutdown();
-        databaseService.shutdown();
-        serverExecutor.shutdown();
+        try {
+            clientHandlerService.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            verificationHandlerService.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            databaseService.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            serverExecutor.awaitTermination(2000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+            
+        }
     }
 
 }

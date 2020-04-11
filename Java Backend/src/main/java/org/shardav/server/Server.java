@@ -23,16 +23,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: PRIORITY 1: Save messages that are not delivered to the database
 
 public class Server {
 
-    public static Map<String, ClientHandler> activeClientMap = new HashMap<>(); // Map of active clients
+    public static final Map<String, ClientHandler> ACTIVE_CLIENT_MAP = new HashMap<>(); // Map of active clients
 
-    public static List<UserDetails> clients = new ArrayList<>();//List of all registered users.
+    public static final List<UserDetails> CLIENTS = new ArrayList<>();//List of all registered users.
+
+    public static final List<Socket> NON_CLIENT_SOCKETS = new ArrayList<>();
 
     //Log tag
     private static final String LOG_TAG = Server.class.getSimpleName();
@@ -118,7 +119,7 @@ public class Server {
     private List<String> getActiveClients(){
 
         List<String> clientList = new ArrayList<>();
-        for(ClientHandler currentClient: activeClientMap.values())
+        for(ClientHandler currentClient: ACTIVE_CLIENT_MAP.values())
             clientList.add(currentClient.getEmail());
         return clientList;
 
@@ -127,7 +128,7 @@ public class Server {
     //Prints the active clients
     private void printActiveClients() {
 
-        Log.i(LOG_TAG, "Active Clients: " + (activeClientMap.values().size() == 0 ? "No Active Clients" : ""));
+        Log.i(LOG_TAG, "Active Clients: " + (ACTIVE_CLIENT_MAP.values().size() == 0 ? "No Active Clients" : ""));
         for (String currentClient : getActiveClients()) {
             Log.i(LOG_TAG, currentClient);
         }
@@ -140,7 +141,6 @@ public class Server {
         boolean previous = Log.verboseIsShown();
         Log.i(LOG_TAG, previous ? "Disabling verbose output." : "Enabling verbose output.");
         Log.showVerbose(!previous);
-        Log.d(LOG_TAG, clients.toString());
 
     }
 
@@ -234,7 +234,7 @@ public class Server {
     private void loadExistingUsers() {
         CompletableFuture<List<UserDetails>> future = new CompletableFuture<>();
         ServerExecutors.getDatabaseExecutor().submit(()->future.complete(database.fetchUserList()));
-        future.thenApply(clients::addAll);
+        future.thenApply(CLIENTS::addAll);
     }
 
     private void startServer() {
@@ -270,6 +270,8 @@ public class Server {
                 try {
 
                     Socket client = messageServerSocket.accept(); //Accept connections to the server
+
+                    NON_CLIENT_SOCKETS.add(client);
                         
                     //Creating a new thread to handle logging in
                     // so that client requests are not queued
@@ -303,7 +305,7 @@ public class Server {
                                 break;
 
                             case 'q': // Shut down server
-                                quitServer();
+                                shutdownServer();
                                 break;
 
                             case '?': // Display help menu
@@ -324,7 +326,7 @@ public class Server {
     }
 
     //Cleans up and closes the server ;
-    private void quitServer() throws IOException {
+    private void shutdownServer() throws IOException {
 
         verboseLogging = Log.verboseIsShown();
         Log.showVerbose(false);
@@ -337,18 +339,23 @@ public class Server {
         if (RUNNING.get()) {
             try {
                 RUNNING.set(false);
-                for (ClientHandler currentClient : activeClientMap.values()) {
+                for (ClientHandler currentClient : ACTIVE_CLIENT_MAP.values()) {
                     if (currentClient.isLoggedIn) {
                         currentClient.disconnect(true);
                     }
                 }
                 ServerExecutors.close();
+                for (Socket socket : NON_CLIENT_SOCKETS) {
+                    socket.getInputStream().close();
+                    socket.getOutputStream().close();
+                    socket.close();
+                }
                 messageServerSocket.close();
-            } catch (IOException ex) {
-                Log.e(LOG_TAG, "Server force closed: " + ex.getMessage(), ex);
+            } catch (IOException ignore) {
             } finally {
                 Log.i(LOG_TAG, "Server Shutdown, EXITING...");
             }
+            System.exit(0);
         }
     }
 

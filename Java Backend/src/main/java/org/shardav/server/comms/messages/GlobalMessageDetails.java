@@ -35,7 +35,27 @@ public class GlobalMessageDetails extends MessageDetails {
      * @return An instance of GlobalMessageDetails class
      */
     public static GlobalMessageDetails getInstance(JSONObject detailsObject) throws IllegalArgumentException {
-        return (GlobalMessageDetails) MessageDetails.getInstance(detailsObject);
+        if(detailsObject.has("id") && detailsObject.getString("id")!=null
+                && detailsObject.has("message")
+                && detailsObject.has("time") && detailsObject.getLong("time")!=0
+                && detailsObject.has("from")) {
+
+            String id = detailsObject.getString("id");
+            String message = detailsObject.getString("message");
+            long timestamp = detailsObject.getLong("time");
+            String sender = detailsObject.getString("from");
+
+            if(detailsObject.has("media") && detailsObject.get("media") != null){
+                String media = detailsObject.getString("media");
+                return new GlobalMessageDetails(id,message,media,timestamp,sender);
+            } else if (message!=null) {
+                return new GlobalMessageDetails(id, message, timestamp, sender);
+            } else {
+                throw new IllegalArgumentException("Message cannot be null");
+            }
+        } else {
+            throw new IllegalArgumentException("JSONObject should contain 'id', 'message', 'time' and 'from' keys");
+        }
     }
 
 }

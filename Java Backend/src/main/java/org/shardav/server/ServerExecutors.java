@@ -1,6 +1,5 @@
 package org.shardav.server;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -8,35 +7,42 @@ import java.util.concurrent.TimeUnit;
 public class ServerExecutors {
 
 
-    private static final ExecutorService clientHandlerService = Executors.newFixedThreadPool(20);
-    private static final ExecutorService verificationHandlerService = Executors.newFixedThreadPool(20);
-    private static final ExecutorService databaseService = Executors.newFixedThreadPool(2);
-    private static final ExecutorService serverExecutor = Executors.newFixedThreadPool(2);
+    private static final ExecutorService CLIENT_HANDLER_SERVICE = Executors.newFixedThreadPool(20);
+    private static final ExecutorService VERIFICATION_HANDLER_SERVICE = Executors.newFixedThreadPool(20);
+
+    private static final ExecutorService DATABASE_SERVICE = Executors.newFixedThreadPool(2);
+    private static final ExecutorService SERVER_EXECUTOR = Executors.newFixedThreadPool(2);
+
+    private static final ExecutorService DATABASE_RESULT_SERVICE = Executors.newSingleThreadExecutor();
 
     private ServerExecutors(){}
 
     public static ExecutorService getClientHandlerExecutor() {
-        return clientHandlerService;
+        return CLIENT_HANDLER_SERVICE;
     }
 
     public static ExecutorService getVerificationHandlerExecutor() {
-        return verificationHandlerService;
+        return VERIFICATION_HANDLER_SERVICE;
     }
 
     public static ExecutorService getDatabaseExecutor() {
-        return databaseService;
+        return DATABASE_SERVICE;
     }
 
     public static ExecutorService getServerExecutor() {
-        return serverExecutor;
+        return SERVER_EXECUTOR;
+    }
+
+    public static ExecutorService getDatabaseResultExecutor() {
+        return DATABASE_RESULT_SERVICE;
     }
 
     public static void close() {
         try {
-            clientHandlerService.awaitTermination(2000, TimeUnit.MILLISECONDS);
-            verificationHandlerService.awaitTermination(2000, TimeUnit.MILLISECONDS);
-            databaseService.awaitTermination(2000, TimeUnit.MILLISECONDS);
-            serverExecutor.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            CLIENT_HANDLER_SERVICE.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            VERIFICATION_HANDLER_SERVICE.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            DATABASE_SERVICE.awaitTermination(2000, TimeUnit.MILLISECONDS);
+            SERVER_EXECUTOR.awaitTermination(2000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
             
         }

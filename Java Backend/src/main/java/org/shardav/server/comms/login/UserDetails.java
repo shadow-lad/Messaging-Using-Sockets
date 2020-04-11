@@ -81,8 +81,7 @@ public class UserDetails implements Details {
 
         if((detailsObject.has("email") || detailsObject.has("username"))
                 && detailsObject.has("password")
-                && detailsObject.getString("password") != null
-                && ( detailsObject.getString("email")!=null || detailsObject.getString("username")!=null)) {
+                && detailsObject.getString("password") != null) {
 
             String username = detailsObject.has("username") ? detailsObject.getString("username") : null;
             String password = detailsObject.getString("password");

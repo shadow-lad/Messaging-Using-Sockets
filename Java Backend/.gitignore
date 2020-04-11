@@ -10,9 +10,11 @@
 .DS_Store
 /build
 /src/main/java/org/shardav/server/testing
+
 .project
 .vscode
 .classpath
 .settings
 tokens
 bin
+credentials.json

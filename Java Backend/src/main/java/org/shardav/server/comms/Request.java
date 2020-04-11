@@ -10,6 +10,7 @@ public abstract class Request {
         LOGOUT("logout"),
         MESSAGE("message"),
         REGISTRATION("registration"),
+        USERS("users"),
         VERIFY("verify");
 
         private final String requestType;

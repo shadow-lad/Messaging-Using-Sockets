@@ -114,9 +114,10 @@ public class RegistrationHandler implements Runnable {
                             if (inserted.get()) {
                                 details.setPassword(null);
                                 ClientHandler clientHandler = new ClientHandler(client, details.getEmail(), in, out);
-                                Server.activeClientMap.put(clientHandler.getEmail(), clientHandler);
-                                Server.clients.add(details);
+                                Server.ACTIVE_CLIENT_MAP.put(clientHandler.getEmail(), clientHandler);
+                                Server.CLIENTS.add(details);
                                 ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
+                                Server.NON_CLIENT_SOCKETS.remove(client);
                                 Response success = new Response(ResponseStatus.SUCCESS);
                                 out.println(success.toJSON());
                                 out.flush();

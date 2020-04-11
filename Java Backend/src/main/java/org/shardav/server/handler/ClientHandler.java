@@ -43,12 +43,12 @@ public class ClientHandler implements Runnable {
 
             try {
 
-
-
                 String requestData = in.readLine();
 
-                if (requestData == null)
+                if (requestData == null) {
+                    disconnect(false);
                     continue;
+                }
 
                 JSONTokener jsonTokenizer = new JSONTokener(requestData);
                 JSONObject requestObject = new JSONObject(jsonTokenizer);

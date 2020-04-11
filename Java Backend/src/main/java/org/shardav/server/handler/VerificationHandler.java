@@ -19,7 +19,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -75,9 +74,11 @@ public class VerificationHandler implements Runnable {
                         Database database = Database.getInstance();
                         UserDetails existingUser = null;
                         try {
-                            existingUser = database.fetchUserDetailsByMail(email);
+                            existingUser = ServerExecutors.getDatabaseResultExecutor().submit(()->database.fetchUserDetailsByMail(email)).get();
                         } catch (IllegalArgumentException ignore) {
                             //Ignore Exception
+                        } catch (InterruptedException | ExecutionException ex) {
+                            Log.v(LOG_TAG, "An error occurred while fetching details", ex);
                         }
                         if (request == RequestType.REGISTRATION) {
                             if (existingUser == null) {
@@ -88,14 +89,11 @@ public class VerificationHandler implements Runnable {
                                 out.flush();
                             }
                         } else {
-                            Future<UserDetails> databaseUser = ServerExecutors.getDatabaseExecutor().submit(()->{
+                            Future<UserDetails> databaseUser = ServerExecutors.getDatabaseResultExecutor().submit(()->{
                                 try {
                                     return email == null ? database.fetchUserDetailsByUsername(username) : database.fetchUserDetailsByMail(email);
                                 } catch (SQLException ex) {
                                     Log.e(LOG_TAG, "Error fetching user details", ex);
-                                    Response failed = new Response(ResponseStatus.FAILED, ex.getMessage());
-                                    out.println(failed.toJSON());
-                                    out.flush();
                                     return null;
                                 }
                             });
@@ -113,8 +111,8 @@ public class VerificationHandler implements Runnable {
 
                                         Log.v(LOG_TAG, "Client username: " + (username == null ? email : username));
 
-                                        ClientHandler clientHandler = new ClientHandler(client, details.getUsername(), in, out);
-                                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", (username == null ? email : username)));
+                                        ClientHandler clientHandler = new ClientHandler(client, registeredDetails.getEmail(), in, out);
+                                        Log.i(LOG_TAG, String.format("Adding %s to active clients list", registeredDetails.getEmail()));
                                         Server.ACTIVE_CLIENT_MAP.put(clientHandler.getEmail(), clientHandler);
                                         ServerExecutors.getClientHandlerExecutor().submit(clientHandler);
 
@@ -140,7 +138,7 @@ public class VerificationHandler implements Runnable {
                         errorResponse.setMessage(ex.getMessage());
                         out.println(errorResponse.toJSON());
                         out.flush();
-                    } catch (InstantiationException | SQLException ex) {
+                    } catch (InstantiationException ex) {
                         Log.e(LOG_TAG, "An error occurred while trying to access the database", ex);
                         errorResponse.setMessage("Internal server error. Please try again later.");
                         out.println(errorResponse.toJSON());

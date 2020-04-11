@@ -69,7 +69,7 @@ public class RegistrationHandler implements Runnable {
         out.println(response.toJSON());
         out.flush();
 
-        if (response.getResponseStatus() == ResponseStatus.SUCCESS) {
+        if (response.getResponseStatus() == ResponseStatus.SENT) {
             login();
         }
 

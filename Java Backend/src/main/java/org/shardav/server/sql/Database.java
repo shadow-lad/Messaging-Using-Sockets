@@ -3,6 +3,7 @@ package org.shardav.server.sql;
 import org.shardav.server.Server;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.comms.messages.Message;
+import org.shardav.server.comms.messages.MessageDetails;
 import org.shardav.server.comms.messages.PrivateMessageDetails;
 import org.shardav.utils.Log;
 
@@ -75,13 +76,13 @@ public class Database {
         }
     }
 
-    public boolean addMessage (Message message)throws SQLException {
+    public boolean addMessage (MessageDetails messageDetails)throws SQLException {
 
-        if (!(message.getDetails() instanceof PrivateMessageDetails)) {
+        if (!(messageDetails instanceof PrivateMessageDetails)) {
             return false;
         } else {
 
-            PrivateMessageDetails details = (PrivateMessageDetails) message.getDetails();
+            PrivateMessageDetails details = (PrivateMessageDetails) messageDetails;
             String statement;
 
             if (details.getMedia() == null ) {

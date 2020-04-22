@@ -16,3 +16,6 @@
 .settings
 tokens
 bin
+
+# Ignore Gradle build output directory
+build

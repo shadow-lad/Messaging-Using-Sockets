@@ -8,7 +8,8 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
-/build
+# Ignore Gradle build output directory
+build
 /src/main/java/org/shardav/server/testing
 
 .project
@@ -19,5 +20,3 @@ tokens
 bin
 credentials.json
 
-# Ignore Gradle build output directory
-build

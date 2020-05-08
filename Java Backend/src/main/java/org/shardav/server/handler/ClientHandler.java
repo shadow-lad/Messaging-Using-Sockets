@@ -1,16 +1,11 @@
 package org.shardav.server.handler;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.shardav.server.Server;
-import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
-import org.shardav.server.comms.messages.GlobalMessageDetails;
-import org.shardav.server.comms.messages.Message;
-import org.shardav.server.comms.messages.PrivateMessageDetails;
-import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
 
 import java.io.BufferedReader;
@@ -18,28 +13,43 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler implements Runnable {
 
     private static final String LOG_TAG = Server.class.getSimpleName() + ": " + ClientHandler.class.getSimpleName();
 
+    // Executors for Client Requests
+    private final ExecutorService MESSAGE_EXECUTOR = Executors.newSingleThreadExecutor();
+    private final ExecutorService LOGIN_EXECUTOR = Executors.newSingleThreadExecutor();
+
+    // Client variables
     private String email;
-    private final BufferedReader in;
-    private final PrintWriter out;
-    private final Socket socket;
     public boolean isLoggedIn;
+
+    // Socket variables
+    private final BufferedReader in;
+    protected final PrintWriter out;
+    private final Socket socket;
+
+    // Operation Handlers
+    private final MessageHandler messageHandler;
+    private final SignUpHandler registrationHandler;
 
     public ClientHandler(Socket socket, String email, final BufferedReader in, final PrintWriter out) {
         this.socket = socket;
         this.email = email;
         this.in = in;
         this.out = out;
-        this.isLoggedIn = true;
+        this.isLoggedIn = false;
+        this.messageHandler = new MessageHandler(ClientHandler.this);
+        this.registrationHandler = new SignUpHandler(ClientHandler.this);
     }
 
     @Override
     public void run() {
-        while (isLoggedIn) {
+        while (!socket.isClosed()) {
 
             try {
 
@@ -50,39 +60,53 @@ public class ClientHandler implements Runnable {
                     continue;
                 }
 
-                JSONTokener jsonTokenizer = new JSONTokener(requestData);
-                JSONObject requestObject = new JSONObject(jsonTokenizer);
+                JsonObject requestObject = JsonParser.parseString(requestData).getAsJsonObject();
 
                 Response errorResponse = new Response(ResponseStatus.INVALID);
 
                 try {
-                    RequestType requestType = RequestType.getRequestType(requestObject.getString("request"));
+                    RequestType requestType = RequestType.valueOf(requestObject.getAsJsonPrimitive("request").getAsString());
 
-                    if (requestType == RequestType.MESSAGE) {
-                        Message message = Message.getInstance(requestObject);
-
-                        switch (message.getMessageType()) {
-                            case GLOBAL:
-                                GlobalMessageDetails globalMessageDetails = (GlobalMessageDetails) message.getDetails();
-                                globalMessageDetails.setSender(this.email);
-                                sendGlobalMessage(message);
-                                break;
-
-                            case PRIVATE:
-                                PrivateMessageDetails privateMessageDetails = (PrivateMessageDetails) message.getDetails();
-                                privateMessageDetails.setSender(this.email);
-                                String recipient = privateMessageDetails.getRecipient();
-                                sendPrivate(recipient, message);
-                                break;
-                        }
-                    } else if (requestType == RequestType.LOGOUT) {
-                        disconnect(false);
-                    } else {
-                        Log.d(LOG_TAG, "Made a request of type: " + requestType.getValue());
-                        errorResponse.setMessage("Invalid request");
-                        out.println(errorResponse.toJSON());
-                        out.flush();
+                    switch (requestType) {
+                        case users:
+                            //TODO: Send back the list of registered users based on search
+                            break;
+                        case message:
+                            if (isLoggedIn) {
+                                MESSAGE_EXECUTOR.submit(() -> messageHandler.handleJson(requestObject));
+                            } else {
+                                Log.v(LOG_TAG, socket.getInetAddress() + " sent message request without log in");
+                                errorResponse.setMessage("User not logged in");
+                                out.println(errorResponse.toJSON());
+                                out.flush();
+                            }
+                            break;
+                        case login:
+                        case registration:
+                        case verify:
+                            if (!isLoggedIn) {
+                                switch (requestType) {
+                                    case login: //TODO: handle login
+                                        break;
+                                    case registration:
+                                    case verify: LOGIN_EXECUTOR.submit(()-> registrationHandler.handleJson(requestObject));
+                                    break;
+                                }
+                            } else {
+                                Log.v(LOG_TAG, email + " is already logged in, invalid request");
+                                errorResponse.setMessage("User is already logged in");
+                                out.println(errorResponse);
+                                out.flush();
+                            }
+                        case logout:
+                            disconnect(false);
+                        default:
+                            Log.d(LOG_TAG, "Made a request of type: " + requestType.toString());
+                            errorResponse.setMessage("Invalid request");
+                            out.println(errorResponse.toJSON());
+                            out.flush();
                     }
+
                 } catch (IllegalArgumentException ex) {
                     Log.e(LOG_TAG, "Error occurred", ex);
                     errorResponse.setMessage("Request type not recognised by server.");
@@ -106,51 +130,27 @@ public class ClientHandler implements Runnable {
 
     synchronized public void disconnect(boolean kicked) {
 
-        if (socket != null && socket.isConnected()) {
+        if (socket != null && !socket.isClosed() && socket.isConnected()) {
+
             try {
+
                 isLoggedIn = false;
 
-                socket.close();
-                in.close();
-                out.close();
-
-                in.close();
-                out.close();
+                socket.shutdownInput();
+                socket.shutdownOutput();
                 socket.close();
 
                 Server.ACTIVE_CLIENT_MAP.remove(this.email);
                 Log.i(LOG_TAG, email + (kicked ? " was kicked from the server." : " left the session."));
+
             } catch (IOException ex) {
                 Log.e(LOG_TAG, "Error occurred", ex);
             }
         }
-
     }
 
-    private void sendPrivate(String recipient, Message message) {
-        ClientHandler recipientClient = Server.ACTIVE_CLIENT_MAP.get(recipient);
-        JSONObject object = new JSONObject(message.toMap());
-        if (recipientClient.isLoggedIn) {
-            recipientClient.out.println(object.toString());
-            recipientClient.out.flush();
-        } else {
-            try {
-                Database database = Database.getInstance();
-                ServerExecutors.getDatabaseExecutor().submit(()->database.addMessage(message.getDetails()));
-            } catch (InstantiationException ex) {
-                Log.e(LOG_TAG, "An error occurred while trying to fetch an instance of database", ex);
-            }
-        }
-    }
+    protected void setEmail(String email) {
+        this.email = email;
 
-    private void sendGlobalMessage(Message message) {
-        JSONObject object = new JSONObject(message.toMap());
-        for (ClientHandler client : Server.ACTIVE_CLIENT_MAP.values()) {
-            if (!client.getEmail().equals(email) && client.isLoggedIn) {
-                client.out.println(object.toString());
-                client.out.flush();
-            }
-        }
     }
-
 }

@@ -2,11 +2,9 @@ package org.shardav.server.comms.messages;
 
 import org.json.JSONObject;
 
-import java.util.Map;
-
 public class PrivateMessageDetails extends MessageDetails {
 
-    private String recipient;
+    private String to;
 
     /**
      * Private message with media
@@ -16,47 +14,34 @@ public class PrivateMessageDetails extends MessageDetails {
      * @param media the media attached to the message
      * @param timeStamp the time at which the message was sent
      * @param sender the sender of the message
-     * @param recipient the recipient of the message
+     * @param to the recipient of the message
      */
-    public PrivateMessageDetails(String id, String message, String media, long timeStamp, String sender,String recipient) {
+    public PrivateMessageDetails(String id, String message, String media, long timeStamp, String sender,String to) {
         super(id, message, media, timeStamp, sender);
-        this.recipient = recipient;
+        this.to = to;
     }
 
     private PrivateMessageDetails(String id, String message, String media, long timeStamp, String sender) {
         super(id, message, media, timeStamp, sender);
-        this.recipient = null;
+        this.to = null;
     }
 
     private PrivateMessageDetails(String id, String message, long timeStamp, String sender) {
         super(id, message, timeStamp, sender);
-        this.recipient = null;
+        this.to = null;
 
     }
 
-    private void setRecipient(String recipient) {
-        this.recipient = recipient;
+    private void setTo(String to) {
+        this.to = to;
     }
 
     /**
      * Fetch the recipient of the message
      * @return Returns the recipient of the current message.
      */
-    public String getRecipient() {
-        return recipient;
-    }
-
-    /**
-     * Converts the attributes of the current object to a map and returns it.
-     *
-     * @return A map containing the details of the attributes of the object.
-     */
-    @Override
-    public Map<String, Object> toMap() {
-        Map<String, Object> object = super.toMap();
-        object.put("to",this.recipient);
-        object.remove("from");
-        return object;
+    public String getTo() {
+        return this.to;
     }
 
     /**
@@ -88,7 +73,7 @@ public class PrivateMessageDetails extends MessageDetails {
             }
 
             if(detailsObject.has("to") && detailsObject.getString("to")!=null){
-                details.setRecipient(detailsObject.getString("to"));
+                details.setTo(detailsObject.getString("to"));
                 return details;
             } else
                 throw new IllegalArgumentException("private messages should contain the key 'to'");

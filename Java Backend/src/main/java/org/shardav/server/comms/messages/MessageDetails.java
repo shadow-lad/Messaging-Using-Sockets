@@ -7,24 +7,27 @@ import java.util.Map;
 
 public class MessageDetails implements Details {
 
-    private String id, message, media, sender;
+    private final String id;
+    private final String message;
+    private String media;
+    private String from;
 
-    private long timeStamp;
+    private final long time;
 
     /**
      * Message without any media
      *
      * @param id the id of the message, it should be unique for future purposes
      * @param message the body of the message to be sent
-     * @param timeStamp the time at which the message was sent
-     * @param sender the person who sent the message
+     * @param time the time at which the message was sent
+     * @param from the person who sent the message
      */
-    protected MessageDetails(String id, String message, long timeStamp, String sender) {
+    protected MessageDetails(String id, String message, long time, String from) {
         this.id = id;
         this.message = message;
-        this.timeStamp = timeStamp;
+        this.time = time;
         this.media = null;
-        this.sender = sender;
+        this.from = from;
     }
 
     /**
@@ -32,11 +35,11 @@ public class MessageDetails implements Details {
      * @param id the id of the message, it should be unique for future purposes
      * @param message the body of the message to be sent
      * @param media the media of the message
-     * @param timeStamp the time at which the message was sent
-     * @param sender the person who sent the message
+     * @param time the time at which the message was sent
+     * @param from the person who sent the message
      */
-    protected MessageDetails(String id, String message, String media, long timeStamp, String sender) {
-        this(id,message,timeStamp, sender);
+    protected MessageDetails(String id, String message, String media, long time, String from) {
+        this(id,message, time, from);
         this.media = media;
     }
 
@@ -52,9 +55,9 @@ public class MessageDetails implements Details {
 
         map.put("id",this.id);
         map.put("message",this.message);
-        map.put("from",this.sender);
+        map.put("from",this.from);
         map.put("media",this.media);
-        map.put("time",this.timeStamp);
+        map.put("time",this.time);
 
         return map;
     }
@@ -87,24 +90,25 @@ public class MessageDetails implements Details {
      * Fetch the sender of the message
      * @return Returns the sender of the current message.
      */
-    public String getSender() {
-        return sender;
+    public String getFrom() {
+        return from;
     }
 
     /**
      * Fetch the timestamp of the message
      * @return Returns the timestamp of the current message.
      */
-    public long getTimeStamp() {
-        return timeStamp;
+    public long getTime() {
+        return time;
     }
 
     /**
      * Set the sender username
-     * @param sender username of the sender
+     * @param from username of the sender
      */
-    public void setSender(String sender) {
-        this.sender = sender;
+    public MessageDetails setFrom(String from) {
+        this.from = from;
+        return this;
     }
 
 }

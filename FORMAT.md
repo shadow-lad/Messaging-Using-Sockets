@@ -5,44 +5,45 @@ This file contains the guidelines to communicate with the server. Proper respons
 ## Table of Contents
 
 - [Communicating with the Server](#communicating-with-the-server)
-  - [Table of Contents](#table-of-contents)
-  - [Registration](#registration)
-    - [Client Request](#client-request)
-      - [Begin Registration Process](#begin-registration-process)
-      - [Verify OTP](#verify-otp)
-    - [Server Response](#server-response)
-      - [OTP Sent](#otp-sent)
-      - [User is successfully registered](#user-is-successfully-registered)
-      - [Error why the registration failed](#error-why-the-registration-failed)
-  - [Login](#login)
-    - [Client Login Request](#client-login-request)
-    - [Server Login Response](#server-login-response)
-      - [if credentials found](#if-credentials-found)
-      - [if credentials not found](#if-credentials-not-found)
-  - [Log-Out](#log-out)
-    - [Client Log-Out Request](#client-log-out-request)
-  - [Messages](#messages)
-    - [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
-      - [Sending Message](#sending-message)
-        - [Without media](#without-media)
-        - [With media](#with-media)
-      - [Receiving Message](#receiving-message)
-        - [Receiving Messages without Media](#receiving-messages-without-media)
-        - [Receiving Messages with Media](#receiving-messages-with-media)
-    - [Private Message](#private-message)
-      - [Sending Private Message](#sending-private-message)
-        - [Sending Private Message without Media](#sending-private-message-without-media)
-        - [Sending Private Message with Media](#sending-private-message-with-media)
-      - [Receiving Private Message](#receiving-private-message)
-        - [Receving Private Message without Media](#receving-private-message-without-media)
-        - [Receiving Private Message with Media](#receiving-private-message-with-media)
-  - [Error (Will be classified in the future.)](#error-will-be-classified-in-the-future)
+	- [Table of Contents](#table-of-contents)
+	- [Registration](#registration)
+		- [Client Request](#client-request)
+			- [Begin Registration Process](#begin-registration-process)
+			- [Verify OTP](#verify-otp)
+		- [Server Response](#server-response)
+			- [OTP Sent](#otp-sent)
+			- [User is successfully registered](#user-is-successfully-registered)
+			- [Error why the registration failed](#error-why-the-registration-failed)
+	- [Login](#login)
+		- [Client Login Request](#client-login-request)
+		- [Server Login Response](#server-login-response)
+			- [if credentials found](#if-credentials-found)
+			- [if credentials not found](#if-credentials-not-found)
+	- [Log-Out](#log-out)
+		- [Client Log-Out Request](#client-log-out-request)
+	- [Messages](#messages)
+		- [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
+			- [Sending Message](#sending-message)
+				- [Without media](#without-media)
+				- [With media](#with-media)
+			- [Receiving Message](#receiving-message)
+				- [Receiving Messages without Media](#receiving-messages-without-media)
+				- [Receiving Messages with Media](#receiving-messages-with-media)
+		- [Private Message](#private-message)
+			- [Sending Private Message](#sending-private-message)
+				- [Sending Private Message without Media](#sending-private-message-without-media)
+				- [Sending Private Message with Media](#sending-private-message-with-media)
+			- [Receiving Private Message](#receiving-private-message)
+				- [Receving Private Message without Media](#receving-private-message-without-media)
+				- [Receiving Private Message with Media](#receiving-private-message-with-media)
+	- [Error (Will be classified in the future.)](#error-will-be-classified-in-the-future)
 
 ## Registration
 
 - The first message sent must be a [login](#login)/registration request to the server when making a socket connection.
 - Failure to do so will result in error.
 - It should be a valid JSON message.
+- A new request should be made to generate a new OTP.
 
 ### Client Request
 
@@ -98,7 +99,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 }
 ```
 
->***NOTE: User will be logged in once the registration is complete.***
+>***NOTE: After successful registration, the user should be taken back to the login screen.***
 
 ## Login
 

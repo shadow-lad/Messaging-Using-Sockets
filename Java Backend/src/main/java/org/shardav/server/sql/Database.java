@@ -88,25 +88,25 @@ public class Database {
             if (details.getMedia() == null ) {
                 statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA,
                         details.getId(),
-                        details.getRecipient(),
-                        details.getSender(),
+                        details.getTo(),
+                        details.getFrom(),
                         details.getMessage(),
-                        details.getTimeStamp());
+                        details.getTime());
             } else if(details.getMessage() == null) {
                 statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MESSAGES,
                         details.getId(),
-                        details.getRecipient(),
-                        details.getSender(),
+                        details.getTo(),
+                        details.getFrom(),
                         details.getMedia(),
-                        details.getTimeStamp());
+                        details.getTime());
             } else {
                 statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITH_MEDIA,
                         details.getId(),
-                        details.getRecipient(),
-                        details.getSender(),
+                        details.getTo(),
+                        details.getFrom(),
                         details.getMedia(),
                         details.getMessage(),
-                        details.getTimeStamp());
+                        details.getTime());
             }
 
             Statement insertMessage = connection.createStatement();
@@ -142,8 +142,8 @@ public class Database {
 
     }
 
-    public List<Message> fetchMessagesByEmail (String email) throws SQLException {
-        List<Message> messages = new ArrayList<>();
+    public List<Message<?>> fetchMessagesByEmail (String email) throws SQLException {
+        List<Message<?>> messages = new ArrayList<>();
 
         VIEW_MESSAGES_BY_EMAIL.clearParameters();
         VIEW_MESSAGES_BY_EMAIL.setString(1, email);
@@ -151,7 +151,7 @@ public class Database {
         ResultSet result = VIEW_MESSAGES_BY_EMAIL.executeQuery();
 
         while(result.next()){
-            messages.add(new Message(new PrivateMessageDetails(
+            messages.add(new Message<>(new PrivateMessageDetails(
                     result.getString("id"), //ID
                     result.getString("message"), //Message
                     result.getString("media"), //Media
@@ -227,9 +227,7 @@ public class Database {
                     result.getString("username")
             ));
         }
-
-        if(users.isEmpty())
-            return null;
+        
         return users;
 
     }

@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//TODO: PRIORITY 1: Save messages that are not delivered to the database
+//TODO: PRIORITY 1: Save messages that are not delivered to the database    
 
 public class Server {
 

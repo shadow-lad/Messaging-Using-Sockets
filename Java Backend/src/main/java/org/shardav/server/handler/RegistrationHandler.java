@@ -87,7 +87,7 @@ public class RegistrationHandler implements Runnable {
             JSONObject verify = new JSONObject(new JSONTokener(json));
 
             if (verify.has("request")
-                    && RequestType.getRequestType(verify.getString("request")) == RequestType.VERIFY) {
+                    && RequestType.valueOf(verify.getString("request")) == RequestType.verify) {
 
                 if (verify.has("otp")
                         && verify.getString("otp") != null) {

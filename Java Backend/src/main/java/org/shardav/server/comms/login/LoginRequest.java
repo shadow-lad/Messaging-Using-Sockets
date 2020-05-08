@@ -3,15 +3,15 @@ package org.shardav.server.comms.login;
 import org.json.JSONObject;
 import org.shardav.server.comms.Request;
 
-public class LoginRequest extends Request {
+public class LoginRequest<T extends UserDetails> extends Request<T> {
 
     /**
      * Constructor used to create a new login request
      *
      * @param details An instance of login details containing the username and password
      */
-    private LoginRequest(UserDetails details) {
-        super(RequestType.LOGIN, details);
+    private LoginRequest(T details) {
+        super(RequestType.login, details);
     }
 
     /**
@@ -20,8 +20,8 @@ public class LoginRequest extends Request {
      * @return An instance of LoginDetails object
      */
     @Override
-    public UserDetails getDetails() {
-        return (UserDetails) this.details;
+    public T getDetails() {
+        return this.details;
     }
 
     /**
@@ -31,17 +31,17 @@ public class LoginRequest extends Request {
      * @return An instance of class login request with all the fields satisfied
      * @throws IllegalArgumentException Thrown if the request is invalid
      */
-    public static LoginRequest getInstance(JSONObject loginObject)throws IllegalArgumentException {
+    public static LoginRequest<UserDetails> getInstance(JSONObject loginObject)throws IllegalArgumentException {
 
         if(loginObject.has("request") && loginObject.getString("request")!=null
                 && loginObject.has("details") && loginObject.getJSONObject("details")!=null){
-            RequestType request = RequestType.getRequestType(loginObject.getString("request"));
-            if(request == RequestType.LOGIN){
-                return new LoginRequest(UserDetails.getInstance(loginObject.getJSONObject("details")));
-            } else if (request == RequestType.REGISTRATION){
+            RequestType request = RequestType.valueOf(loginObject.getString("request"));
+            if(request == RequestType.login){
+                return new LoginRequest<>(UserDetails.getInstance(loginObject.getJSONObject("details")));
+            } else if (request == RequestType.registration){
                 UserDetails details = UserDetails.getInstance(loginObject.getJSONObject("details"));
                 if(details.hasEmail() && details.hasUsername() && details.hasPassword())
-                    return new LoginRequest(details);
+                    return new LoginRequest<>(details);
                 else
                     throw new IllegalArgumentException("Invalid registration request, email, username and password should be present.");
             } else {

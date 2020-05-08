@@ -56,15 +56,15 @@ public class VerificationHandler implements Runnable {
 
             try {
 
-                RequestType request = RequestType.getRequestType(root.getString("request"));
+                RequestType request = RequestType.valueOf(root.getString("request"));
 
-                if (request == RequestType.LOGIN || request == RequestType.REGISTRATION) {
+                if (request == RequestType.login || request == RequestType.registration) {
 
                     try {
 
-                        Log.i(LOG_TAG, "Handling " + request.getValue() + " request.");
+                        Log.i(LOG_TAG, "Handling " + request.toString() + " request.");
 
-                        LoginRequest loginRequest = LoginRequest.getInstance(root);
+                        LoginRequest<UserDetails> loginRequest = LoginRequest.getInstance(root);
 
                         UserDetails details = loginRequest.getDetails();
 
@@ -80,7 +80,7 @@ public class VerificationHandler implements Runnable {
                         } catch (InterruptedException | ExecutionException ex) {
                             Log.v(LOG_TAG, "An error occurred while fetching details", ex);
                         }
-                        if (request == RequestType.REGISTRATION) {
+                        if (request == RequestType.registration) {
                             if (existingUser == null) {
                                 ServerExecutors.getVerificationHandlerExecutor().submit(new RegistrationHandler(client, in, out, details, gMailService));
                             } else {

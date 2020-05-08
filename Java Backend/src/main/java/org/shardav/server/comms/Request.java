@@ -1,51 +1,29 @@
 package org.shardav.server.comms;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public abstract class Request {
+public abstract class Request<T extends Details> {
 
     public enum RequestType {
-        LOGIN("login"),
-        LOGOUT("logout"),
-        MESSAGE("message"),
-        REGISTRATION("registration"),
-        USERS("users"),
-        VERIFY("verify");
-
-        private final String requestType;
-
-        RequestType(String requestType){
-            this.requestType = requestType;
-        }
-
-        public String getValue(){return requestType;}
-
-        public static RequestType getRequestType(String requestType) throws IllegalArgumentException {
-            switch (requestType){
-                case "login": return LOGIN;
-                case "logout": return LOGOUT;
-                case "message": return MESSAGE;
-                case "registration": return REGISTRATION;
-                case "verify": return VERIFY;
-                default: throw new IllegalArgumentException("Illegal Request Type: " + requestType);
-            }
-        }
+        login,
+        logout,
+        message,
+        registration,
+        users,
+        verify
 
     }
 
-    protected RequestType requestType;
+    protected RequestType request;
 
-    protected Details details;
+    protected T details;
 
     /**
      * Constructor used to create a Request
      *
-     * @param requestType The type of request
+     * @param request The type of request
      * @param details The details of the request
      */
-    public Request(RequestType requestType, Details details) {
-        this.requestType = requestType;
+    public Request(RequestType request, T details) {
+        this.request = request;
         this.details = details;
     }
 
@@ -53,22 +31,8 @@ public abstract class Request {
      * Fetch the type of request
      * @return Returns a value of type RequestType representing the current RequestType.
      */
-    public RequestType getRequestType() {
-        return requestType;
-    }
-
-    /**
-     * Converts the attributes of the current object to a map and returns it.
-     *
-     * @return A map containing the details of the attributes of the object.
-     */
-    public Map<String, Object> toMap(){
-        Map<String, Object> map = new HashMap<>();
-
-        map.put("request",getRequestType().getValue());
-        map.put("details",getDetails().toMap());
-
-        return map;
+    public RequestType getRequest() {
+        return this.request;
     }
 
     /**
@@ -76,5 +40,5 @@ public abstract class Request {
      *
      * @return Returns the details of the object
      */
-    public abstract Details getDetails();
+    public abstract T getDetails();
 }

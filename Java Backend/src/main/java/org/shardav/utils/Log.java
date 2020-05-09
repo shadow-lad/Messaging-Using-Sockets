@@ -28,7 +28,7 @@ public class Log {
 
     private static boolean LOG_VERBOSE = false;
 
-    private static final String MESSAGE_FORMAT = "[%s\t%s]\t%s\t|\t%s\t:\t%s";
+    private static final String MESSAGE_FORMAT = "[%s %s] %s | %s : %s";
 
     private static final Object LOCK = new Object();
 
@@ -111,7 +111,7 @@ public class Log {
     public static void i(String TAG, String message, Throwable throwable) {
 
         printLogMessage(LOG.INFO,
-                Thread.currentThread().getStackTrace()[2].getClassName(),
+                Thread.currentThread().getStackTrace()[3].getClassName(),
                 TAG,
                 message,
                 throwable);

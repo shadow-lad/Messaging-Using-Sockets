@@ -22,9 +22,6 @@ dependencies {
     // Include all libraries in the lib folder.
     implementation fileTree(dir:'libs', include:['*.jar'])
 
-    // Include the json parsing library from maven
-    implementation 'org.json:json:20190722'
-
     // Libraries for GMail
     implementation 'com.google.api-client:google-api-client:1.23.0'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'

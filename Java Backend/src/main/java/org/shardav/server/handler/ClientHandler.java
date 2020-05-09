@@ -199,5 +199,6 @@ public class ClientHandler implements Runnable {
 
     protected void setIsLoggedIn() {
         this.isLoggedIn = true;
+        Log.i(LOG_TAG, this.email + " logged in.");
     }
 }

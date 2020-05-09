@@ -56,12 +56,11 @@ public class RegistrationHandler {
 
             if (userDetails.hasEmail() && userDetails.hasUsername() && userDetails.hasPassword()) {
                 ServerExecutors.getDatabaseResultExecutor().submit(()->{
-                    Log.i(LOG_TAG, "Fetching from database");
                     try {
                         UserDetails emailDetails = database.fetchUserDetailsByMail(email);
                         UserDetails usernameDetails = database.fetchUserDetailsByUsername(username);
                         if (emailDetails == null && usernameDetails == null) {
-                            StringBuilder otp = new StringBuilder(new Random(new Random().nextInt(Integer.MAX_VALUE)).nextInt(10000));
+                            StringBuilder otp = new StringBuilder(String.valueOf(new Random().nextInt(10000)));
                             while (otp.length() < 4) {
                                 otp.insert(0, '0');
                             }

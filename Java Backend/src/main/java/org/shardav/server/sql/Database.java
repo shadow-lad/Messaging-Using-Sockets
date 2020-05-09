@@ -157,7 +157,7 @@ public class Database {
         return messages;
     }
 
-    public UserDetails fetchUserDetailsByUsername(String username) throws SQLException, IllegalArgumentException {
+    public UserDetails fetchUserDetailsByUsername(String username) throws SQLException {
 
         FETCH_USER_DETAILS_BY_USERNAME.clearParameters();
         FETCH_USER_DETAILS_BY_USERNAME.setString(1, username);
@@ -175,10 +175,7 @@ public class Database {
 
         result.close();
 
-        if (userDetails == null)
-            throw new IllegalArgumentException("User not found.");
-        else
-            return userDetails;
+        return userDetails;
 
     }
 
@@ -201,10 +198,7 @@ public class Database {
 
         result.close();
 
-        if (userDetails == null)
-            throw new IllegalArgumentException("User not found.");
-        else
-            return userDetails;
+        return userDetails;
 
     }
 

@@ -1,10 +1,6 @@
 package org.shardav.server.comms.login;
 
-import org.json.JSONObject;
 import org.shardav.server.comms.Details;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class UserDetails implements Details {
 

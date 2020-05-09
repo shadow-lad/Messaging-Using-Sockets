@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.handler.ClientHandler;
-import org.shardav.server.handler.VerificationHandler;
 import org.shardav.server.mail.GMailService;
 import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
@@ -18,66 +17,48 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-//TODO: PRIORITY 1: Save messages that are not delivered to the database    
 
 public class Server {
 
-    public static final Map<String, ClientHandler> ACTIVE_CLIENT_MAP = new HashMap<>(); // Map of active clients
+    public static final Set<UserDetails> CLIENT_SET = new HashSet<>();
+    public static final Map<String, ClientHandler> CLIENT_MAP = new HashMap<>(); // Map of all clients
+    public static final Set<String> ACTIVE_CLIENTS = new HashSet<>();//List of all registered users.
 
-    public static final List<UserDetails> CLIENTS = new ArrayList<>();//List of all registered users.
-
-    public static final List<Socket> NON_CLIENT_SOCKETS = new ArrayList<>();
-
-    //Log tag
     private static final String LOG_TAG = Server.class.getSimpleName();
-
-    //State of server
     private static final AtomicBoolean RUNNING = new AtomicBoolean(true);
-
-    //Reading input from the user.
     private static final BufferedReader STDIN = new BufferedReader(new InputStreamReader(System.in));
 
     final String SETTINGS_JSON_PATH;
 
-    //ServerSocket, should be on at all times.
+    //ServerSocket should be on at all times.
     private static ServerSocket messageServerSocket;
 
-    //Class Variables
     private int serverPort;
     private String mySQLUsername, mySQLPassword;
     private boolean verboseLogging;
 
+    // External service variables
     private final Database database;
-
-    private final GMailService gMailService;
+    private final GMailService mailService;
 
     //Default constructor
-    private Server() throws URISyntaxException, IOException, SQLException, InstantiationException {
+    private Server() throws URISyntaxException, IOException,
+            SQLException, InstantiationException, GeneralSecurityException {
 
-        serverPort = 6969;
-        mySQLUsername = "root";
-        mySQLPassword = "toor";
-        verboseLogging = false;
+        this.serverPort = 6969;
+        this.mySQLUsername = "root";
+        this.mySQLPassword = "toor";
+        this.verboseLogging = false;
 
-        try {
-            this.gMailService = GMailService.getInstance();
-        } catch (GeneralSecurityException | IOException ex) {
-            throw new RuntimeException("Error getting an instance of GMail Service", ex);
-        }
+        this.mailService = GMailService.getInstance(); // Initializing GMailService
 
         final URI PATH = Server.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-
         String directoryPath = Paths.get(PATH).toString();
         directoryPath = directoryPath.substring(0,directoryPath.lastIndexOf(File.separatorChar)+1);
 
-        SETTINGS_JSON_PATH = directoryPath+"settings.json";
+        this.SETTINGS_JSON_PATH = directoryPath + "settings.json";
 
         getServerConfig(); // Load the configuration from the settings.json file
         database = Database.getInstance(mySQLUsername, mySQLPassword);
@@ -94,7 +75,8 @@ public class Server {
             server.startServer(); // Start the server once setup is done
             Log.i(LOG_TAG, "A detailed output is available in the server.log file");
 
-        } catch (URISyntaxException | IOException | SQLException | InstantiationException ex) {
+        } catch (URISyntaxException | IOException |
+                SQLException | InstantiationException | GeneralSecurityException ex) {
 
             Log.e(LOG_TAG, "An error occurred while setting up the server : " + ex.getMessage(), ex);
 
@@ -115,24 +97,12 @@ public class Server {
                         "? - Show this menu\n");
     }
 
-    //Returns a list of currently active clients
-    private List<String> getActiveClients(){
-
-        List<String> clientList = new ArrayList<>();
-        for(ClientHandler currentClient: ACTIVE_CLIENT_MAP.values())
-            clientList.add(currentClient.getEmail());
-        return clientList;
-
-    }
-
     //Prints the active clients
     private void printActiveClients() {
-
-        Log.i(LOG_TAG, "Active Clients: " + (ACTIVE_CLIENT_MAP.values().size() == 0 ? "No Active Clients" : ""));
-        for (String currentClient : getActiveClients()) {
+        Log.i(LOG_TAG, "Active Clients: " + (ACTIVE_CLIENTS.size() == 0 ? "No Active Clients" : ""));
+        for (String currentClient : ACTIVE_CLIENTS) {
             Log.i(LOG_TAG, currentClient);
         }
-
     }
 
     //Toggles verbose output
@@ -231,10 +201,14 @@ public class Server {
 
     }
 
-    private void loadExistingUsers() {
-        CompletableFuture<List<UserDetails>> future = new CompletableFuture<>();
-        ServerExecutors.getDatabaseExecutor().submit(()->future.complete(database.fetchUserList()));
-        future.thenApply(CLIENTS::addAll);
+    private void loadExistingUsers() throws SQLException {
+        Log.i(LOG_TAG, "Loading existing users");
+        List<UserDetails> userDetails = database.fetchUserList();
+        for (UserDetails user : userDetails) {
+            CLIENT_MAP.put(user.getEmail(), null);
+            CLIENT_SET.add(user);
+        }
+        Log.i(LOG_TAG, "Loaded existing users");
     }
 
     private void startServer() {
@@ -264,18 +238,13 @@ public class Server {
     private void startAcceptingClients() {
 
         ServerExecutors.getServerExecutor().submit(() -> {
-
             while (RUNNING.get()) {
-
                 try {
-
                     Socket client = messageServerSocket.accept(); //Accept connections to the server
-
-                    NON_CLIENT_SOCKETS.add(client);
                         
                     //Creating a new thread to handle logging in
                     // so that client requests are not queued
-                    ServerExecutors.getVerificationHandlerExecutor().submit(new VerificationHandler(client, gMailService));
+                    ServerExecutors.getClientHandlerExecutor().submit(new ClientHandler(client, database, mailService));
 
                 } catch (IOException ex) {
                     if (!ex.getMessage().equalsIgnoreCase("socket closed")) {
@@ -339,19 +308,14 @@ public class Server {
         if (RUNNING.get()) {
             try {
                 RUNNING.set(false);
-                for (ClientHandler currentClient : ACTIVE_CLIENT_MAP.values()) {
-                    if (currentClient.isLoggedIn) {
-                        currentClient.disconnect(true);
-                    }
+                for (String client : ACTIVE_CLIENTS) {
+                    ClientHandler currentClient = CLIENT_MAP.get(client);
+                    currentClient.disconnect(true);
                 }
                 ServerExecutors.close();
-                for (Socket socket : NON_CLIENT_SOCKETS) {
-                    socket.getInputStream().close();
-                    socket.getOutputStream().close();
-                    socket.close();
-                }
                 messageServerSocket.close();
-            } catch (IOException ignore) {
+                database.close();
+            } catch (IOException | SQLException ignore) {
             } finally {
                 Log.i(LOG_TAG, "Server Shutdown, EXITING...");
             }

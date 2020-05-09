@@ -1,44 +1,53 @@
 package org.shardav.server.comms;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
-public class Response {
+public class Response<T> {
 
     public enum ResponseStatus {
-        FAILED("failed"),
-        INVALID("invalid"),
-        SENT("sent"),
-        SUCCESS("success");
-
-        private String status;
-
-        ResponseStatus(String status){
-            this.status = status;
-        }
-
-        public String getValue() {
-            return status;
-        }
+        failed,
+        invalid,
+        sent,
+        success
     }
 
-    ResponseStatus responseStatus;
+    public enum ResponseType {
+        general,
+        login,
+        logout,
+        message,
+        otp,
+        registration,
+        user,
+        verify
+    }
+
+    ResponseStatus status;
+    ResponseType type;
     String message;
+    T details;
 
-    public Response(ResponseStatus responseStatus) {
-        this.responseStatus = responseStatus;
+    public Response (ResponseStatus status, ResponseType type) {
+        this.status = status;
+        this.type = type;
         this.message = null;
+        this.details = null;
     }
 
-    public Response(ResponseStatus responseStatus, String message) {
-        this.responseStatus = responseStatus;
+    public Response (ResponseStatus status, ResponseType type, String message) {
+        this.status = status;
+        this.type = type;
         this.message = message;
+        this.details = null;
     }
 
-    public ResponseStatus getResponseStatus() {
-        return responseStatus;
+    public Response (ResponseStatus status, ResponseType type, T details) {
+        this.status = status;
+        this.type = type;
+        this.message = null;
+        this.details = details;
+    }
+
+    public ResponseStatus getStatus() {
+        return status;
     }
 
     public String getMessage() {
@@ -49,19 +58,13 @@ public class Response {
         this.message = message;
     }
 
-    public void setResponseStatus(ResponseStatus status){this.responseStatus = status;}
+    public void setStatus(ResponseStatus status){this.status = status;}
 
-    public String toJSON(){
-        return new JSONObject(this.toMap()).toString();
+    public void setType(ResponseType type) {
+        this.type = type;
     }
 
-    private Map<String, Object> toMap(){
-
-        Map<String,Object> map = new HashMap<>();
-        map.put("status",this.responseStatus.getValue());
-        map.put("message",this.getMessage());
-        return map;
-
+    public void setDetails(T details) {
+        this.details = details;
     }
-
 }

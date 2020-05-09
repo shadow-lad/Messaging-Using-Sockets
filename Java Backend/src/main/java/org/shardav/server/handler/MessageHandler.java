@@ -7,22 +7,28 @@ import org.shardav.server.Server;
 import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseStatus;
+import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.messages.GlobalMessageDetails;
 import org.shardav.server.comms.messages.Message;
 import org.shardav.server.comms.messages.Message.MessageType;
-import org.shardav.server.comms.messages.PrivateMessageDetails;
+import org.shardav.server.comms.messages.PersonalMessageDetails;
 import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
+
+import java.sql.SQLException;
+import java.util.Date;
 
 public class MessageHandler {
 
     private static final String LOG_TAG = MessageHandler.class.getSimpleName();
 
     private final ClientHandler client;
+    private final Database database;
     private final Gson gson;
 
-    public MessageHandler(ClientHandler client) {
+    protected MessageHandler(ClientHandler client, Database database) {
         this.client = client;
+        this.database = database;
         this.gson = new Gson();
     }
 
@@ -33,52 +39,70 @@ public class MessageHandler {
             if (messageDetails == null) {
                 throw new JsonSyntaxException("JSON object \"details\" not present.");
             }
-            Message<?> message;
+            String id = client.getEmail() + new Date().getTime();
             switch (messageType) {
                 case global:
-                    message = new Message<>(gson.fromJson(messageDetails, GlobalMessageDetails.class).setFrom("server"));
-                    sendGlobalMessage(message);
+                    Message<GlobalMessageDetails> globalMessage = new Message<>(gson.fromJson(messageDetails, GlobalMessageDetails.class).setFrom(client.getEmail()).setId(id));
+                    sendGlobalMessage(globalMessage);
                     break;
                 case personal:
-                    message = new Message<>(gson.fromJson(messageDetails, PrivateMessageDetails.class).setFrom("server"));
-                    sendPersonalMessage(((PrivateMessageDetails)message.getDetails()).getTo(), message);
+                    Message<PersonalMessageDetails> personalMessage = new Message<>(gson.fromJson(messageDetails, PersonalMessageDetails.class).setFrom(client.getEmail()).setId(id));
+                    sendPersonalMessage((personalMessage.getDetails()).getTo(), personalMessage);
                     break;
             }
         } catch (JsonSyntaxException ex) {
             Log.e("An error occurred while parsing the message", ex.getMessage(), ex);
-            Response errorResponse = new Response(ResponseStatus.INVALID);
+            Response<Void> errorResponse = new Response<>(ResponseStatus.invalid, ResponseType.message);
             errorResponse.setMessage(ex.getMessage());
-            client.out.println(errorResponse.toJSON());
+            client.out.println(gson.toJson(errorResponse));
             client.out.flush();
         } catch (EnumConstantNotPresentException ex) {
-            Response errorResponse = new Response(ResponseStatus.INVALID);
+            Response<Void> errorResponse = new Response<>(ResponseStatus.invalid, ResponseType.message);
             Log.d(LOG_TAG, "Message type not identified: " + root.getAsJsonPrimitive("type").getAsString());
             errorResponse.setMessage("Invalid message type");
-            client.out.println(errorResponse.toJSON());
+            client.out.println(gson.toJson(errorResponse));
             client.out.flush();
         }
     }
 
-    private void sendPersonalMessage(String recipient, Message<?> message) {
-        ClientHandler recipientClient = Server.ACTIVE_CLIENT_MAP.get(recipient);
-        String messageJSON = gson.toJson(message);
-        if (recipientClient.isLoggedIn) {
-            recipientClient.out.println(messageJSON);
-            recipientClient.out.flush();
-        } else {
-            try {
-                Database database = Database.getInstance();
-                ServerExecutors.getDatabaseExecutor().submit(() -> database.addMessage(message.getDetails()));
-            } catch (InstantiationException ex) {
-                Log.e(LOG_TAG, "An error occurred while trying to fetch an instance of database", ex);
+    private void sendPersonalMessage(String recipient, Message<PersonalMessageDetails> message) {
+        ClientHandler recipientClient = Server.CLIENT_MAP.get(recipient);
+        if (recipientClient != null) {
+            String messageJSON = gson.toJson(message);
+            if (recipientClient.isLoggedIn) {
+                recipientClient.out.println(messageJSON);
+                recipientClient.out.flush();
+            } else {
+                try {
+                    Database database = Database.getInstance();
+                    ServerExecutors.getDatabaseExecutor().submit(() -> {
+                        try {
+                            database.addMessage(message.getDetails());
+                        } catch (SQLException ignore) {
+                        }
+                    });
+                } catch (InstantiationException ex) {
+                    Log.e(LOG_TAG, "An error occurred while trying to fetch an instance of database", ex);
+                }
             }
+        } else {
+            ServerExecutors.getDatabaseExecutor().submit(()-> {
+                try {
+                    database.addMessage(message.getDetails());
+                } catch (SQLException ex) {
+                    Log.v(LOG_TAG, "Error occurred while trying to add message to database : " + ex.getLocalizedMessage(), ex);
+                    Response<Void> errorResponse = new Response<>(ResponseStatus.failed, ResponseType.message);
+                    errorResponse.setMessage(ex.getLocalizedMessage());
+                    client.out.println(gson.toJson(errorResponse));
+                    client.out.flush();
+                }
+            });
         }
-        System.out.println(messageJSON);
     }
 
-    private void sendGlobalMessage(Message<?> message) {
+    private void sendGlobalMessage(Message<GlobalMessageDetails> message) {
         String messageJSON = gson.toJson(message);
-        for (ClientHandler client : Server.ACTIVE_CLIENT_MAP.values()) {
+        for (ClientHandler client : Server.CLIENT_MAP.values()) {
             if (!client.getEmail().equals(this.client.getEmail()) && client.isLoggedIn) {
                 client.out.println(messageJSON);
                 client.out.flush();

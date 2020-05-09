@@ -53,10 +53,10 @@ public class RegistrationHandler {
             this.userDetails = gson.fromJson(root.get("details"), UserDetails.class);
             String email = userDetails.getEmail();
             String username = userDetails.getUsername();
-            String password = userDetails.getPassword();
 
-            if (email != null && username != null && password != null) {
+            if (userDetails.hasEmail() && userDetails.hasUsername() && userDetails.hasPassword()) {
                 ServerExecutors.getDatabaseResultExecutor().submit(()->{
+                    Log.i(LOG_TAG, "Fetching from database");
                     try {
                         UserDetails emailDetails = database.fetchUserDetailsByMail(email);
                         UserDetails usernameDetails = database.fetchUserDetailsByUsername(username);
@@ -74,7 +74,9 @@ public class RegistrationHandler {
                             client.out.println(gson.toJson(invalid));
                             client.out.flush();
                         }
-                    } catch (SQLException ignore) {}
+                    } catch (SQLException ex) {
+                        Log.e(LOG_TAG, "An error occurred : " + ex.getLocalizedMessage(), ex);
+                    }
                 });
             } else {
                 this.userDetails = null;

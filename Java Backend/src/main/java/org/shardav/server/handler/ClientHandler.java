@@ -179,8 +179,6 @@ public class ClientHandler implements Runnable {
 
                 logout(true);
 
-                Log.i(LOG_TAG, socket.getInetAddress() + " left the session.");
-
                 socket.shutdownInput();
                 socket.shutdownOutput();
                 socket.setKeepAlive(false);

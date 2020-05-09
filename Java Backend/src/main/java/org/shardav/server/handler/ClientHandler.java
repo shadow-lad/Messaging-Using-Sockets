@@ -158,15 +158,17 @@ public class ClientHandler implements Runnable {
     }
 
     synchronized private void logout(boolean disconnect) {
-        Log.i(LOG_TAG, email + " logged out.");
-        Server.CLIENT_MAP.put(this.email, null);
-        Server.ACTIVE_CLIENTS.remove(this.email);
-        if (!disconnect) {
-            this.out.println(new Response<Void>(ResponseStatus.success, ResponseType.logout));
-            this.out.flush();
+        if (isLoggedIn) {
+            Log.i(LOG_TAG, this.email + " logged out.");
+            Server.CLIENT_MAP.put(this.email, null);
+            Server.ACTIVE_CLIENTS.remove(this.email);
+            if (!disconnect) {
+                this.out.println(new Response<Void>(ResponseStatus.success, ResponseType.logout));
+                this.out.flush();
+            }
+            this.isLoggedIn = false;
+            this.email = null;
         }
-        this.isLoggedIn = false;
-        this.email = null;
     }
 
     synchronized public void disconnect(boolean kicked) {
@@ -176,6 +178,8 @@ public class ClientHandler implements Runnable {
             try {
 
                 logout(true);
+
+                Log.i(LOG_TAG, socket.getInetAddress() + " left the session.");
 
                 socket.shutdownInput();
                 socket.shutdownOutput();

@@ -24,9 +24,11 @@ public class Log {
 
     }
 
+    private static String path = null;
+
     private static boolean LOG_VERBOSE = false;
 
-    private static final String MESSAGE_FORMAT = "[%s %s] %s | %s : %s";
+    private static final String MESSAGE_FORMAT = "[%s\t%s]\t%s\t|\t%s\t:\t%s";
 
     private static final Object LOCK = new Object();
 
@@ -39,9 +41,13 @@ public class Log {
             PrintWriter out = null;
 
             try {
-                String path = Paths.get(Log.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
-                path = path.substring(0, path.lastIndexOf(File.separatorChar) + 1) + "server.log";
-                out = new PrintWriter(new FileOutputStream(path));
+                SimpleDateFormat logFormat = new SimpleDateFormat("yyyy-MM-dd+hh-mm-ssaa");
+                if (path == null) {
+                    path = Paths.get(Log.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
+                    path = path.substring(0, path.lastIndexOf(File.separatorChar) + 1) + "server" + logFormat.format(new Date()) + ".log";
+                }
+
+                out = new PrintWriter(new FileWriter(path, true));
 
                 if (TAG == null) {
                     TAG = "";
@@ -78,7 +84,7 @@ public class Log {
             } catch (Exception ex) {
                 System.err.println("Error creating log.txt: " + ex.getMessage());
             } finally {
-                if(out!=null) {
+                if(out != null) {
                     out.flush();
                     out.close();
                 }

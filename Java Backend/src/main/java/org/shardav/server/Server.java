@@ -80,11 +80,11 @@ public class Server {
 
     //Displays the help menu
     private void displayHelpMenu() {
-        System.out.println(
-                "--------\n" +
-                        "  HELP\n" +
-                        "--------\n" +
-                        "\n" +
+        Log.i(LOG_TAG,
+                "\n--------" +
+                        "\n  HELP" +
+                        "\n--------" +
+                        "\n\n" +
                         "l - List connected clients\n" +
                         "v - Toggle verbose logging\n" +
                         "q - Shutdown server\n" +
@@ -93,10 +93,12 @@ public class Server {
 
     //Prints the active clients
     private void printActiveClients() {
-        Log.i(LOG_TAG, "Active Clients: " + (ACTIVE_CLIENTS.size() == 0 ? "No Active Clients" : ""));
+        StringBuilder activeClients = new StringBuilder(ACTIVE_CLIENTS.size() == 0 ? "\nNo Active Clients" : "\nActive Clients:");
         for (String currentClient : ACTIVE_CLIENTS) {
-            Log.i(LOG_TAG, currentClient);
+            activeClients.append('\n').append(currentClient);
         }
+        Log.i(LOG_TAG, activeClients.toString());
+
     }
 
     //Toggles verbose output

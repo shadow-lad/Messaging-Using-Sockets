@@ -1,13 +1,8 @@
 package org.shardav.server.comms.messages;
 
-import org.shardav.server.Server;
 import org.shardav.server.comms.Request;
 
-import java.util.Map;
-
 public class Message<T extends MessageDetails> extends Request<T> {
-
-    private static final String LOG_TAG = Server.class.getSimpleName()+": "+Message.class.getSimpleName();
 
     /**
      * A custom data type created to support the types of messages that can be sent
@@ -29,7 +24,7 @@ public class Message<T extends MessageDetails> extends Request<T> {
      */
     public Message( T details ) {
         super(RequestType.message, details);
-        if(details instanceof PrivateMessageDetails)
+        if(details instanceof PersonalMessageDetails)
             this.type = MessageType.personal;
         else if(details instanceof GlobalMessageDetails)
             this.type = MessageType.global;

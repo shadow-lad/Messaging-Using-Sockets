@@ -12,8 +12,8 @@ public class SQLStatements {
             ");";
     public static final String CREATE_TABLE_PRIVATE_MESSAGES = "CREATE TABLE IF NOT EXISTS private_messages (" +
             "id VARCHAR(100) PRIMARY KEY NOT NULL," +
-            "receiver VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE," +
-            "sender VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE," +
+            "receiver VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE," +
+            "sender VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE," +
             "media VARCHAR(500) DEFAULT NULL," +
             "message VARCHAR(1000) DEFAULT NULL," +
             "time LONG NOT NULL" +

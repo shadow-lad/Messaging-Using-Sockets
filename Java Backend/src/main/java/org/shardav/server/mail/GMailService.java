@@ -38,7 +38,7 @@ public class GMailService {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
-    private static List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_SEND);
+    private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
     private static final String LOG_TAG = GMailService.class.getCanonicalName() + " : " + GMailService.class.getSimpleName();

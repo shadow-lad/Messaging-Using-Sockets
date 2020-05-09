@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class MessageDetails implements Details {
 
-    private final String id;
+    private String id;
     private final String message;
     private String media;
     private String from;
@@ -41,25 +41,6 @@ public class MessageDetails implements Details {
     protected MessageDetails(String id, String message, String media, long time, String from) {
         this(id,message, time, from);
         this.media = media;
-    }
-
-    /**
-     * Converts the attributes of the current object to a map and returns it.
-     *
-     * @return A map containing the details of the attributes of the object.
-     */
-    @Override
-    public Map<String, Object> toMap() {
-
-        Map<String, Object> map = new HashMap<>();
-
-        map.put("id",this.id);
-        map.put("message",this.message);
-        map.put("from",this.from);
-        map.put("media",this.media);
-        map.put("time",this.time);
-
-        return map;
     }
 
     /**
@@ -108,7 +89,12 @@ public class MessageDetails implements Details {
      */
     public MessageDetails setFrom(String from) {
         this.from = from;
-        return this;
+        return MessageDetails.this;
+    }
+
+    public MessageDetails setId(String id) {
+        this.id = id;
+        return MessageDetails.this;
     }
 
 }

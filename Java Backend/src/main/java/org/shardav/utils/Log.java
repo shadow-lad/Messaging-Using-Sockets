@@ -17,17 +17,10 @@ public class Log {
 
     enum LOG {
 
-        DEBUG("DEBUG"),
-        ERROR("ERROR"),
-        INFO("INFO"),
-        VERBOSE("VERBOSE");
-
-        private String level;
-        LOG(String level){
-            this.level = level;
-        }
-
-        public String getLevel(){return this.level;}
+        DEBUG,
+        ERROR,
+        INFO,
+        VERBOSE
 
     }
 
@@ -37,7 +30,7 @@ public class Log {
 
     private static final Object LOCK = new Object();
 
-    private static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss aa");
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss aa");
 
     private static void printLogMessage(LOG level, String className, String TAG, String message, Throwable throwable ) {
 
@@ -56,7 +49,7 @@ public class Log {
 
                 String output = String.format(MESSAGE_FORMAT,
                         getCurrentTime(),
-                        level.getLevel(),
+                        level.toString(),
                         className,
                         TAG,
                         message);

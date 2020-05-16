@@ -41,15 +41,15 @@ public class UserDetails implements Details {
     }
 
     public boolean hasEmail() {
-        return this.email != null;
+        return this.email != null && !email.isEmpty();
     }
 
     public boolean hasUsername() {
-        return this.username != null;
+        return this.username != null && !username.isEmpty();
     }
 
     public boolean hasPassword() {
-        return this.password != null;
+        return this.password != null && !password.isEmpty();
     }
 
 }

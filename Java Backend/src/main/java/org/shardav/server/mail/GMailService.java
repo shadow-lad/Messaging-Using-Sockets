@@ -1,5 +1,6 @@
 package org.shardav.server.mail;
 
+import java.awt.event.WindowStateListener;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -72,10 +73,10 @@ public class GMailService {
                                                 clientSecrets, 
                                                 SCOPES)
                                                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                                                .setAccessType("online")
+                                                .setAccessType("offline")
                                                 .build();
         
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8889).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 
     }
@@ -143,6 +144,14 @@ public class GMailService {
                 instance = new GMailService();
             }
             return instance;
+        }
+    }
+
+    public void destroyInstance() {
+        synchronized (LOCK) {
+            if (instance != null) {
+                instance = null;
+            }
         }
     }
 

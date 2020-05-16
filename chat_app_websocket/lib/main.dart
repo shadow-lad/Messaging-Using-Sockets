@@ -6,7 +6,7 @@ void main(){
   runApp(
     new MaterialApp(
       title: "Chat App",
-      home: chat_room(),
+      home: ChatRoom(),
       debugShowCheckedModeBanner: false,
     )
   );

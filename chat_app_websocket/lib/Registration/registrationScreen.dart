@@ -1,7 +1,8 @@
 import 'dart:io';
 
+import 'package:chat_app_websocket/models/registration_model.dart';
+import 'package:chat_app_websocket/models/user_details_model.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app_websocket/models/registrationModel.dart';
 import 'dart:convert';
 import 'otp_verification_screen.dart';
 
@@ -41,14 +42,25 @@ class RegistrationScreenState extends State<RegistrationScreen> {
     String usermail = registerMail.text.toString().trim();
     String userpassword = registerPassword.text.toString().trim();
 
-    registrationModel user =
-        registrationModel('$username', '$usermail', '$userpassword');
-    String userMap = jsonEncode(user);
+    UserDetailsModel user =
+        UserDetailsModel(username: username, emailID: usermail, password: userpassword);
+
+    RegistrationModel registrationModel= RegistrationModel(details: user);
+    String userMap = jsonEncode(registrationModel);
     widget.socket.writeln(userMap);
-    Navigator.of(context).push(new MaterialPageRoute(
-        builder: (BuildContext context) => OtpVerificationScreen(
-              socket: widget.socket,
-            )));
+    widget.socket.listen((data) {
+      String serverResponse = String.fromCharCodes(data);
+      Map<String, dynamic> response = jsonDecode(serverResponse);
+      if (response['status'] == 'sent') {
+        Navigator.of(context).push(new MaterialPageRoute(
+            builder: (BuildContext context) => OtpVerificationScreen(
+                  socket: widget.socket,
+                
+            ))); // Replacing Registration Page with OTP Page
+      } else {
+        print('DEBUG: An error occurred' + response['message']);
+      }
+    });
   }
 
   @override

@@ -15,6 +15,13 @@ class ChatRoom extends StatefulWidget{
 }
 
 class ChatRoomState extends State<ChatRoom>{
+
+  @override
+  void initState() {
+    super.initState(); 
+    print("Logged in as : " + widget.email + " and username: " + widget.name);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

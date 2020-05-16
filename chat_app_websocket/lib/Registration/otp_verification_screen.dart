@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app_websocket/Registration/login_screen.dart';
+import 'package:chat_app_websocket/models/otp_verification_model.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app_websocket/models/otpVerificationModel.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final Socket socket;
@@ -25,22 +25,40 @@ class OtpVerificationScreenState extends State<OtpVerificationScreen> {
 //  }
 
   void register(String credential) {
-    otpVerificationModel otpVerificationObject =
-        otpVerificationModel(credential);
+
+    widget.socket.listen((data) {
+      String recievedMessage = new String.fromCharCodes(data).trim();
+      print("DEBUG: Received message from server: " + recievedMessage);
+
+      Map<String, String> response = jsonDecode(recievedMessage);
+
+      if (response['status'] == 'success') {
+        Navigator.of(context)
+            .pop(); // Popping OTP Page back to Registration Page
+        Navigator.of(context)
+            .pop(); // Popping Registration Page back to Login Page
+
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) =>
+                LoginScreen())); // Replacing Login Page
+      } else {
+        print('DEBUG: An error occurred' + response['message']);
+        Navigator.of(context)
+            .pop(); // Popping OTP Page back to Registration Page
+      }
+    });
+
+    print("DEBUG: Listener initialized");
+
+    print("DEBUG: Got otp from user");
+    OtpVerificationModel otpVerificationObject =
+        OtpVerificationModel(credential);
+
     String otpMap = jsonEncode(otpVerificationObject);
 
     widget.socket.writeln(otpMap);
+    print("DEBUG: Sent otp to server");
 
-    widget.socket.listen((data) async {
-      String recievedMessage = new String.fromCharCodes(data).trim();
-      Map<String, String> response = jsonDecode(recievedMessage);
-      if (response['status'] == 'success') {
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-        Navigator.of(context).pushReplacement(new MaterialPageRoute(
-            builder: (BuildContext context) => new LoginScreen()));
-      }
-    });
   }
 
   @override

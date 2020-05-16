@@ -32,10 +32,10 @@ public class LoginHandler {
         Response<Void> errorResponse = new Response<>(ResponseStatus.failed, ResponseType.login);
         if (root.has("details")) {
             UserDetails loginDetails = gson.fromJson(root.getAsJsonObject("details"), UserDetails.class);
-            if (loginDetails.getPassword() != null) {
-                if (loginDetails.getEmail() != null) {
+            if (loginDetails.hasPassword()) {
+                if (loginDetails.hasEmail()) {
                     loginUsingEmail(loginDetails);
-                } else if (loginDetails.getUsername() != null) {
+                } else if (loginDetails.hasUsername()) {
                     loginUsingUsername(loginDetails);
                 } else {
                     errorResponse.setMessage("Neither username nor email is present");

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:chat_app_websocket/models/loginModel.dart';
+import 'package:chat_app_websocket/models/login_model.dart';
+import 'package:chat_app_websocket/models/user_details_model.dart';
 import 'package:flutter/material.dart';
 import '../ChatRoom/chat_room.dart';
 import 'registrationScreen.dart';
@@ -15,24 +16,44 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   Socket socket;
   void socketInitialize() async {
-    socket = await Socket.connect('127.0.0.1', 6969);
+    print("DEBUG: Connecting to server");
+    socket = await Socket.connect('192.168.29.52', 6969);
+    print("DEBUG: Connection established to server");
     print(socket.toString());
   }
 
   String userMail, userName;
-  final TextEditingController userEmail = new TextEditingController();
-  final TextEditingController userPassword = new TextEditingController();
+  final TextEditingController userEmailController = new TextEditingController();
+  final TextEditingController userPasswordController = new TextEditingController();
 
   void signInUser(String mail, String password) {
-    loginModel userDetails = new loginModel(mail, password);
-    socket.writeln(userDetails);
-    socket.listen((data) async {
+
+    // This piece of code from here
+    RegExp emailPattern = RegExp(r'^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$');
+    UserDetailsModel userDetails;
+    if (emailPattern.hasMatch(mail)) {
+      userDetails = UserDetailsModel(emailID: mail, password: password, username: "");
+    } else {
+      userDetails = UserDetailsModel(emailID: "", password: password, username: mail);
+    }
+    // to here is used to check whether the user entered an email or password and make the userDetails object appropriately
+
+    LoginModel loginModel = LoginModel(details: userDetails);
+
+    print("DEBUG: Login details entered by user");
+    socket.writeln(jsonEncode(loginModel));
+    print("DEBUG: Login details sent to server");
+
+    socket.listen((data) {
       String recievedMessage = new String.fromCharCodes(data).trim();
-      Map<String, String> response = jsonDecode(recievedMessage);
+      
+      print("DEBUG: Message received from server" + recievedMessage);
+
+      Map<String, dynamic> response = jsonDecode(recievedMessage);
       if (response['status'] == 'success') {
         setState(() {
-          userMail = response['email'];
-          userName = response['username'];
+          userMail = response['details']['email'];
+          userName = response['details']['username'];  
         });
         Navigator.of(context).pushReplacement(new MaterialPageRoute(
             builder: (BuildContext context) => new ChatRoom(
@@ -43,6 +64,8 @@ class LoginScreenState extends State<LoginScreen> {
         print(response['message'].toString());
       }
     });
+
+    print("DEBUG: Listening on socket");
   }
 
   @override
@@ -80,7 +103,7 @@ class LoginScreenState extends State<LoginScreen> {
             child: ListView(
               children: <Widget>[
                 TextField(
-                  controller: userEmail,
+                  controller: userEmailController,
                   decoration: InputDecoration(
                       border: UnderlineInputBorder(),
                       icon: Icon(
@@ -103,7 +126,7 @@ class LoginScreenState extends State<LoginScreen> {
                 //Another textfield to get the password
 
                 TextField(
-                  controller: userPassword,
+                  controller: userPasswordController,
                   decoration: InputDecoration(
                       border: UnderlineInputBorder(),
                       icon: Icon(
@@ -155,8 +178,8 @@ class LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       onTap: () {
-                        signInUser(userEmail.text.toString().trim(),
-                            userPassword.text.toString().trim());
+                        signInUser(userEmailController.text.toString().trim(),
+                            userPasswordController.text.toString().trim());
                       },
                     ),
 

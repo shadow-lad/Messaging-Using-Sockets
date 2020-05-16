@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
-class chat_room extends StatefulWidget{
+class ChatRoom extends StatefulWidget{
+
+  final String email;
+  final String name;
+
+  ChatRoom({this.email, this.name});
+
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return new chat_roomState();
+    return new ChatRoomState();
   }
 
 }
 
-class chat_roomState extends State<chat_room>{
+class ChatRoomState extends State<ChatRoom>{
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
 //        backgroundColor:Colors.red,
@@ -68,6 +72,7 @@ class chat_roomState extends State<chat_room>{
                     child: IconButton(
                       icon: Icon(Icons.send,
                         color: Color(0xff26fff8),),
+                        onPressed: null,
                     ),
                   )
 

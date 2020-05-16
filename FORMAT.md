@@ -101,9 +101,9 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "status" : "failed",
-    "type" : "otp or registration or verify"
-    "message" : "Reason why the user was not registered"
+	"status": "failed",
+	"type": "otp or registration or verify",
+	"message": "Reason why the user was not registered"
 }
 ```
 

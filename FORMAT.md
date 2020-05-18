@@ -5,43 +5,43 @@ This file contains the guidelines to communicate with the server. Proper respons
 ## Table of Contents
 
 - [Communicating with the Server](#communicating-with-the-server)
-	- [Table of Contents](#table-of-contents)
-	- [Registration](#registration)
-		- [Client Request](#client-request)
-			- [Begin Registration Process](#begin-registration-process)
-			- [Verify OTP](#verify-otp)
-		- [Server Response](#server-response)
-			- [OTP Sent](#otp-sent)
-			- [User is successfully registered](#user-is-successfully-registered)
-			- [Error why the registration failed](#error-why-the-registration-failed)
-	- [Login](#login)
-		- [Client Login Request](#client-login-request)
-		- [Server Login Response](#server-login-response)
-			- [if credentials found](#if-credentials-found)
-			- [if credentials not found](#if-credentials-not-found)
-	- [Log-Out](#log-out)
-		- [Client Log-Out Request](#client-log-out-request)
-		- [Server Log-Out Response](#server-log-out-response)
-	- [Messages](#messages)
-		- [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
-			- [Sending Message](#sending-message)
-				- [Without media](#without-media)
-				- [With media](#with-media)
-			- [Receiving Message](#receiving-message)
-				- [Receiving Messages without Media](#receiving-messages-without-media)
-				- [Receiving Messages with Media](#receiving-messages-with-media)
-		- [Personal Message](#personal-message)
-			- [Sending Personal Message](#sending-personal-message)
-				- [Sending Personal Message without Media](#sending-personal-message-without-media)
-				- [Sending Personal Message with Media](#sending-personal-message-with-media)
-			- [Receiving Personal Message](#receiving-personal-message)
-				- [Receving Personal Message without Media](#receving-personal-message-without-media)
-				- [Receiving Personal Message with Media](#receiving-personal-message-with-media)
-		- [Server Message Response](#server-message-response)
-	- [User List](#user-list)
-		- [Request](#request)
-		- [Response](#response)
-	- [Error](#error)
+  - [Table of Contents](#table-of-contents)
+  - [Registration](#registration)
+    - [Client Request](#client-request)
+      - [Begin Registration Process](#begin-registration-process)
+      - [Verify OTP](#verify-otp)
+    - [Server Response](#server-response)
+      - [OTP Sent](#otp-sent)
+      - [User is successfully registered](#user-is-successfully-registered)
+      - [Error why the registration failed](#error-why-the-registration-failed)
+  - [Login](#login)
+    - [Client Login Request](#client-login-request)
+    - [Server Login Response](#server-login-response)
+      - [if credentials found](#if-credentials-found)
+      - [if credentials not found](#if-credentials-not-found)
+  - [Log-Out](#log-out)
+    - [Client Log-Out Request](#client-log-out-request)
+    - [Server Log-Out Response](#server-log-out-response)
+  - [Messages](#messages)
+    - [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
+      - [Sending Message](#sending-message)
+        - [Without media](#without-media)
+        - [With media](#with-media)
+      - [Receiving Message](#receiving-message)
+        - [Receiving Messages without Media](#receiving-messages-without-media)
+        - [Receiving Messages with Media](#receiving-messages-with-media)
+    - [Personal Message](#personal-message)
+      - [Sending Personal Message](#sending-personal-message)
+        - [Sending Personal Message without Media](#sending-personal-message-without-media)
+        - [Sending Personal Message with Media](#sending-personal-message-with-media)
+      - [Receiving Personal Message](#receiving-personal-message)
+        - [Receving Personal Message without Media](#receving-personal-message-without-media)
+        - [Receiving Personal Message with Media](#receiving-personal-message-with-media)
+    - [Server Message Response](#server-message-response)
+  - [User List](#user-list)
+    - [Request](#request)
+    - [Response](#response)
+  - [Error](#error)
 
 ## Registration
 
@@ -58,12 +58,12 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-	"request": "registration",
-	"details": {
-		"email": "xyz@abc.com",
-		"password": "md5-hashed-password",
-		"username": "xyz"
-	}
+    "request": "registration",
+    "details": {
+        "email": "xyz@abc.com",
+        "password": "md5-hashed-password",
+        "username": "xyz"
+    }
 }
 ```
 
@@ -71,8 +71,8 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-	"request": "verify",
-	"otp": "1234"
+    "request": "verify",
+    "otp": "1234"
 }
 ```
 
@@ -82,9 +82,9 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-	"status": "sent",
-	"type": "otp",
-	"message": "OTP sent to xyz@abc.com"
+    "status": "sent",
+    "type": "otp",
+    "message": "OTP sent to xyz@abc.com"
 }
 ```
 
@@ -92,8 +92,8 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-	"status": "success",
-	"type": "verify"
+    "status": "success",
+    "type": "verify"
 }
 ```
 
@@ -101,9 +101,9 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-	"status": "failed",
-	"type": "otp or registration or verify",
-	"message": "Reason why the user was not registered"
+    "status": "failed",
+    "type": "otp or registration or verify",
+    "message": "Reason why the user was not registered"
 }
 ```
 
@@ -121,12 +121,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "login",
-	"details": {
-		"username": "xyz",
-		"email": "xyz@abc.com",
-		"password": "md5-hashed-password"
-	}
+    "request": "login",
+    "details": {
+        "username": "xyz",
+        "email": "xyz@abc.com",
+        "password": "md5-hashed-password"
+    }
 }
 ```
 
@@ -138,11 +138,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"status": "success",
-	"details": {
-		"username": "xyz",
-		"email": "xyz@abc.com"
-	}
+    "status": "success",
+    "details": {
+        "username": "xyz",
+        "email": "xyz@abc.com"
+    }
 }
 ```
 
@@ -150,9 +150,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"status": "failed",
-	"type": "login",
-	"message": "Reason why user was not logged in"
+    "status": "failed",
+    "type": "login",
+    "message": "Reason why user was not logged in"
 }
 ```
 
@@ -164,7 +164,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "logout"
+    "request": "logout"
 }
 ```
 
@@ -172,8 +172,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"status": "success",
-	"type": "logout"
+    "status": "success",
+    "type": "logout"
 }
 ```
 
@@ -192,13 +192,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "global",
-	"details": {
-		"message": "Hello World",
-		"media": null,
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "global",
+    "details": {
+        "message": "Hello World",
+        "media": null,
+        "time": 1214343465
+    }
 }
 ```
 
@@ -206,13 +206,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "global",
-	"details": {
-		"message": "Hello World",
-		"media": "https://url-to-firestore/",
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "global",
+    "details": {
+        "message": "Hello World",
+        "media": "https://url-to-firestore/",
+        "time": 1214343465
+    }
 }
 ```
 
@@ -222,15 +222,15 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "global",
-	"details": {
-		"id": "some-id",
-		"from": "xyz",
-		"message": "Hello World",
-		"media": null,
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "global",
+    "details": {
+        "id": "some-id",
+        "from": "xyz",
+        "message": "Hello World",
+        "media": null,
+        "time": 1214343465
+    }
 }
 ```
 
@@ -238,14 +238,14 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "global",
-	"details": {
-		"from": "xyz",
-		"message": "Hello World",
-		"media": "https://url-to-firestore/",
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "global",
+    "details": {
+        "from": "xyz",
+        "message": "Hello World",
+        "media": "https://url-to-firestore/",
+        "time": 1214343465
+    }
 }
 ```
 
@@ -259,14 +259,14 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "personal",
-	"details": {
-		"to": "xyz",
-		"message": "Hello World",
-		"media": null,
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "personal",
+    "details": {
+        "to": "xyz",
+        "message": "Hello World",
+        "media": null,
+        "time": 1214343465
+    }
 }
 ```
 
@@ -274,14 +274,14 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "personal",
-	"details": {
-		"to": "xyz",
-		"message": "Hello World",
-		"media": "https://url-to-firestore/",
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "personal",
+    "details": {
+        "to": "xyz",
+        "message": "Hello World",
+        "media": "https://url-to-firestore/",
+        "time": 1214343465
+    }
 }
 ```
 
@@ -291,15 +291,15 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "personal",
-	"details": {
-		"id": "some-id",
-		"from": "xyz",
-		"message": "Hello World",
-		"media": null,
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "personal",
+    "details": {
+        "id": "some-id",
+        "from": "xyz",
+        "message": "Hello World",
+        "media": null,
+        "time": 1214343465
+    }
 }
 ```
 
@@ -307,15 +307,15 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "message",
-	"type": "personal",
-	"details": {
-		"id": "some-id",
-		"from": "xyz",
-		"message": "Hello World",
-		"media": "https://url-to-firestore/",
-		"time": 1214343465
-	}
+    "request": "message",
+    "type": "personal",
+    "details": {
+        "id": "some-id",
+        "from": "xyz",
+        "message": "Hello World",
+        "media": "https://url-to-firestore/",
+        "time": 1214343465
+    }
 }
 ```
 
@@ -325,9 +325,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"status": "sent",
-	"type": "message",
-	"id": "id-of-the-message"
+    "status": "sent",
+    "type": "message",
+    "id": "id-of-the-message"
 }
 ```
 
@@ -339,7 +339,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"request": "users"
+    "request": "users"
 }
 ```
 
@@ -347,15 +347,15 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"status": "success",
-	"type": "users",
-	"details": [
-		{
-			"username": "xyz",
-			"email": "xyz@abc.com"
-		},
-		"List-of-objects"
-	]
+    "status": "success",
+    "type": "users",
+    "details": [
+        {
+            "username": "xyz",
+            "email": "xyz@abc.com"
+        },
+        "List-of-objects"
+    ]
 }
 ```
 
@@ -365,8 +365,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"status": "invalid or failed",
-	"type": "type-of-request-made",
-	"message": "A message regarding the event."
+    "status": "invalid or failed",
+    "type": "type-of-request-made",
+    "message": "A message regarding the event."
 }
 ```

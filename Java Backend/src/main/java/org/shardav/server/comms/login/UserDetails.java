@@ -2,11 +2,17 @@ package org.shardav.server.comms.login;
 
 import org.shardav.server.comms.Details;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class UserDetails implements Details {
 
     private final String email;
     private final String username;
     private String password;
+    private Set<UserDetails> friends;
 
     public UserDetails(String email, String username){
         this(email,username,null);
@@ -50,6 +56,14 @@ public class UserDetails implements Details {
 
     public boolean hasPassword() {
         return this.password != null && !password.isEmpty();
+    }
+
+    public void setFriends(Collection<UserDetails> friends) {
+        if (this.friends == null) {
+            this.friends = new HashSet<>(friends);
+        } else {
+            this.friends.addAll(friends);
+        }
     }
 
 }

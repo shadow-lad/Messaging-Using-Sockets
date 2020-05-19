@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
 
-    public static final Set<UserDetails> CLIENT_SET = new HashSet<>();
+    public static final Map<String, UserDetails> CLIENT_DETAILS_MAP = new HashMap<>();
     public static final Map<String, ClientHandler> CLIENT_MAP = new HashMap<>(); // Map of all clients
     public static final Set<String> ACTIVE_CLIENTS = new HashSet<>();//List of all registered users.
 
@@ -239,7 +239,7 @@ public class Server {
         List<UserDetails> userDetails = database.fetchUserList();
         for (UserDetails user : userDetails) {
             CLIENT_MAP.put(user.getEmail(), null);
-            CLIENT_SET.add(user);
+            CLIENT_DETAILS_MAP.put(user.getEmail(), user);
         }
         Log.i(LOG_TAG, "Loaded existing users");
     }

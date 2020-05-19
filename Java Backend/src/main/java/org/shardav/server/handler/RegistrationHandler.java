@@ -118,7 +118,7 @@ public class RegistrationHandler {
                             client.out.flush();
                             Server.CLIENT_MAP.put(userDetails.getEmail(), null);
                             userDetails.setPassword(null);
-                            Server.CLIENT_SET.add(userDetails);
+                            Server.CLIENT_DETAILS_MAP.put(userDetails.getEmail(), userDetails);
                             this.userDetails = null;
                             this.otp = null;
                         } catch (SQLException ex) {

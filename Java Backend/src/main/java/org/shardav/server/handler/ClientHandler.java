@@ -17,6 +17,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +34,7 @@ public class ClientHandler implements Runnable {
     // Client variables
     private String email;
     public boolean isLoggedIn;
+    private Set<String> friends;
 
     // Socket variables
     private final BufferedReader in;
@@ -86,7 +89,7 @@ public class ClientHandler implements Runnable {
                         case users:
                             if (isLoggedIn) {
                                 Response<Set<UserDetails>> userListResponse = new Response<>(ResponseStatus.success, ResponseType.user);
-                                userListResponse.setDetails(Server.CLIENT_SET);
+                                userListResponse.setDetails(new HashSet<>(Server.CLIENT_DETAILS_MAP.values()));
                                 this.out.println(gson.toJson(userListResponse));
                             } else {
                                 Log.v(LOG_TAG, socket.getInetAddress() + " sent message request without log in");
@@ -201,5 +204,17 @@ public class ClientHandler implements Runnable {
     protected void setIsLoggedIn() {
         this.isLoggedIn = true;
         Log.i(LOG_TAG, this.email + " logged in.");
+    }
+
+    protected void addFriends(Collection<String> friends) {
+        if (this.friends == null) {
+            this.friends = new HashSet<>(friends);
+        } else {
+            this.friends.addAll(friends);
+        }
+    }
+
+    protected Set<String> getFriends() {
+        return this.friends;
     }
 }

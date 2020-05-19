@@ -145,13 +145,24 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 #### if credentials found
 
 - The response data will contain the username and email address of the user.
+- The response data will also contain a list of all the users the user has previously contacted or has been contacted by.
 
 ```json
 {
     "status": "success",
     "details": {
         "username": "xyz",
-        "email": "xyz@abc.com"
+        "email": "xyz@abc.com",
+        "friends": [
+            {
+                "email": "xyz@abc.com",
+                "username": "xyz"
+            },
+            {
+                "email": "def@abc.com",
+                "username": "def"
+            }
+        ]
     }
 }
 ```
@@ -378,9 +389,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "request": "voice",
-    "type":"call",
+    "type": "call",
     "details": {
-        "email":"email@userto.call"
+        "email": "email@userto.call"
     }
 }
 ```
@@ -392,9 +403,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "request": "voice",
-    "type":"request",
+    "type": "request",
     "details": {
-        "email":"email@calling.user"
+        "email": "email@calling.user"
     }
 }
 ```
@@ -405,10 +416,10 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request":"voice",
-    "type":"accept",
+    "request": "voice",
+    "type": "accept",
     "details": {
-        "email":"email@calling.user"
+        "email": "email@calling.user"
     }
 }
 ```
@@ -419,10 +430,10 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request":"voice",
-    "type":"reject",
+    "request": "voice",
+    "type": "reject",
     "details": {
-        "email":"email@calling.user"
+        "email": "email@calling.user"
     }
 }
 ```
@@ -434,10 +445,10 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request":"voice",
-    "type":"time",
+    "request": "voice",
+    "type": "time",
     "details": {
-        "email":"email@userto.call"
+        "email": "email@userto.call"
     }
 }
 ```
@@ -446,10 +457,10 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request":"voice",
-    "type":"time",
+    "request": "voice",
+    "type": "time",
     "details": {
-        "email":"email@calling.user"
+        "email": "email@calling.user"
     }
 }
 ```
@@ -459,16 +470,16 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 #### If Call Accepted
 
 - When the receiver accepts the call, 2 responses are sent from the server
-    1. To do the one who makes the call
-    2. To the one who receives the call
+  1. To do the one who makes the call
+  2. To the one who receives the call
 - The message contains the details of the IP Address and port over to which the UDP packets should be sent.
 
 ```json
 {
     "response": "voice",
-    "type":"accepted",
+    "type": "accepted",
     "details": {
-        "ip" : "x.x.x.x",
+        "ip": "x.x.x.x",
         "port": "0000"
     }
 }
@@ -481,9 +492,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "response": "voice",
-    "type":"rejected",
+    "type": "rejected",
     "details": {
-        "email":"email@userto.call"
+        "email": "email@userto.call"
     }
 }
 ```
@@ -495,7 +506,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "response": "voice",
-    "type":"offline",
+    "type": "offline",
     "details": {
         "email": "email@userto.call"
     }

@@ -16,6 +16,7 @@ import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 
 public class MessageHandler {
@@ -67,26 +68,25 @@ public class MessageHandler {
 
     private void sendPersonalMessage(String recipient, Message<PersonalMessageDetails> message) {
         ClientHandler recipientClient = Server.CLIENT_MAP.get(recipient);
+        if (!client.getFriends().contains(recipient)) {
+            client.addFriends(Collections.singleton(recipient));
+            ServerExecutors.getDatabaseExecutor().submit(() -> database.addUserFriends(client.getEmail(), recipient));
+        }
         if (recipientClient != null) {
             String messageJSON = gson.toJson(message);
             if (recipientClient.isLoggedIn) {
                 recipientClient.out.println(messageJSON);
                 recipientClient.out.flush();
             } else {
-                try {
-                    Database database = Database.getInstance();
-                    ServerExecutors.getDatabaseExecutor().submit(() -> {
-                        try {
-                            database.addMessage(message.getDetails());
-                        } catch (SQLException ignore) {
-                        }
-                    });
-                } catch (InstantiationException ex) {
-                    Log.e(LOG_TAG, "An error occurred while trying to fetch an instance of database", ex);
-                }
+                ServerExecutors.getDatabaseExecutor().submit(() -> {
+                    try {
+                        database.addMessage(message.getDetails());
+                    } catch (SQLException ignore) {
+                    }
+                });
             }
         } else {
-            ServerExecutors.getDatabaseExecutor().submit(()-> {
+            ServerExecutors.getDatabaseExecutor().submit(() -> {
                 try {
                     database.addMessage(message.getDetails());
                 } catch (SQLException ex) {

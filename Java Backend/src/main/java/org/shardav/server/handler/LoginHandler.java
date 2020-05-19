@@ -14,6 +14,7 @@ import org.shardav.server.sql.Database;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LoginHandler {
 
@@ -58,16 +59,23 @@ public class LoginHandler {
         ServerExecutors.getDatabaseResultExecutor().submit(()->{
             try {
                 UserDetails userDetails = database.fetchUserDetailsByMail(loginDetails.getEmail());
-                if (userDetails.getPassword().equals(loginDetails.getPassword())) {
-                    setAsLoggedIn(userDetails.getEmail());
-                    userDetails.setPassword(null);
-                    Response<UserDetails> success = new Response<>(ResponseStatus.success, ResponseType.login, userDetails);
-                    client.out.println(gson.toJson(success));
+                if (userDetails != null) {
+                    if (userDetails.getPassword().equals(loginDetails.getPassword())) {
+                        setAsLoggedIn(userDetails.getEmail());
+                        userDetails.setPassword(null);
+                        List<String> friends = database.getFriends(userDetails.getEmail());
+                        sendLoginSuccessful(userDetails, friends);
+                    } else {
+                        Response<Void> loginFailed = new Response<>(ResponseStatus.failed, ResponseType.login, "Wrong credentials");
+                        client.out.println(gson.toJson(loginFailed));
+                        client.out.flush();
+                    }
                 } else {
-                    Response<Void> loginFailed = new Response<>(ResponseStatus.failed, ResponseType.login, "Wrong credentials");
-                    client.out.println(gson.toJson(loginFailed));
+                    Response<Void> userNotFound = new Response<>(ResponseStatus.failed,
+                            ResponseType.login, "User not found");
+                    client.out.println(gson.toJson(userNotFound));
+                    client.out.flush();
                 }
-                client.out.flush();
             } catch (SQLException ex) {
                 Response<Void> errorResponse = new Response<>(ResponseStatus.failed,
                         ResponseType.login,
@@ -78,6 +86,18 @@ public class LoginHandler {
         });
     }
 
+    private void sendLoginSuccessful(UserDetails userDetails, List<String> friends) {
+        Response<UserDetails> success = new Response<>(ResponseStatus.success, ResponseType.login, userDetails);
+        List<UserDetails> friendsDetails = Server.CLIENT_DETAILS_MAP.values()
+                .stream()
+                .filter(userDetails1 -> friends.contains(userDetails1.getEmail()))
+                .collect(Collectors.toList());
+        userDetails.setFriends(friendsDetails);
+        client.addFriends(friends);
+        client.out.println(gson.toJson(success));
+        client.out.flush();
+    }
+
     private void loginUsingUsername(UserDetails loginDetails) {
         ServerExecutors.getDatabaseResultExecutor().submit(()->{
             try {
@@ -86,19 +106,20 @@ public class LoginHandler {
                     if (userDetails.getPassword().equals(loginDetails.getPassword())) {
                         setAsLoggedIn(userDetails.getEmail());
                         userDetails.setPassword(null);
-                        Response<UserDetails> success = new Response<>(ResponseStatus.success, ResponseType.login, userDetails);
-                        client.out.println(gson.toJson(success));
+                        List<String> friends = database.getFriends(userDetails.getEmail());
+                        sendLoginSuccessful(userDetails, friends);
                     } else {
                         Response<Void> loginFailed = new Response<>(ResponseStatus.failed,
                                 ResponseType.login, "Wrong credentials");
                         client.out.println(gson.toJson(loginFailed));
+                        client.out.flush();
                     }
                 } else {
                     Response<Void> userNotFound = new Response<>(ResponseStatus.failed,
                             ResponseType.login, "User not found");
                     client.out.println(gson.toJson(userNotFound));
+                    client.out.flush();
                 }
-                client.out.flush();
 
             } catch (SQLException ex) {
                 Response<Void> errorResponse = new Response<>(ResponseStatus.failed,

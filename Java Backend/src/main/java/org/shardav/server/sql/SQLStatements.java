@@ -12,17 +12,21 @@ public class SQLStatements {
             ");";
     public static final String CREATE_TABLE_PRIVATE_MESSAGES = "CREATE TABLE IF NOT EXISTS private_messages (" +
             "id VARCHAR(100) PRIMARY KEY NOT NULL," +
-            "receiver VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE," +
-            "sender VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE," +
+            "receiver VARCHAR(100) NOT NULL," +
+            "sender VARCHAR(100) NOT NULL," +
             "media VARCHAR(500) DEFAULT NULL," +
             "message VARCHAR(1000) DEFAULT NULL," +
-            "time LONG NOT NULL" +
+            "time LONG NOT NULL," +
+            "    FOREIGN KEY (receiver) REFERENCES users(email) ON DELETE CASCADE,\n" +
+            "    FOREIGN KEY (sender) REFERENCES users(email) ON DELETE CASCADE\n" +
             ");";
 
     public static final String CREATE_TABLE_USERS_FRIENDS = "CREATE TABLE IF NOT EXISTS users_friends (" +
-            "user VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE," +
-            "friend VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE," +
-            "PRIMARY KEY (user, friend)" +
+            "user VARCHAR(100) NOT NULL," +
+            "friend VARCHAR(100) NOT NULL," +
+            "PRIMARY KEY (user, friend)," +
+            "FOREIGN KEY (user) REFERENCES users(email) ON DELETE CASCADE," +
+            "FOREIGN KEY (friend) REFERENCES users(email) ON DELETE CASCADE" +
             ");";
 
     public static final String VIEW_USER_LIST = "SELECT email, username from users;";

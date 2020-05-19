@@ -86,6 +86,7 @@ public class ClientHandler implements Runnable {
                         case users:
                             if (isLoggedIn) {
                                 Response<Set<UserDetails>> userListResponse = new Response<>(ResponseStatus.success, ResponseType.user);
+                                userListResponse.setDetails(Server.CLIENT_SET);
                                 this.out.println(gson.toJson(userListResponse));
                             } else {
                                 Log.v(LOG_TAG, socket.getInetAddress() + " sent message request without log in");

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:chat_app_websocket/models/login_model.dart';
 import 'package:chat_app_websocket/models/user_details_model.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +17,13 @@ class LoginScreen extends StatefulWidget {
 
 class LoginScreenState extends State<LoginScreen> {
   Socket socket;
+
+  StreamSubscription<Uint8List> socketListener;
+
   void socketInitialize() async {
     print("DEBUG: Connecting to server");
-    socket = await Socket.connect('192.168.29.52', 6969);
+    socket = await Socket.connect('192.168.1.10', 6969);
+    socketListener = socket.listen(null);
     print("DEBUG: Connection established to server");
     print(socket.toString());
   }
@@ -44,7 +50,7 @@ class LoginScreenState extends State<LoginScreen> {
     socket.writeln(jsonEncode(loginModel));
     print("DEBUG: Login details sent to server");
 
-    socket.listen((data) {
+    socketListener.onData((data) {
       String recievedMessage = new String.fromCharCodes(data).trim();
       
       print("DEBUG: Message received from server" + recievedMessage);
@@ -55,10 +61,13 @@ class LoginScreenState extends State<LoginScreen> {
           userMail = response['details']['email'];
           userName = response['details']['username'];  
         });
+
         Navigator.of(context).pushReplacement(new MaterialPageRoute(
             builder: (BuildContext context) => new ChatRoom(
                   email: userMail,
                   name: userName,
+                  socketListener: socketListener,
+                  c_rsocket: socket,
                 )));
       } else {
         print(response['message'].toString());

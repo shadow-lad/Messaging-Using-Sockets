@@ -7,10 +7,10 @@ This file contains the guidelines to communicate with the server. Proper respons
 - [Communicating with the Server](#communicating-with-the-server)
   - [Table of Contents](#table-of-contents)
   - [Registration](#registration)
-    - [Client Request](#client-request)
+    - [Client Registration Request](#client-registration-request)
       - [Begin Registration Process](#begin-registration-process)
       - [Verify OTP](#verify-otp)
-    - [Server Response](#server-response)
+    - [Server Registration Response](#server-registration-response)
       - [OTP Sent](#otp-sent)
       - [User is successfully registered](#user-is-successfully-registered)
       - [Error why the registration failed](#error-why-the-registration-failed)
@@ -41,6 +41,16 @@ This file contains the guidelines to communicate with the server. Proper respons
   - [User List](#user-list)
     - [Request](#request)
     - [Response](#response)
+  - [Audio Call](#audio-call)
+    - [Placing a call](#placing-a-call)
+    - [Receiving a call](#receiving-a-call)
+    - [Accepting a Call](#accepting-a-call)
+    - [Rejecting a Call](#rejecting-a-call)
+    - [Call Time Out](#call-time-out)
+    - [Server Voice Call Response](#server-voice-call-response)
+      - [If Call Accepted](#if-call-accepted)
+      - [If Call Rejected](#if-call-rejected)
+    - [If Receiver is not Online](#if-receiver-is-not-online)
   - [Error](#error)
 
 ## Registration
@@ -50,7 +60,7 @@ This file contains the guidelines to communicate with the server. Proper respons
 - It should be a valid JSON message.
 - A new request should be made to generate a new OTP.
 
-### Client Request
+### Client Registration Request
 
 #### Begin Registration Process
 
@@ -76,7 +86,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 }
 ```
 
-### Server Response
+### Server Registration Response
 
 #### OTP Sent
 
@@ -135,13 +145,24 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 #### if credentials found
 
 - The response data will contain the username and email address of the user.
+- The response data will also contain a list of all the users the user has previously contacted or has been contacted by.
 
 ```json
 {
     "status": "success",
     "details": {
         "username": "xyz",
-        "email": "xyz@abc.com"
+        "email": "xyz@abc.com",
+        "friends": [
+            {
+                "email": "xyz@abc.com",
+                "username": "xyz"
+            },
+            {
+                "email": "def@abc.com",
+                "username": "def"
+            }
+        ]
     }
 }
 ```
@@ -356,6 +377,139 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
         },
         "List-of-objects"
     ]
+}
+```
+
+## Audio Call
+
+### Placing a call
+
+- When placing a call, the current user must send the email address of the person he wants to call in the following format.
+
+```json
+{
+    "request": "voice",
+    "type": "call",
+    "details": {
+        "email": "email@userto.call"
+    }
+}
+```
+
+### Receiving a call
+
+- The server will try to communicate with the recipient of the call by sending the following message.
+
+```json
+{
+    "request": "voice",
+    "type": "request",
+    "details": {
+        "email": "email@calling.user"
+    }
+}
+```
+
+### Accepting a Call
+
+- For accepting the call, the recipient of the call should send the following response
+
+```json
+{
+    "request": "voice",
+    "type": "accept",
+    "details": {
+        "email": "email@calling.user"
+    }
+}
+```
+
+### Rejecting a Call
+
+- For accepting the call, the recipient of the call should send the following response
+
+```json
+{
+    "request": "voice",
+    "type": "reject",
+    "details": {
+        "email": "email@calling.user"
+    }
+}
+```
+
+### Call Time Out
+
+- The server will wait 30 seconds for a response from the recipient of the call.
+- If in that time, no response is received, the server will send the following response to the caller:
+
+```json
+{
+    "request": "voice",
+    "type": "time",
+    "details": {
+        "email": "email@userto.call"
+    }
+}
+```
+
+- And the following response to the receiver:
+
+```json
+{
+    "request": "voice",
+    "type": "time",
+    "details": {
+        "email": "email@calling.user"
+    }
+}
+```
+
+### Server Voice Call Response
+
+#### If Call Accepted
+
+- When the receiver accepts the call, 2 responses are sent from the server
+  1. To do the one who makes the call
+  2. To the one who receives the call
+- The message contains the details of the IP Address and port over to which the UDP packets should be sent.
+
+```json
+{
+    "response": "voice",
+    "type": "accepted",
+    "details": {
+        "ip": "x.x.x.x",
+        "port": "0000"
+    }
+}
+```
+
+#### If Call Rejected
+
+- If the receiver rejects the call the following response is sent to the caller.
+
+```json
+{
+    "response": "voice",
+    "type": "rejected",
+    "details": {
+        "email": "email@userto.call"
+    }
+}
+```
+
+### If Receiver is not Online
+
+- If the receiver is not available to take your call, the server will send the following response:
+
+```json
+{
+    "response": "voice",
+    "type": "offline",
+    "details": {
+        "email": "email@userto.call"
+    }
 }
 ```
 

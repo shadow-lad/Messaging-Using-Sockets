@@ -19,6 +19,12 @@ public class SQLStatements {
             "time LONG NOT NULL" +
             ");";
 
+    public static final String CREATE_TABLE_USERS_FRIENDS = "CREATE TABLE IF NOT EXISTS users_friends (" +
+            "user VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE," +
+            "friend VARCHAR(100) NOT NULL REFERENCES users(email) ON DELETE CASCADE," +
+            "PRIMARY KEY (user, friend)" +
+            ");";
+
     public static final String VIEW_USER_LIST = "SELECT email, username from users;";
 
     public static final String DELETE_USER_BY_EMAIL = "DELETE FROM users WHERE email = ?;";
@@ -28,6 +34,8 @@ public class SQLStatements {
     public static final String FETCH_USER_DETAILS_BY_EMAIL = "SELECT username, password FROM users WHERE email = ?";
 
     public static final String FETCH_USER_DETAILS_BY_USERNAME = "SELECT email, password FROM users WHERE username = ?";
+
+    public static final String FETCH_USER_FRIENDS = "SELECT friend FROM users WHERE email = ?";
 
     public static final String INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA = "INSERT INTO private_messages(id, receiver, sender, message, time) VALUES (" +
             "\"%s\", \"%s\", \"%s\", \"%s\", \"%d\"" +
@@ -42,6 +50,12 @@ public class SQLStatements {
 
     public static final String INSERT_USER = "INSERT INTO users VALUES (" +
             " \"%s\", \"%s\", \"%s\"" +
+            ");";
+
+    public static final String INSERT_USER_FRIENDS = "INSERT INTO users_friends VALUES (" +
+            " \"%s\", \"%s\"" +
+            "), (" +
+            " \"%s\", \"%s\"" +
             ");";
 
 }

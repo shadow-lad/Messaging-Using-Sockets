@@ -19,6 +19,7 @@ public class Database {
     private final PreparedStatement FETCH_USER_DETAILS_BY_EMAIL;
     private final PreparedStatement FETCH_USER_DETAILS_BY_USERNAME;
     private final PreparedStatement DELETE_USER_BY_EMAIL;
+    private final PreparedStatement FETCH_USER_FRIENDS;
 
     private static final Object LOCK = new Object();
 
@@ -42,6 +43,7 @@ public class Database {
         VIEW_MESSAGES_BY_EMAIL = connection.prepareStatement(SQLStatements.VIEW_MESSAGES_BY_EMAIL);
         FETCH_USER_DETAILS_BY_EMAIL = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_EMAIL);
         FETCH_USER_DETAILS_BY_USERNAME = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_USERNAME);
+        FETCH_USER_FRIENDS = connection.prepareStatement(SQLStatements.FETCH_USER_FRIENDS);
         DELETE_USER_BY_EMAIL = connection.prepareStatement(SQLStatements.DELETE_USER_BY_EMAIL);
 
     }
@@ -108,6 +110,28 @@ public class Database {
 
         Log.v(LOG_TAG, "Message " + details.getId() + " inserted into database, " + rows + " affected.");
 
+    }
+
+    public void addUserFriends (String firstEmail, String secondEmail) {
+        String statement = String.format(SQLStatements.INSERT_USER_FRIENDS, firstEmail, secondEmail, secondEmail, firstEmail);
+
+        try {
+            connection.createStatement().executeUpdate(statement);
+        } catch (SQLException ignore){}
+    }
+
+    public List<String> getFriends (String email) throws SQLException {
+        List<String> arrayList = new ArrayList<>();
+
+        FETCH_USER_FRIENDS.clearParameters();
+        FETCH_USER_FRIENDS.setString(1, email);
+
+        ResultSet resultSet = FETCH_USER_FRIENDS.executeQuery();
+        while(resultSet.next()) {
+            arrayList.add(resultSet.getString("friend"));
+        }
+
+        return arrayList;
     }
 
     public void deleteUserByEmail(String email) throws SQLException {

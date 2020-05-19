@@ -1,6 +1,5 @@
 package org.shardav.server.mail;
 
-import java.awt.event.WindowStateListener;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -147,6 +146,7 @@ public class GMailService {
         }
     }
 
+    // Not sure if this is needed waiting for server to break once.
     public void destroyInstance() {
         synchronized (LOCK) {
             if (instance != null) {

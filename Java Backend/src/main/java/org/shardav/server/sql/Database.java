@@ -39,6 +39,7 @@ public class Database {
 
         statement.executeUpdate(SQLStatements.CREATE_TABLE_USERS);
         statement.executeUpdate(SQLStatements.CREATE_TABLE_PRIVATE_MESSAGES);
+        statement.executeUpdate(SQLStatements.CREATE_TABLE_USERS_FRIENDS);
 
         VIEW_MESSAGES_BY_EMAIL = connection.prepareStatement(SQLStatements.VIEW_MESSAGES_BY_EMAIL);
         FETCH_USER_DETAILS_BY_EMAIL = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_EMAIL);

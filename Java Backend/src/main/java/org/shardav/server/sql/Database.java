@@ -121,16 +121,20 @@ public class Database {
         } catch (SQLException ignore){}
     }
 
-    public List<String> getFriends (String email) throws SQLException {
+    public List<String> getFriends (String email) {
+
         List<String> arrayList = new ArrayList<>();
 
-        FETCH_USER_FRIENDS.clearParameters();
-        FETCH_USER_FRIENDS.setString(1, email);
+        try {
 
-        ResultSet resultSet = FETCH_USER_FRIENDS.executeQuery();
-        while(resultSet.next()) {
-            arrayList.add(resultSet.getString("friend"));
-        }
+            FETCH_USER_FRIENDS.clearParameters();
+            FETCH_USER_FRIENDS.setString(1, email);
+
+            ResultSet resultSet = FETCH_USER_FRIENDS.executeQuery();
+            while (resultSet.next()) {
+                arrayList.add(resultSet.getString("friend"));
+            }
+        } catch (SQLException ignore){}
 
         return arrayList;
     }

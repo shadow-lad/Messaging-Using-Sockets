@@ -125,7 +125,7 @@ public class ClientHandler implements Runnable {
                                 } else {
                                     Log.v(LOG_TAG, email + " is already logged in, invalid request");
                                     errorResponse.setMessage("User is already logged in");
-                                    this.out.println(errorResponse);
+                                    this.out.println(gson.toJson(errorResponse));
                                     this.out.flush();
                                 }
                             });
@@ -136,7 +136,7 @@ public class ClientHandler implements Runnable {
                         default:
                             Log.d(LOG_TAG, "Made a request of type: " + requestType.toString());
                             errorResponse.setMessage("Invalid request");
-                            this.out.println();
+                            this.out.println(gson.toJson(errorResponse));
                             this.out.flush();
                     }
 
@@ -167,7 +167,7 @@ public class ClientHandler implements Runnable {
             Server.CLIENT_MAP.put(this.email, null);
             Server.ACTIVE_CLIENTS.remove(this.email);
             if (!disconnect) {
-                this.out.println(new Response<Void>(ResponseStatus.success, ResponseType.logout));
+                this.out.println(gson.toJson(new Response<Void>(ResponseStatus.success, ResponseType.logout)));
                 this.out.flush();
             }
             this.isLoggedIn = false;

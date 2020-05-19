@@ -22,7 +22,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   void socketInitialize() async {
     print("DEBUG: Connecting to server");
-    socket = await Socket.connect('192.168.1.10', 6969);
+    socket = await Socket.connect('192.168.43.173', 6969);
     socketListener = socket.listen(null);
     print("DEBUG: Connection established to server");
     print(socket.toString());

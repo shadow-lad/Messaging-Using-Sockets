@@ -134,6 +134,9 @@ public class Database {
             while (resultSet.next()) {
                 arrayList.add(resultSet.getString("friend"));
             }
+
+            resultSet.close();
+
         } catch (SQLException ignore){}
 
         return arrayList;

@@ -7,7 +7,7 @@ class Message {
   int _time;
 
   Message.fromJson(Map<String, dynamic> json) {
-    if (json['request'] == 'message' && json['type'] == 'personal') {
+    if (json['type'] == 'message' && json['event'] == 'personal') {
       Map<String, dynamic> details = json['details'];
       this._id = details['id'];
       this._from = details['from'];
@@ -19,11 +19,11 @@ class Message {
   }
 
   Map<String,dynamic> toJson ()=>{
-    "request": "message",
-    "type": "personal",
+    "type": "message",
+    "event": "personal",
     "details": {
-      "to": "${_to}",
-      "message": "${_message}",
+      "to": "$_to",
+      "message": "$_message",
       "media": null,
       "time": new DateTime.now().millisecondsSinceEpoch
     }
@@ -70,11 +70,11 @@ class Message {
     return this._time;
   }
 
-  void set id(String id){
+  set id(String id){
     this._id = id;
   }
 
-  void set from(String from){
+  set from(String from){
     this._from = from;
   }
 

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chat_app_websocket/Registration/login_screen.dart';
-import 'package:chat_app_websocket/models/otp_verification_model.dart';
+import 'login_screen.dart';
+import '../models/otp_verification_model.dart';
 import 'package:flutter/material.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -18,11 +18,6 @@ class OtpVerificationScreen extends StatefulWidget {
 
 class OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final TextEditingController otp = new TextEditingController();
-//  Socket _socket;
-//  void socketInitialize() async{
-//    _socket = await Socket.connect('127.0.0.1', 6969);
-//    print(_socket.toString());
-//  }
 
   void register(String credential) {
 

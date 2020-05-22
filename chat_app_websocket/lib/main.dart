@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'Registration/login_screen.dart';
+import './verification/login_screen.dart';
 void main(){
   runApp(
     new MaterialApp(

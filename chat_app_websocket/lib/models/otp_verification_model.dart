@@ -3,5 +3,5 @@ class OtpVerificationModel {
 
   OtpVerificationModel(this.credential);
 
-  Map<String, dynamic> toJson() => {"request": "verify", "otp": credential};
+  Map<String, dynamic> toJson() => {"type": "verify", "otp": credential};
 }

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app_websocket/models/registration_model.dart';
-import 'package:chat_app_websocket/models/user_details_model.dart';
+import 'package:chat_app_websocket/models/user_details.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'otp_verification_screen.dart';
@@ -42,8 +42,8 @@ class RegistrationScreenState extends State<RegistrationScreen> {
     String usermail = registerMail.text.toString().trim();
     String userpassword = registerPassword.text.toString().trim();
 
-    UserDetailsModel user =
-        UserDetailsModel(username: username, emailID: usermail, password: userpassword);
+    UserDetails user =
+        UserDetails(username, usermail, userpassword);
 
     RegistrationModel registrationModel= RegistrationModel(details: user);
     String userMap = jsonEncode(registrationModel);

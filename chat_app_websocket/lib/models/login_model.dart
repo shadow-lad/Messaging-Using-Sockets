@@ -1,17 +1,17 @@
-import 'package:chat_app_websocket/models/user_details_model.dart';
+import '../models/user_details.dart';
 
 class LoginModel {
 
-  UserDetailsModel details;
+  UserDetails details;
 
   LoginModel({this.details})
     :assert(details != null 
-    && details.password != null 
-    && (details.emailID != null || details.username != null));
+    && details.hasPassword()
+    && (details.hasEmail() || details.hasUsername()));
 
   Map<String, dynamic> toJson () => {
-    "request": "login",
-    "details": details
+    "type": "login",
+    "details": details.toJson()
   };
 
 }

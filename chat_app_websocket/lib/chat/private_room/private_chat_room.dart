@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:chat_app_websocket/EventHandler/chatBloc.dart';
 import 'package:chat_app_websocket/EventHandler/chat_event.dart';
-import 'package:chat_app_websocket/database/database.dart';
 import 'package:chat_app_websocket/models/message_model.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app_websocket/ChatRoom/chat_room.dart';
+import '../chat_room.dart';
 
 class privateChatRoom extends StatefulWidget{
   final String my_email;

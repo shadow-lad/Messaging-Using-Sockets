@@ -92,7 +92,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "status": "sent",
+    "event": "sent",
     "type": "otp",
     "message": "OTP sent to xyz@abc.com"
 }
@@ -102,7 +102,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "status": "success",
+    "event": "success",
     "type": "verify"
 }
 ```
@@ -111,7 +111,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "status": "failed",
+    "event": "failed",
     "type": "otp or registration or verify",
     "message": "Reason why the user was not registered"
 }
@@ -149,7 +149,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "status": "success",
+    "event": "success",
     "type": "login",
     "details": {
         "username": "xyz",
@@ -172,7 +172,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "status": "failed",
+    "event": "failed",
     "type": "login",
     "message": "Reason why user was not logged in"
 }
@@ -194,7 +194,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "status": "success",
+    "event": "success",
     "type": "logout"
 }
 ```
@@ -343,7 +343,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "status": "sent",
+    "event": "sent",
     "type": "message",
     "id": "id-for-the-message"
 }
@@ -365,7 +365,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "status": "success",
+    "event": "success",
     "type": "users",
     "details": [
         {
@@ -474,7 +474,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "status": "accepted",
+    "event": "accepted",
     "details": {
         "ip": "x.x.x.x",
         "port": "0000"
@@ -489,7 +489,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "status": "rejected",
+    "event": "rejected",
     "details": {
         "email": "email@userto.call"
     }
@@ -503,7 +503,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "status": "offline",
+    "event": "offline",
     "details": {
         "email": "email@userto.call"
     }
@@ -516,7 +516,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "status": "invalid or failed",
+    "event": "invalid or failed",
     "type": "type-of-request-made",
     "message": "A message regarding the event."
 }

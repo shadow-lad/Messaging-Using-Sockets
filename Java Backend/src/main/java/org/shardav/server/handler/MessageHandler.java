@@ -11,6 +11,7 @@ import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.messages.GlobalMessageDetails;
 import org.shardav.server.comms.messages.Message;
 import org.shardav.server.comms.messages.Message.MessageType;
+import org.shardav.server.comms.messages.MessageResponse;
 import org.shardav.server.comms.messages.PersonalMessageDetails;
 import org.shardav.server.sql.Database;
 import org.shardav.utils.Log;
@@ -77,10 +78,12 @@ public class MessageHandler {
             if (recipientClient.isLoggedIn) {
                 recipientClient.out.println(messageJSON);
                 recipientClient.out.flush();
+                onSent(message.getDetails().getId());
             } else {
                 ServerExecutors.getDatabaseExecutor().submit(() -> {
                     try {
                         database.addMessage(message.getDetails());
+                        onSent(message.getDetails().getId());
                     } catch (SQLException ignore) {
                     }
                 });
@@ -89,6 +92,7 @@ public class MessageHandler {
             ServerExecutors.getDatabaseExecutor().submit(() -> {
                 try {
                     database.addMessage(message.getDetails());
+                    onSent(message.getDetails().getId());
                 } catch (SQLException ex) {
                     Log.v(LOG_TAG, "Error occurred while trying to add message to database : " + ex.getLocalizedMessage(), ex);
                     Response<Void> errorResponse = new Response<>(ResponseStatus.failed, ResponseType.message);
@@ -108,5 +112,11 @@ public class MessageHandler {
                 client.out.flush();
             }
         }
+    }
+
+    private void onSent(String id) {
+        MessageResponse response = new MessageResponse(ResponseStatus.sent, id);
+        client.out.println(gson.toJson(response));
+        client.out.flush();
     }
 }

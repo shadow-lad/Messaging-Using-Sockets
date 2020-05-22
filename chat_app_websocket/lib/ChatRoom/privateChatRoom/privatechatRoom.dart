@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:chat_app_websocket/EventHandler/chatBloc.dart';
+import 'package:chat_app_websocket/EventHandler/chat_event.dart';
+import 'package:chat_app_websocket/database/database.dart';
 import 'package:chat_app_websocket/models/message_model.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app_websocket/ChatRoom/chat_room.dart';
@@ -29,9 +31,23 @@ class privateChatRoomState extends State<privateChatRoom>{
 
   final _bloc = chatBloc();
   List<Message> previousMessages = [];
-  void initializeBloc(){
+
+//  void intializeMessages() async{
+//    previousMessages = await DatabaseProvider.db.getMessagesByUser(widget.reciever_mail);
+//    setState(() {
+//      this.previousMessages = previousMessages;
+//    });
+//  }
+  void initializeBloc() async{
     _bloc.current_chat_username = widget.reciever_name;
     _bloc.current_chat_email = widget.reciever_mail;
+    _bloc.my_email = widget.my_email;
+    _bloc.my_username = widget.my_name;
+    _bloc.socketListner = widget.socketListener;
+    _bloc.tempSocket = widget.c_rsocket;
+    _bloc.startListening();
+//    previousMessages = await DatabaseProvider.db.getMessagesByUser(widget.reciever_mail);
+    _bloc.getMessages();
   }
 
   TextEditingController textToSend = new TextEditingController();
@@ -41,27 +57,32 @@ class privateChatRoomState extends State<privateChatRoom>{
       "request": "message",
       "type": "personal",
       "details": {
-        "to": "${widget.reciever_name}",
+        "to": "${widget.reciever_mail}",
         "message": "${message}",
         "media": null,
         "time": new DateTime.now().millisecondsSinceEpoch
       }
     };
-    widget.c_rsocket.writeln(jsonEncode(sendMsg));
-    widget.socketListener.onData((data) {
-      var res = String.fromCharCodes(data);
-      var r = json.decode(res);
-      if(r['status']=='sent'){
-        //Display
-        print("Message sent");
-        //Database
-      }else{
-        //Database
-        print("No..message not sent");
-      }
-    });
-  }
+    Message msg  = new Message.fromJson(sendMsg);
+    print("Object message Private chat : ${msg.message}");
+//    widget.c_rsocket.writeln(jsonEncode(sendMsg));
+//    widget.socketListener.onData((data) {
+//      var res = String.fromCharCodes(data);
+//      var r = json.decode(res);
+//      if(r['status']=='sent'){
+//        //Display
+//
+//        print("Message sent");
+//        //Database
+//      }else{
+//        //Database
+//        print("No..message not sent");
+//      }
+//    });
 
+    _bloc.chatEventsink.add(sendMessageEvent(msg));
+
+  }
 
   @override
   void initState() {
@@ -80,15 +101,15 @@ class privateChatRoomState extends State<privateChatRoom>{
           children: <Widget>[
 
             StreamBuilder(
-              stream: _bloc.response,
+              stream: _bloc.chats,
               initialData: previousMessages,
               builder: (context,snapshot){
                 return ListView.builder(
                     itemCount: snapshot.data.length,
                     itemBuilder: (context,index){
                       return ListTile(
-                        title: Text("${snapshot.data[index]['from']}"),
-                        subtitle: Text("${snapshot.data[index]['message']}"),
+                        title: Text("${snapshot.data[index].from}"),
+                        subtitle: Text("${snapshot.data[index].message}"),
                       );
                     }
                 );

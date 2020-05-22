@@ -51,9 +51,4 @@ public class Message<T extends MessageDetails> extends Request<T> {
         return this.details;
     }
 
-    public static void main(String[] args) {
-        Message<PersonalMessageDetails> message = new Message<>(new PersonalMessageDetails ("id","Hello World", "https://url-to-firestore", 1234567890, "xyz@abc.com", "def@abc.com"));
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(message));
-    }
-
 }

@@ -31,6 +31,7 @@ class DatabaseProvider {
 
     var result;
     if (message.hasMessage()) {
+      print("In database : ${message}");
       if (message.hasMedia()) {
         result = await db.rawInsert(
           SQLStatements.INSERT_INTO_MESSAGES_WITH_MEDIA,
@@ -63,6 +64,24 @@ class DatabaseProvider {
       }
     }
     
+    return message;
+  }
+
+  Future<List<Message>> getMessagesByUser(String email) async {
+    final db = await database;
+    List<Message> message = [];
+
+    var results = await db.rawQuery(SQLStatements.FETCH_MESSAGES_BY_USER,
+      [email,email]
+    );
+
+    for (var result in results) {
+      if (result.isNotEmpty) {
+        print(result);
+        message.add(Message.fromMap(result));
+      }
+    }
+
     return message;
   }
 

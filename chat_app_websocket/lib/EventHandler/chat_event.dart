@@ -1,9 +1,26 @@
-abstract class chat_event{}
+import 'package:chat_app_websocket/models/message_model.dart';
 
-class externalChat extends chat_event{}
+abstract class chat_event{
+  final Message response;
+  chat_event(this.response);
+}
 
-class currentChat extends chat_event{}
+class externalChat extends chat_event{
+  externalChat(Message response) : super(response);
+}
 
-class currentChatMessageSent extends chat_event{}
+class currentChat extends chat_event{
+  currentChat(Message response) : super(response);
+}
 
-class NoActivityEvent extends chat_event{}
+class currentChatMessageSent extends chat_event{
+  currentChatMessageSent(Message response) : super(response);
+}
+
+class NoActivityEvent extends chat_event{
+  NoActivityEvent(Message response) : super(response);
+}
+
+class sendMessageEvent extends chat_event{
+  sendMessageEvent(Message response) : super(response);
+}

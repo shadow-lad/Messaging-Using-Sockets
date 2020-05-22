@@ -61,7 +61,6 @@ public class LoginHandler {
                 UserDetails userDetails = database.fetchUserDetailsByMail(loginDetails.getEmail());
                 if (userDetails != null) {
                     if (userDetails.getPassword().equals(loginDetails.getPassword())) {
-                        setAsLoggedIn(userDetails.getEmail());
                         userDetails.setPassword(null);
                         List<String> friends = database.getFriends(userDetails.getEmail());
                         sendLoginSuccessful(userDetails, friends);
@@ -96,6 +95,7 @@ public class LoginHandler {
         client.addFriends(friends);
         client.out.println(gson.toJson(success));
         client.out.flush();
+        setAsLoggedIn(userDetails.getEmail());
     }
 
     private void loginUsingUsername(UserDetails loginDetails) {
@@ -104,7 +104,6 @@ public class LoginHandler {
                 UserDetails userDetails = database.fetchUserDetailsByUsername(loginDetails.getUsername());
                 if (userDetails != null) {
                     if (userDetails.getPassword().equals(loginDetails.getPassword())) {
-                        setAsLoggedIn(userDetails.getEmail());
                         userDetails.setPassword(null);
                         List<String> friends = database.getFriends(userDetails.getEmail());
                         sendLoginSuccessful(userDetails, friends);

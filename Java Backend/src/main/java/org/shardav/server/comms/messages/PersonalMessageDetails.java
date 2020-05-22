@@ -2,20 +2,21 @@ package org.shardav.server.comms.messages;
 
 public class PersonalMessageDetails extends MessageDetails {
 
+    private String id;
     private String to;
 
     /**
      * Private message with media
      *
-     * @param id id of the message, it should be unique for future purposes
      * @param message the message to be sent
      * @param media the media attached to the message
      * @param timeStamp the time at which the message was sent
-     * @param sender the sender of the message
+     * @param from the sender of the message
      * @param to the recipient of the message
      */
-    public PersonalMessageDetails(String id, String message, String media, long timeStamp, String sender, String to) {
-        super(id, message, media, timeStamp, sender);
+    public PersonalMessageDetails(String id, String message, String media, long timeStamp, String from, String to) {
+        super(message, media, timeStamp, from);
+        this.id = id;
         this.to = to;
     }
 
@@ -37,9 +38,10 @@ public class PersonalMessageDetails extends MessageDetails {
         return PersonalMessageDetails.this;
     }
 
-    @Override
     public PersonalMessageDetails setId(String id) {
-        super.setId(id);
+        this.id = id;
         return PersonalMessageDetails.this;
     }
+
+    public String getId() {return this.id;}
 }

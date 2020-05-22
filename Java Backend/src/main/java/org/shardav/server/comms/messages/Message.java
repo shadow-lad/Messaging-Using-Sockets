@@ -1,5 +1,7 @@
 package org.shardav.server.comms.messages;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.shardav.server.comms.Request;
 
 public class Message<T extends MessageDetails> extends Request<T> {
@@ -15,7 +17,7 @@ public class Message<T extends MessageDetails> extends Request<T> {
     /**
      * Current messageType
      */
-    private MessageType type;
+    private MessageType request;
 
     /**
      * Constructor used to create a message
@@ -25,9 +27,9 @@ public class Message<T extends MessageDetails> extends Request<T> {
     public Message( T details ) {
         super(RequestType.message, details);
         if(details instanceof PersonalMessageDetails)
-            this.type = MessageType.personal;
+            this.request = MessageType.personal;
         else if(details instanceof GlobalMessageDetails)
-            this.type = MessageType.global;
+            this.request = MessageType.global;
 
     }
 
@@ -35,8 +37,8 @@ public class Message<T extends MessageDetails> extends Request<T> {
      * Get the current messageType
      * @return A value of enum MessageType representing the current MessageType.
      */
-    public MessageType getType() {
-        return this.type;
+    public MessageType getRequest() {
+        return this.request;
     }
 
     /**
@@ -47,6 +49,11 @@ public class Message<T extends MessageDetails> extends Request<T> {
     @Override
     public T getDetails() {
         return this.details;
+    }
+
+    public static void main(String[] args) {
+        Message<PersonalMessageDetails> message = new Message<>(new PersonalMessageDetails ("id","Hello World", "https://url-to-firestore", 1234567890, "xyz@abc.com", "def@abc.com"));
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(message));
     }
 
 }

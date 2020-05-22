@@ -36,7 +36,7 @@ public class MessageHandler {
 
     protected void handleJson(JsonObject root) {
         try {
-            MessageType messageType = MessageType.valueOf(root.getAsJsonPrimitive("type").getAsString());
+            MessageType messageType = MessageType.valueOf(root.getAsJsonPrimitive("request").getAsString());
             JsonObject messageDetails = root.getAsJsonObject("details");
             if (messageDetails == null) {
                 throw new JsonSyntaxException("JSON object \"details\" not present.");
@@ -44,12 +44,12 @@ public class MessageHandler {
             String id = client.getEmail() + new Date().getTime();
             switch (messageType) {
                 case global:
-                    Message<GlobalMessageDetails> globalMessage = new Message<>(gson.fromJson(messageDetails, GlobalMessageDetails.class).setFrom(client.getEmail()).setId(id));
+                    Message<GlobalMessageDetails> globalMessage = new Message<>(gson.fromJson(messageDetails, GlobalMessageDetails.class).setFrom(client.getEmail()));
                     sendGlobalMessage(globalMessage);
                     break;
                 case personal:
                     Message<PersonalMessageDetails> personalMessage = new Message<>(gson.fromJson(messageDetails, PersonalMessageDetails.class).setFrom(client.getEmail()).setId(id));
-                    sendPersonalMessage((personalMessage.getDetails()).getTo(), personalMessage);
+                    sendPersonalMessage(personalMessage.getDetails().getTo(), personalMessage);
                     break;
             }
         } catch (JsonSyntaxException ex) {
@@ -60,7 +60,7 @@ public class MessageHandler {
             client.out.flush();
         } catch (EnumConstantNotPresentException ex) {
             Response<Void> errorResponse = new Response<>(ResponseStatus.invalid, ResponseType.message);
-            Log.d(LOG_TAG, "Message type not identified: " + root.getAsJsonPrimitive("type").getAsString());
+            Log.d(LOG_TAG, "Message type not identified: " + root.getAsJsonPrimitive("request").getAsString());
             errorResponse.setMessage("Invalid message type");
             client.out.println(gson.toJson(errorResponse));
             client.out.flush();

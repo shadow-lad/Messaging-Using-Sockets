@@ -12,18 +12,18 @@ public abstract class Request<T extends Details> {
 
     }
 
-    protected RequestType request;
+    protected RequestType type;
 
     protected T details;
 
     /**
      * Constructor used to create a Request
      *
-     * @param request The type of request
+     * @param type The type of request
      * @param details The details of the request
      */
-    public Request(RequestType request, T details) {
-        this.request = request;
+    public Request(RequestType type, T details) {
+        this.type = type;
         this.details = details;
     }
 
@@ -31,8 +31,8 @@ public abstract class Request<T extends Details> {
      * Fetch the type of request
      * @return Returns a value of type RequestType representing the current RequestType.
      */
-    public RequestType getRequest() {
-        return this.request;
+    public RequestType getType() {
+        return this.type;
     }
 
     /**

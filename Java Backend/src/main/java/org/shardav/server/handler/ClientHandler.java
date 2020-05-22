@@ -83,12 +83,12 @@ public class ClientHandler implements Runnable {
 
                 try {
                     RequestType requestType =
-                            RequestType.valueOf(requestObject.getAsJsonPrimitive("request").getAsString());
+                            RequestType.valueOf(requestObject.getAsJsonPrimitive("type").getAsString());
 
                     switch (requestType) {
                         case users:
                             if (isLoggedIn) {
-                                Response<Set<UserDetails>> userListResponse = new Response<>(ResponseStatus.success, ResponseType.user);
+                                Response<Set<UserDetails>> userListResponse = new Response<>(ResponseStatus.success, ResponseType.users);
                                 userListResponse.setDetails(new HashSet<>(Server.CLIENT_DETAILS_MAP.values()));
                                 this.out.println(gson.toJson(userListResponse));
                             } else {

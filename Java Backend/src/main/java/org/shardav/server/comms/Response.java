@@ -16,7 +16,7 @@ public class Response<T> {
         message,
         otp,
         registration,
-        user,
+        users,
         verify
     }
 

@@ -40,7 +40,7 @@ public class RegistrationHandler {
     }
 
     protected void handleJson(JsonObject root) {
-        String request = root.getAsJsonPrimitive("request").getAsString();
+        String request = root.getAsJsonPrimitive("type").getAsString();
         if ("registration".equals(request)) {
             handleRegistration(root);
         } else {

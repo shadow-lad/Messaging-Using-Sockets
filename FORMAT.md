@@ -5,53 +5,53 @@ This file contains the guidelines to communicate with the server. Proper respons
 ## Table of Contents
 
 - [Communicating with the Server](#communicating-with-the-server)
-  - [Table of Contents](#table-of-contents)
-  - [Registration](#registration)
-    - [Client Registration Request](#client-registration-request)
-      - [Begin Registration Process](#begin-registration-process)
-      - [Verify OTP](#verify-otp)
-    - [Server Registration Response](#server-registration-response)
-      - [OTP Sent](#otp-sent)
-      - [User is successfully registered](#user-is-successfully-registered)
-      - [Error why the registration failed](#error-why-the-registration-failed)
-  - [Login](#login)
-    - [Client Login Request](#client-login-request)
-    - [Server Login Response](#server-login-response)
-      - [if credentials found](#if-credentials-found)
-      - [if credentials not found](#if-credentials-not-found)
-  - [Log-Out](#log-out)
-    - [Client Log-Out Request](#client-log-out-request)
-    - [Server Log-Out Response](#server-log-out-response)
-  - [Messages](#messages)
-    - [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
-      - [Sending Message](#sending-message)
-        - [Without media](#without-media)
-        - [With media](#with-media)
-      - [Receiving Message](#receiving-message)
-        - [Receiving Messages without Media](#receiving-messages-without-media)
-        - [Receiving Messages with Media](#receiving-messages-with-media)
-    - [Personal Message](#personal-message)
-      - [Sending Personal Message](#sending-personal-message)
-        - [Sending Personal Message without Media](#sending-personal-message-without-media)
-        - [Sending Personal Message with Media](#sending-personal-message-with-media)
-      - [Receiving Personal Message](#receiving-personal-message)
-        - [Receving Personal Message without Media](#receving-personal-message-without-media)
-        - [Receiving Personal Message with Media](#receiving-personal-message-with-media)
-    - [Server Message Response](#server-message-response)
-  - [User List](#user-list)
-    - [Request](#request)
-    - [Response](#response)
-  - [Audio Call](#audio-call)
-    - [Placing a call](#placing-a-call)
-    - [Receiving a call](#receiving-a-call)
-    - [Accepting a Call](#accepting-a-call)
-    - [Rejecting a Call](#rejecting-a-call)
-    - [Call Time Out](#call-time-out)
-    - [Server Voice Call Response](#server-voice-call-response)
-      - [If Call Accepted](#if-call-accepted)
-      - [If Call Rejected](#if-call-rejected)
-    - [If Receiver is not Online](#if-receiver-is-not-online)
-  - [Error](#error)
+	- [Table of Contents](#table-of-contents)
+	- [Registration](#registration)
+		- [Client Registration Request](#client-registration-request)
+			- [Begin Registration Process](#begin-registration-process)
+			- [Verify OTP](#verify-otp)
+		- [Server Registration Response](#server-registration-response)
+			- [OTP Sent](#otp-sent)
+			- [User is successfully registered](#user-is-successfully-registered)
+			- [Error why the registration failed](#error-why-the-registration-failed)
+	- [Login](#login)
+		- [Client Login Request](#client-login-request)
+		- [Server Login Response](#server-login-response)
+			- [if credentials found](#if-credentials-found)
+			- [if credentials not found](#if-credentials-not-found)
+	- [Log-Out](#log-out)
+		- [Client Log-Out Request](#client-log-out-request)
+		- [Server Log-Out Response](#server-log-out-response)
+	- [Messages](#messages)
+		- [Global Message (This feature will be deprecated in the future.)](#global-message-this-feature-will-be-deprecated-in-the-future)
+			- [Sending Message](#sending-message)
+				- [Without media](#without-media)
+				- [With media](#with-media)
+			- [Receiving Message](#receiving-message)
+				- [Receiving Messages without Media](#receiving-messages-without-media)
+				- [Receiving Messages with Media](#receiving-messages-with-media)
+		- [Personal Message](#personal-message)
+			- [Sending Personal Message](#sending-personal-message)
+				- [Sending Personal Message without Media](#sending-personal-message-without-media)
+				- [Sending Personal Message with Media](#sending-personal-message-with-media)
+			- [Receiving Personal Message](#receiving-personal-message)
+				- [Receving Personal Message without Media](#receving-personal-message-without-media)
+				- [Receiving Personal Message with Media](#receiving-personal-message-with-media)
+		- [Server Message Response](#server-message-response)
+	- [User List](#user-list)
+		- [Request](#request)
+		- [Response](#response)
+	- [Audio Call](#audio-call)
+		- [Placing a call](#placing-a-call)
+		- [Receiving a call](#receiving-a-call)
+		- [Accepting a Call](#accepting-a-call)
+		- [Rejecting a Call](#rejecting-a-call)
+		- [Call Time Out](#call-time-out)
+		- [Server Voice Call Response](#server-voice-call-response)
+			- [If Call Accepted](#if-call-accepted)
+			- [If Call Rejected](#if-call-rejected)
+		- [If Receiver is not Online](#if-receiver-is-not-online)
+	- [Error](#error)
 
 ## Registration
 
@@ -68,7 +68,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "request": "registration",
+    "type": "registration",
     "details": {
         "email": "xyz@abc.com",
         "password": "md5-hashed-password",
@@ -81,7 +81,7 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "request": "verify",
+    "type": "verify",
     "otp": "1234"
 }
 ```
@@ -131,7 +131,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "login",
+    "type": "login",
     "details": {
         "username": "xyz",
         "email": "xyz@abc.com",
@@ -150,6 +150,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "status": "success",
+    "type": "login",
     "details": {
         "username": "xyz",
         "email": "xyz@abc.com",
@@ -185,7 +186,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "logout"
+    "type": "logout"
 }
 ```
 
@@ -213,12 +214,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "global",
+    "request": "global",
+    "type": "message",
     "details": {
         "message": "Hello World",
-        "media": null,
-        "time": 1214343465
+        "time": 1234567890
     }
 }
 ```
@@ -227,12 +227,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "global",
+    "request": "global",
+    "type": "message",
     "details": {
         "message": "Hello World",
         "media": "https://url-to-firestore/",
-        "time": 1214343465
+        "time": 1234567890
     }
 }
 ```
@@ -243,14 +243,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "global",
+    "request": "global",
+    "type": "message",
     "details": {
-        "id": "some-id",
-        "from": "xyz",
         "message": "Hello World",
-        "media": null,
-        "time": 1214343465
+        "from": "xyz@abc.com",
+        "time": 1234567890
     }
 }
 ```
@@ -259,13 +257,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "global",
+    "request": "global",
+    "type": "message",
     "details": {
-        "from": "xyz",
         "message": "Hello World",
-        "media": "https://url-to-firestore/",
-        "time": 1214343465
+        "media": "https://url-to-firstore",
+        "from": "xyz@abc.com",
+        "time": 1234567890
     }
 }
 ```
@@ -280,13 +278,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "personal",
+    "request": "personal",
+    "type": "message",
     "details": {
-        "to": "xyz",
+        "to": "def@abc.com",
         "message": "Hello World",
-        "media": null,
-        "time": 1214343465
+        "time": 1234567890
     }
 }
 ```
@@ -295,13 +292,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "personal",
+    "request": "personal",
+    "type": "message",
     "details": {
-        "to": "xyz",
+        "to": "def@abc.com",
         "message": "Hello World",
         "media": "https://url-to-firestore/",
-        "time": 1214343465
+        "time": 1234567890
     }
 }
 ```
@@ -312,14 +309,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "personal",
+    "request": "personal",
+    "type": "message",
     "details": {
         "id": "some-id",
-        "from": "xyz",
         "message": "Hello World",
-        "media": null,
-        "time": 1214343465
+        "from": "xyz@abc.com",
+        "time": 1234567890
     }
 }
 ```
@@ -328,27 +324,28 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "message",
-    "type": "personal",
+    "request": "personal",
+    "type": "message",
     "details": {
         "id": "some-id",
-        "from": "xyz",
         "message": "Hello World",
-        "media": "https://url-to-firestore/",
-        "time": 1214343465
+        "media": "https://url-to-firestore",
+        "from": "xyz@abc.com",
+        "time": 1234567890
     }
 }
 ```
 
 ### Server Message Response
 
-- This is the standard response from the server when any kind of message is sent.
+- This is the standard response from the server when a personal message is sent.
+- No response is sent for Global Messages.
 
 ```json
 {
     "status": "sent",
     "type": "message",
-    "id": "id-of-the-message"
+    "id": "id-for-the-message"
 }
 ```
 
@@ -360,7 +357,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "users"
+    "type": "users"
 }
 ```
 
@@ -388,8 +385,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "voice",
-    "type": "call",
+    "type": "voice",
+    "request": "call",
     "details": {
         "email": "email@userto.call"
     }
@@ -402,8 +399,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "voice",
-    "type": "request",
+    "type": "voice",
+    "request": "request",
     "details": {
         "email": "email@calling.user"
     }
@@ -416,8 +413,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "voice",
-    "type": "accept",
+    "type": "voice",
+    "request": "accept",
     "details": {
         "email": "email@calling.user"
     }
@@ -430,8 +427,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "voice",
-    "type": "reject",
+    "type": "voice",
+    "request": "reject",
     "details": {
         "email": "email@calling.user"
     }
@@ -445,8 +442,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "voice",
-    "type": "time",
+    "type": "voice",
+    "reason": "time",
     "details": {
         "email": "email@userto.call"
     }
@@ -458,7 +455,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "request": "voice",
-    "type": "time",
+    "reason": "time",
     "details": {
         "email": "email@calling.user"
     }
@@ -476,8 +473,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "response": "voice",
-    "type": "accepted",
+    "type": "voice",
+    "status": "accepted",
     "details": {
         "ip": "x.x.x.x",
         "port": "0000"
@@ -491,8 +488,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "response": "voice",
-    "type": "rejected",
+    "type": "voice",
+    "status": "rejected",
     "details": {
         "email": "email@userto.call"
     }
@@ -505,8 +502,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "response": "voice",
-    "type": "offline",
+    "type": "voice",
+    "status": "offline",
     "details": {
         "email": "email@userto.call"
     }

@@ -57,7 +57,7 @@ class privateChatRoomState extends State<privateChatRoom>{
         //Database
       }else{
         //Database
-        print("No..nigaa not sent");
+        print("No..message not sent");
       }
     });
   }

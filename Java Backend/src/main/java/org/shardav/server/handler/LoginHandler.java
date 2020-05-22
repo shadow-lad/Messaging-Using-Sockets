@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import org.shardav.server.Server;
 import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Response;
-import org.shardav.server.comms.Response.ResponseStatus;
+import org.shardav.server.comms.Response.ResponseEvent;
 import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.comms.messages.Message;
@@ -30,7 +30,7 @@ public class LoginHandler {
     }
 
     public void handleJson(JsonObject root) {
-        Response<Void> errorResponse = new Response<>(ResponseStatus.failed, ResponseType.login);
+        Response<Void> errorResponse = new Response<>(ResponseEvent.failed, ResponseType.login);
         if (root.has("details")) {
             UserDetails loginDetails = gson.fromJson(root.getAsJsonObject("details"), UserDetails.class);
             if (loginDetails.hasPassword()) {
@@ -65,18 +65,18 @@ public class LoginHandler {
                         List<String> friends = database.getFriends(userDetails.getEmail());
                         sendLoginSuccessful(userDetails, friends);
                     } else {
-                        Response<Void> loginFailed = new Response<>(ResponseStatus.failed, ResponseType.login, "Wrong credentials");
+                        Response<Void> loginFailed = new Response<>(ResponseEvent.failed, ResponseType.login, "Wrong credentials");
                         client.out.println(gson.toJson(loginFailed));
                         client.out.flush();
                     }
                 } else {
-                    Response<Void> userNotFound = new Response<>(ResponseStatus.failed,
+                    Response<Void> userNotFound = new Response<>(ResponseEvent.failed,
                             ResponseType.login, "User not found");
                     client.out.println(gson.toJson(userNotFound));
                     client.out.flush();
                 }
             } catch (SQLException ex) {
-                Response<Void> errorResponse = new Response<>(ResponseStatus.failed,
+                Response<Void> errorResponse = new Response<>(ResponseEvent.failed,
                         ResponseType.login,
                         "An error occurred while trying to log the user in.");
                 client.out.println(gson.toJson(errorResponse));
@@ -86,7 +86,7 @@ public class LoginHandler {
     }
 
     private void sendLoginSuccessful(UserDetails userDetails, List<String> friends) {
-        Response<UserDetails> success = new Response<>(ResponseStatus.success, ResponseType.login, userDetails);
+        Response<UserDetails> success = new Response<>(ResponseEvent.success, ResponseType.login, userDetails);
         List<UserDetails> friendsDetails = Server.CLIENT_DETAILS_MAP.values()
                 .stream()
                 .filter(userDetails1 -> friends.contains(userDetails1.getEmail()))
@@ -108,20 +108,20 @@ public class LoginHandler {
                         List<String> friends = database.getFriends(userDetails.getEmail());
                         sendLoginSuccessful(userDetails, friends);
                     } else {
-                        Response<Void> loginFailed = new Response<>(ResponseStatus.failed,
+                        Response<Void> loginFailed = new Response<>(ResponseEvent.failed,
                                 ResponseType.login, "Wrong credentials");
                         client.out.println(gson.toJson(loginFailed));
                         client.out.flush();
                     }
                 } else {
-                    Response<Void> userNotFound = new Response<>(ResponseStatus.failed,
+                    Response<Void> userNotFound = new Response<>(ResponseEvent.failed,
                             ResponseType.login, "User not found");
                     client.out.println(gson.toJson(userNotFound));
                     client.out.flush();
                 }
 
             } catch (SQLException ex) {
-                Response<Void> errorResponse = new Response<>(ResponseStatus.failed,
+                Response<Void> errorResponse = new Response<>(ResponseEvent.failed,
                         ResponseType.login,
                         "An error occurred while trying to log the user in.");
                 client.out.println(gson.toJson(errorResponse));

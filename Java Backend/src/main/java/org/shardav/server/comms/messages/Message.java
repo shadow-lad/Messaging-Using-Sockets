@@ -1,7 +1,5 @@
 package org.shardav.server.comms.messages;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.shardav.server.comms.Request;
 
 public class Message<T extends MessageDetails> extends Request<T> {
@@ -9,7 +7,7 @@ public class Message<T extends MessageDetails> extends Request<T> {
     /**
      * A custom data type created to support the types of messages that can be sent
      */
-    public enum MessageType{
+    public enum MessageEvent {
         global,
         personal
     }
@@ -17,7 +15,7 @@ public class Message<T extends MessageDetails> extends Request<T> {
     /**
      * Current messageType
      */
-    private MessageType request;
+    private MessageEvent event;
 
     /**
      * Constructor used to create a message
@@ -27,9 +25,9 @@ public class Message<T extends MessageDetails> extends Request<T> {
     public Message( T details ) {
         super(RequestType.message, details);
         if(details instanceof PersonalMessageDetails)
-            this.request = MessageType.personal;
+            this.event = MessageEvent.personal;
         else if(details instanceof GlobalMessageDetails)
-            this.request = MessageType.global;
+            this.event = MessageEvent.global;
 
     }
 
@@ -37,8 +35,8 @@ public class Message<T extends MessageDetails> extends Request<T> {
      * Get the current messageType
      * @return A value of enum MessageType representing the current MessageType.
      */
-    public MessageType getRequest() {
-        return this.request;
+    public MessageEvent getEvent() {
+        return this.event;
     }
 
     /**

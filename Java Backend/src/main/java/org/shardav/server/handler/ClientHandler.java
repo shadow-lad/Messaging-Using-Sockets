@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import org.shardav.server.Server;
 import org.shardav.server.comms.Request.RequestType;
 import org.shardav.server.comms.Response;
-import org.shardav.server.comms.Response.ResponseStatus;
+import org.shardav.server.comms.Response.ResponseEvent;
 import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.mail.GMailService;
@@ -79,7 +79,7 @@ public class ClientHandler implements Runnable {
                 }
 
                 JsonObject requestObject = JsonParser.parseString(requestData).getAsJsonObject();
-                Response<Void> errorResponse = new Response<>(ResponseStatus.invalid, ResponseType.general);
+                Response<Void> errorResponse = new Response<>(ResponseEvent.invalid, ResponseType.general);
 
                 try {
                     RequestType requestType =
@@ -88,7 +88,7 @@ public class ClientHandler implements Runnable {
                     switch (requestType) {
                         case users:
                             if (isLoggedIn) {
-                                Response<Set<UserDetails>> userListResponse = new Response<>(ResponseStatus.success, ResponseType.users);
+                                Response<Set<UserDetails>> userListResponse = new Response<>(ResponseEvent.success, ResponseType.users);
                                 userListResponse.setDetails(new HashSet<>(Server.CLIENT_DETAILS_MAP.values()));
                                 this.out.println(gson.toJson(userListResponse));
                             } else {
@@ -167,7 +167,7 @@ public class ClientHandler implements Runnable {
             Server.CLIENT_MAP.put(this.email, null);
             Server.ACTIVE_CLIENTS.remove(this.email);
             if (!disconnect) {
-                this.out.println(gson.toJson(new Response<Void>(ResponseStatus.success, ResponseType.logout)));
+                this.out.println(gson.toJson(new Response<Void>(ResponseEvent.success, ResponseType.logout)));
                 this.out.flush();
             }
             this.isLoggedIn = false;

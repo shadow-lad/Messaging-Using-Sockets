@@ -2,7 +2,7 @@ package org.shardav.server.comms;
 
 public class Response<T> {
 
-    public enum ResponseStatus {
+    public enum ResponseEvent {
         failed,
         invalid,
         sent,
@@ -20,34 +20,34 @@ public class Response<T> {
         verify
     }
 
-    ResponseStatus status;
+    ResponseEvent event;
     ResponseType type;
     String message;
     T details;
 
-    public Response (ResponseStatus status, ResponseType type) {
-        this.status = status;
+    public Response (ResponseEvent event, ResponseType type) {
+        this.event = event;
         this.type = type;
         this.message = null;
         this.details = null;
     }
 
-    public Response (ResponseStatus status, ResponseType type, String message) {
-        this.status = status;
+    public Response (ResponseEvent event, ResponseType type, String message) {
+        this.event = event;
         this.type = type;
         this.message = message;
         this.details = null;
     }
 
-    public Response (ResponseStatus status, ResponseType type, T details) {
-        this.status = status;
+    public Response (ResponseEvent event, ResponseType type, T details) {
+        this.event = event;
         this.type = type;
         this.message = null;
         this.details = details;
     }
 
-    public ResponseStatus getStatus() {
-        return status;
+    public ResponseEvent getEvent() {
+        return event;
     }
 
     public String getMessage() {
@@ -58,7 +58,7 @@ public class Response<T> {
         this.message = message;
     }
 
-    public void setStatus(ResponseStatus status){this.status = status;}
+    public void setEvent(ResponseEvent event){this.event = event;}
 
     public void setType(ResponseType type) {
         this.type = type;

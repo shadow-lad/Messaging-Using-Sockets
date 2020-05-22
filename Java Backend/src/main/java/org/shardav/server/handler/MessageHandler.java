@@ -6,11 +6,11 @@ import com.google.gson.JsonSyntaxException;
 import org.shardav.server.Server;
 import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Response;
-import org.shardav.server.comms.Response.ResponseStatus;
+import org.shardav.server.comms.Response.ResponseEvent;
 import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.messages.GlobalMessageDetails;
 import org.shardav.server.comms.messages.Message;
-import org.shardav.server.comms.messages.Message.MessageType;
+import org.shardav.server.comms.messages.Message.MessageEvent;
 import org.shardav.server.comms.messages.MessageResponse;
 import org.shardav.server.comms.messages.PersonalMessageDetails;
 import org.shardav.server.sql.Database;
@@ -36,13 +36,13 @@ public class MessageHandler {
 
     protected void handleJson(JsonObject root) {
         try {
-            MessageType messageType = MessageType.valueOf(root.getAsJsonPrimitive("request").getAsString());
+            MessageEvent messageEvent = MessageEvent.valueOf(root.getAsJsonPrimitive("event").getAsString());
             JsonObject messageDetails = root.getAsJsonObject("details");
             if (messageDetails == null) {
                 throw new JsonSyntaxException("JSON object \"details\" not present.");
             }
             String id = client.getEmail() + new Date().getTime();
-            switch (messageType) {
+            switch (messageEvent) {
                 case global:
                     Message<GlobalMessageDetails> globalMessage = new Message<>(gson.fromJson(messageDetails, GlobalMessageDetails.class).setFrom(client.getEmail()));
                     sendGlobalMessage(globalMessage);
@@ -54,13 +54,13 @@ public class MessageHandler {
             }
         } catch (JsonSyntaxException ex) {
             Log.e("An error occurred while parsing the message", ex.getMessage(), ex);
-            Response<Void> errorResponse = new Response<>(ResponseStatus.invalid, ResponseType.message);
+            Response<Void> errorResponse = new Response<>(ResponseEvent.invalid, ResponseType.message);
             errorResponse.setMessage(ex.getMessage());
             client.out.println(gson.toJson(errorResponse));
             client.out.flush();
         } catch (EnumConstantNotPresentException ex) {
-            Response<Void> errorResponse = new Response<>(ResponseStatus.invalid, ResponseType.message);
-            Log.d(LOG_TAG, "Message type not identified: " + root.getAsJsonPrimitive("request").getAsString());
+            Response<Void> errorResponse = new Response<>(ResponseEvent.invalid, ResponseType.message);
+            Log.d(LOG_TAG, "Message type not identified: " + root.getAsJsonPrimitive("event").getAsString());
             errorResponse.setMessage("Invalid message type");
             client.out.println(gson.toJson(errorResponse));
             client.out.flush();
@@ -95,7 +95,7 @@ public class MessageHandler {
                     onSent(message.getDetails().getId());
                 } catch (SQLException ex) {
                     Log.v(LOG_TAG, "Error occurred while trying to add message to database : " + ex.getLocalizedMessage(), ex);
-                    Response<Void> errorResponse = new Response<>(ResponseStatus.failed, ResponseType.message);
+                    Response<Void> errorResponse = new Response<>(ResponseEvent.failed, ResponseType.message);
                     errorResponse.setMessage(ex.getLocalizedMessage());
                     client.out.println(gson.toJson(errorResponse));
                     client.out.flush();
@@ -115,7 +115,7 @@ public class MessageHandler {
     }
 
     private void onSent(String id) {
-        MessageResponse response = new MessageResponse(ResponseStatus.sent, id);
+        MessageResponse response = new MessageResponse(ResponseEvent.sent, id);
         client.out.println(gson.toJson(response));
         client.out.flush();
     }

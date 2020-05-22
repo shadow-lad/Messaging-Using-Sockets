@@ -214,7 +214,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "global",
+    "event": "global",
     "type": "message",
     "details": {
         "message": "Hello World",
@@ -227,7 +227,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "global",
+    "event": "global",
     "type": "message",
     "details": {
         "message": "Hello World",
@@ -243,7 +243,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "global",
+    "event": "global",
     "type": "message",
     "details": {
         "message": "Hello World",
@@ -257,7 +257,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "global",
+    "event": "global",
     "type": "message",
     "details": {
         "message": "Hello World",
@@ -278,7 +278,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "personal",
+    "event": "personal",
     "type": "message",
     "details": {
         "to": "def@abc.com",
@@ -292,7 +292,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "personal",
+    "event": "personal",
     "type": "message",
     "details": {
         "to": "def@abc.com",
@@ -309,7 +309,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "personal",
+    "event": "personal",
     "type": "message",
     "details": {
         "id": "some-id",
@@ -324,7 +324,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "personal",
+    "event": "personal",
     "type": "message",
     "details": {
         "id": "some-id",
@@ -386,7 +386,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "request": "call",
+    "event": "call",
     "details": {
         "email": "email@userto.call"
     }
@@ -400,7 +400,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "request": "request",
+    "event": "request",
     "details": {
         "email": "email@calling.user"
     }
@@ -414,7 +414,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "request": "accept",
+    "event": "accept",
     "details": {
         "email": "email@calling.user"
     }
@@ -428,7 +428,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
     "type": "voice",
-    "request": "reject",
+    "event": "reject",
     "details": {
         "email": "email@calling.user"
     }
@@ -454,7 +454,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "request": "voice",
+    "event": "voice",
     "reason": "time",
     "details": {
         "email": "email@calling.user"

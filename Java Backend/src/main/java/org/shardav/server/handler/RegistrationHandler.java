@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import org.shardav.server.Server;
 import org.shardav.server.ServerExecutors;
 import org.shardav.server.comms.Response;
-import org.shardav.server.comms.Response.ResponseStatus;
+import org.shardav.server.comms.Response.ResponseEvent;
 import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.login.UserDetails;
 import org.shardav.server.mail.GMailService;
@@ -69,7 +69,7 @@ public class RegistrationHandler {
                             String message = String.format("User with %s %s already exists",
                                     emailDetails == null ? "username" : "email",
                                     emailDetails == null ? username : email);
-                            Response<Void> invalid = new Response<>(ResponseStatus.invalid, ResponseType.registration, message);
+                            Response<Void> invalid = new Response<>(ResponseEvent.invalid, ResponseType.registration, message);
                             client.out.println(gson.toJson(invalid));
                             client.out.flush();
                         }
@@ -79,13 +79,13 @@ public class RegistrationHandler {
                 });
             } else {
                 this.userDetails = null;
-                Response<Void> invalid = new Response<>(ResponseStatus.invalid, ResponseType.registration, "User details not present");
+                Response<Void> invalid = new Response<>(ResponseEvent.invalid, ResponseType.registration, "User details not present");
                 client.out.println(gson.toJson(invalid));
                 client.out.flush();
             }
 
         } else {
-            Response<Void> invalid = new Response<>(ResponseStatus.invalid, ResponseType.registration, "User details not present");
+            Response<Void> invalid = new Response<>(ResponseEvent.invalid, ResponseType.registration, "User details not present");
             client.out.println(gson.toJson(invalid));
             client.out.flush();
         }
@@ -93,10 +93,10 @@ public class RegistrationHandler {
 
     private void sendOTP(String otp) {
         this.otp = otp;
-        Response<Void> response = new Response<>(ResponseStatus.failed, ResponseType.registration);
+        Response<Void> response = new Response<>(ResponseEvent.failed, ResponseType.registration);
         try {
             mailService.sendRegistrationOTP(userDetails.getEmail(), otp);
-            response.setStatus(ResponseStatus.sent);
+            response.setEvent(ResponseEvent.sent);
             response.setType(ResponseType.otp);
             response.setMessage("OTP sent to " + userDetails.getEmail());
         } catch (MessagingException | IOException ex) {
@@ -114,7 +114,7 @@ public class RegistrationHandler {
                     ServerExecutors.getDatabaseExecutor().submit(()->{
                         try {
                             database.insertUser(userDetails);
-                            client.out.println(gson.toJson(new Response<Void>(ResponseStatus.success, ResponseType.verify)));
+                            client.out.println(gson.toJson(new Response<Void>(ResponseEvent.success, ResponseType.verify)));
                             client.out.flush();
                             Server.CLIENT_MAP.put(userDetails.getEmail(), null);
                             userDetails.setPassword(null);
@@ -123,7 +123,7 @@ public class RegistrationHandler {
                             this.otp = null;
                         } catch (SQLException ex) {
                             Log.e(LOG_TAG, "Error inserting user" + userDetails.getEmail());
-                            Response<Void> errorResponse = new Response<>(ResponseStatus.failed,
+                            Response<Void> errorResponse = new Response<>(ResponseEvent.failed,
                                     ResponseType.verify,
                                     "Error inserting user :" + ex.getLocalizedMessage());
                             client.out.println(gson.toJson(errorResponse));
@@ -131,16 +131,16 @@ public class RegistrationHandler {
                         }
                     });
                 } else {
-                    Response<Void> response = new Response<>(ResponseStatus.failed, ResponseType.verify, "Wrong OTP");
+                    Response<Void> response = new Response<>(ResponseEvent.failed, ResponseType.verify, "Wrong OTP");
                     client.out.println(gson.toJson(response));
                     client.out.flush();
                 }
             } else {
-                client.out.println(gson.toJson(new Response<Void>(ResponseStatus.failed, ResponseType.verify, "Key OTP not present")));
+                client.out.println(gson.toJson(new Response<Void>(ResponseEvent.failed, ResponseType.verify, "Key OTP not present")));
                 client.out.flush();
             }
         } else {
-            Response<Void> invalid = new Response<>(ResponseStatus.invalid, ResponseType.verify, "Make a registration request first");
+            Response<Void> invalid = new Response<>(ResponseEvent.invalid, ResponseType.verify, "Make a registration request first");
             client.out.println(gson.toJson(invalid));
             client.out.flush();
         }

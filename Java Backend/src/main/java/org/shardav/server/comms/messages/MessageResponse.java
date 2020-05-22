@@ -6,7 +6,7 @@ public class MessageResponse extends Response<Void> {
 
     String id;
 
-    public MessageResponse(ResponseStatus status, String id) {
+    public MessageResponse(ResponseEvent status, String id) {
         super(status, ResponseType.message);
         this.id = id;
     }

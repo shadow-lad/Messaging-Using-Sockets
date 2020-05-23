@@ -12,30 +12,25 @@ import java.util.List;
 
 public class Database {
 
-    private final Connection connection;
-    private static Database instance;
+    private static final Object LOCK = new Object();
+    private static final String LOG_TAG = Server.class.getSimpleName() + ": " + Database.class.getSimpleName();
 
     // READ PREPARED STATEMENTS
-
+    private static Database instance;
+    private final Connection connection;
     private final PreparedStatement FETCH_MESSAGES_BY_EMAIL;
     private final PreparedStatement FETCH_USER_FRIENDS;
-    private final PreparedStatement FETCH_USER_DETAILS_BY_EMAIL;
-    private final PreparedStatement FETCH_USER_DETAILS_BY_USERNAME;
 
     // UPDATE PREPARED STATEMENTS
-
+    private final PreparedStatement FETCH_USER_DETAILS_BY_EMAIL;
+    private final PreparedStatement FETCH_USER_DETAILS_BY_USERNAME;
     private final PreparedStatement INSERT_PRIVATE_MESSAGE;
-    private final PreparedStatement INSERT_INTO_USER_FRIENDS;
-    private final PreparedStatement INSERT_USER;
 
     // DELETE PREPARED STATEMENTS
-
+    private final PreparedStatement INSERT_INTO_USER_FRIENDS;
+    private final PreparedStatement INSERT_USER;
     private final PreparedStatement DELETE_USER_BY_EMAIL;
     private final PreparedStatement DELETE_MESSAGE_BY_ID;
-
-    private static final Object LOCK = new Object();
-
-    private static final String LOG_TAG = Server.class.getSimpleName() + ": " + Database.class.getSimpleName();
 
     private Database(String host, String port, String username, String password) throws SQLException {
 
@@ -121,7 +116,7 @@ public class Database {
 
     }
 
-    public void addUserFriends (String firstEmail, String secondEmail) {
+    public void addUserFriends(String firstEmail, String secondEmail) {
         try {
             INSERT_INTO_USER_FRIENDS.clearParameters();
             INSERT_INTO_USER_FRIENDS.setString(1, firstEmail);
@@ -131,10 +126,11 @@ public class Database {
             INSERT_INTO_USER_FRIENDS.setString(1, secondEmail);
             INSERT_INTO_USER_FRIENDS.setString(2, firstEmail);
             INSERT_INTO_USER_FRIENDS.executeUpdate();
-        } catch (SQLException ignore){}
+        } catch (SQLException ignore) {
+        }
     }
 
-    public List<String> getFriends (String email) {
+    public List<String> getFriends(String email) {
 
         List<String> arrayList = new ArrayList<>();
 
@@ -150,7 +146,8 @@ public class Database {
 
             resultSet.close();
 
-        } catch (SQLException ignore){}
+        } catch (SQLException ignore) {
+        }
 
         return arrayList;
     }

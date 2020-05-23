@@ -1,21 +1,5 @@
 package org.shardav.server.mail;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Message.RecipientType;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -32,8 +16,19 @@ import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
 import org.shardav.utils.Log;
 
+import javax.mail.Message.RecipientType;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.*;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+
 public class GMailService {
-    
+
     private static final String APPLICATION_NAME = "Chat Server";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
@@ -53,32 +48,42 @@ public class GMailService {
     private GMailService() throws IOException, GeneralSecurityException {
         HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         SERVICE = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
-            .setApplicationName(APPLICATION_NAME)
-            .build();
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+    }
+
+    public static GMailService getInstance() throws GeneralSecurityException, IOException {
+        synchronized (LOCK) {
+            if (instance == null) {
+                instance = new GMailService();
+            }
+            return instance;
+        }
     }
 
     private Credential getCredentials() throws IOException {
-       
+
         //Load client secrets.
         InputStream in = GMailService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        if (in == null){
+        if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         //Build flow and trigger authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
-                                                JSON_FACTORY, 
-                                                clientSecrets, 
-                                                SCOPES)
-                                                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                                                .setAccessType("offline")
-                                                .build();
-        
+                JSON_FACTORY,
+                clientSecrets,
+                SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build();
+
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8889).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 
     }
+
     private MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
         Properties properties = new Properties();
         Session session = Session.getDefaultInstance(properties, null);
@@ -88,12 +93,12 @@ public class GMailService {
         email.setFrom(new InternetAddress(from));
         email.addRecipient(RecipientType.TO, new InternetAddress(to));
         email.setSubject(subject);
-        email.setContent(bodyText,"text/html");
+        email.setContent(bodyText, "text/html");
 
         return email;
     }
 
-    private Message createMessageWithEmail(MimeMessage emailContent)throws IOException, MessagingException{
+    private Message createMessageWithEmail(MimeMessage emailContent) throws IOException, MessagingException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         emailContent.writeTo(buffer);
 
@@ -124,7 +129,7 @@ public class GMailService {
                 "<br><br>" +
                 "Here is your one time registration password" +
                 "<br><br><br><br>" +
-                "<span style=\"font-size:200%;background-color: blue; padding: 5px; color: white;\">"+OTP+"</span>" +
+                "<span style=\"font-size:200%;background-color: blue; padding: 5px; color: white;\">" + OTP + "</span>" +
                 "<br><br><br><br>" +
                 "Regards,<br><br>" +
                 "Team SocketChat" +
@@ -135,15 +140,6 @@ public class GMailService {
 
         sendMessage(user, createEmail(to, user, "One Time Password", message));
 
-    }
-
-    public static GMailService getInstance() throws GeneralSecurityException, IOException {
-        synchronized (LOCK) {
-            if(instance == null) {
-                instance = new GMailService();
-            }
-            return instance;
-        }
     }
 
     // Not sure if this is needed waiting for server to break once.

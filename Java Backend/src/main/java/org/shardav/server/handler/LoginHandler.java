@@ -56,7 +56,7 @@ public class LoginHandler {
     }
 
     private void loginUsingEmail(UserDetails loginDetails) {
-        ServerExecutors.getDatabaseResultExecutor().submit(()->{
+        ServerExecutors.getDatabaseResultExecutor().submit(() -> {
             try {
                 UserDetails userDetails = database.fetchUserDetailsByMail(loginDetails.getEmail());
                 if (userDetails != null) {
@@ -99,7 +99,7 @@ public class LoginHandler {
     }
 
     private void loginUsingUsername(UserDetails loginDetails) {
-        ServerExecutors.getDatabaseResultExecutor().submit(()->{
+        ServerExecutors.getDatabaseResultExecutor().submit(() -> {
             try {
                 UserDetails userDetails = database.fetchUserDetailsByUsername(loginDetails.getUsername());
                 if (userDetails != null) {
@@ -139,7 +139,7 @@ public class LoginHandler {
     }
 
     private void postLogin() {
-        ServerExecutors.getDatabaseResultExecutor().submit(()->{
+        ServerExecutors.getDatabaseResultExecutor().submit(() -> {
             try {
                 List<Message<PersonalMessageDetails>> messageList = database.fetchMessagesByEmail(client.getEmail());
                 for (Message<PersonalMessageDetails> message : messageList) {

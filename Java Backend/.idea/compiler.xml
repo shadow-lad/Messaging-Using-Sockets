@@ -4,6 +4,8 @@
     <bytecodeTargetLevel target="1.8">
       <module name="MyServer.main" target="1.8" />
       <module name="MyServer.test" target="1.8" />
+      <module name="SocketServer.main" target="1.8" />
+      <module name="SocketServer.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

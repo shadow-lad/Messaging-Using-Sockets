@@ -1,9 +1,9 @@
 package org.shardav.server;
 
 public class Settings {
+    private final MySQLCredentials mySQL;
     private Boolean verboseLogging;
     private Integer serverPort;
-    private final MySQLCredentials mySQL;
 
     public Settings(Boolean verboseLogging, Integer serverPort, MySQLCredentials mySQL) {
         this.verboseLogging = verboseLogging;
@@ -15,20 +15,20 @@ public class Settings {
         return verboseLogging;
     }
 
-    public Integer getServerPort() {
-        return serverPort;
-    }
-
-    public MySQLCredentials getMySQL() {
-        return mySQL;
-    }
-
     public void setVerboseLogging(Boolean verboseLogging) {
         this.verboseLogging = verboseLogging;
     }
 
+    public Integer getServerPort() {
+        return serverPort;
+    }
+
     public void setServerPort(Integer serverPort) {
         this.serverPort = serverPort;
+    }
+
+    public MySQLCredentials getMySQL() {
+        return mySQL;
     }
 
     public boolean isNull() {
@@ -51,12 +51,12 @@ class MySQLCredentials {
         return username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void setPassword(String password) {

@@ -15,7 +15,8 @@ public class ServerExecutors {
 
     private static final ExecutorService OTP_EXECUTOR = Executors.newFixedThreadPool(2);
 
-    private ServerExecutors() {}
+    private ServerExecutors() {
+    }
 
     public static ExecutorService getClientHandlerExecutor() {
         return CLIENT_HANDLER_SERVICE;

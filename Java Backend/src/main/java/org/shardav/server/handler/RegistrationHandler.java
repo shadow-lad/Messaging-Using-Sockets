@@ -20,16 +20,13 @@ import java.util.Random;
 
 public class RegistrationHandler {
 
+    private static final String LOG_TAG = RegistrationHandler.class.getCanonicalName();
     private final ClientHandler client;
     private final Gson gson;
-
     private final Database database;
     private final GMailService mailService;
-
     private String otp;
     private UserDetails userDetails;
-
-    private static final String LOG_TAG = RegistrationHandler.class.getCanonicalName();
 
     protected RegistrationHandler(ClientHandler client, Database database, GMailService mailService) {
         this.client = client;
@@ -55,7 +52,7 @@ public class RegistrationHandler {
             String username = userDetails.getUsername();
 
             if (userDetails.hasEmail() && userDetails.hasUsername() && userDetails.hasPassword()) {
-                ServerExecutors.getDatabaseResultExecutor().submit(()->{
+                ServerExecutors.getDatabaseResultExecutor().submit(() -> {
                     try {
                         UserDetails emailDetails = database.fetchUserDetailsByMail(email);
                         UserDetails usernameDetails = database.fetchUserDetailsByUsername(username);
@@ -64,7 +61,7 @@ public class RegistrationHandler {
                             while (otp.length() < 4) {
                                 otp.insert(0, '0');
                             }
-                            ServerExecutors.getOtpExecutor().submit(()->sendOTP(otp.toString()));
+                            ServerExecutors.getOtpExecutor().submit(() -> sendOTP(otp.toString()));
                         } else {
                             String message = String.format("User with %s %s already exists",
                                     emailDetails == null ? "username" : "email",
@@ -111,7 +108,7 @@ public class RegistrationHandler {
         if (this.otp != null && this.userDetails != null) {
             if (otp != null) {
                 if (this.otp.equals(otp)) {
-                    ServerExecutors.getDatabaseExecutor().submit(()->{
+                    ServerExecutors.getDatabaseExecutor().submit(() -> {
                         try {
                             database.insertUser(userDetails);
                             client.out.println(gson.toJson(new Response<Void>(ResponseEvent.success, ResponseType.verify)));

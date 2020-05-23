@@ -274,7 +274,7 @@ public class Server {
             while (RUNNING.get()) {
                 try {
                     Socket client = messageServerSocket.accept(); //Accept connections to the server
-                    Log.i(LOG_TAG, "A new client connected : " + client.getInetAddress());
+                    Log.i(LOG_TAG, "A new client connected : " + client.getInetAddress().getHostAddress());
                     //Creating a new thread to handle logging in
                     // so that client requests are not queued
                     ServerExecutors.getClientHandlerExecutor().submit(new ClientHandler(client, database, mailService));

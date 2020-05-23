@@ -29,24 +29,24 @@ public class ClientHandler implements Runnable {
 
     // Executors for Client Requests
     protected final ExecutorService MESSAGE_EXECUTOR;
-    private final ExecutorService LOGIN_EXECUTOR;
-
-    // Client variables
-    private String email;
-    public boolean isLoggedIn;
-    private Set<String> friends;
-
-    // Socket variables
-    private final BufferedReader in;
     protected final PrintWriter out;
+    private final ExecutorService LOGIN_EXECUTOR;
+    private final ExecutorService VOICE_EXECUTOR;
+    // Socket variables
     private final Socket socket;
-
+    private final BufferedReader in;
     // Operation Handlers
     private final MessageHandler messageHandler;
     private final RegistrationHandler registrationHandler;
     private final LoginHandler loginHandler;
+    private final VoiceCallHandler voiceCallHandler;
 
     private final Gson gson;
+    public boolean isLoggedIn;
+
+    // Client variables
+    private String email;
+    private Set<String> friends;
 
     public ClientHandler(Socket socket, Database database, GMailService mailService) throws IOException {
         this.email = null;
@@ -59,12 +59,22 @@ public class ClientHandler implements Runnable {
         this.messageHandler = new MessageHandler(ClientHandler.this, database);
         this.registrationHandler = new RegistrationHandler(ClientHandler.this, database, mailService);
         this.loginHandler = new LoginHandler(ClientHandler.this, database);
+        this.voiceCallHandler = new VoiceCallHandler(ClientHandler.this);
 
         this.gson = new Gson();
 
         // Initialising executors
         this.MESSAGE_EXECUTOR = Executors.newSingleThreadExecutor();
         this.LOGIN_EXECUTOR = Executors.newSingleThreadExecutor();
+        this.VOICE_EXECUTOR = Executors.newSingleThreadExecutor();
+    }
+
+    public boolean isOnVoiceCall() {
+        return voiceCallHandler.isOnVoiceCall();
+    }
+
+    public void startTimeOut() {
+        this.voiceCallHandler.startTimeOut();
     }
 
     @Override
@@ -82,17 +92,17 @@ public class ClientHandler implements Runnable {
                 Response<Void> errorResponse = new Response<>(ResponseEvent.invalid, ResponseType.general);
 
                 try {
-                    RequestType requestType =
+                    RequestType type =
                             RequestType.valueOf(requestObject.getAsJsonPrimitive("type").getAsString());
 
-                    switch (requestType) {
+                    switch (type) {
                         case users:
                             if (isLoggedIn) {
                                 Response<Set<UserDetails>> userListResponse = new Response<>(ResponseEvent.success, ResponseType.users);
                                 userListResponse.setDetails(new HashSet<>(Server.CLIENT_DETAILS_MAP.values()));
                                 this.out.println(gson.toJson(userListResponse));
                             } else {
-                                Log.v(LOG_TAG, socket.getInetAddress() + " sent message request without log in");
+                                Log.v(LOG_TAG, socket.getInetAddress().getHostAddress() + " sent message request without log in");
                                 errorResponse.setMessage("User not logged in");
                                 this.out.println(gson.toJson(errorResponse));
                             }
@@ -102,10 +112,10 @@ public class ClientHandler implements Runnable {
                             if (isLoggedIn) {
                                 MESSAGE_EXECUTOR.submit(() -> messageHandler.handleJson(requestObject));
                             } else {
-                                Log.v(LOG_TAG, socket.getInetAddress() + " sent message request without log in");
+                                Log.v(LOG_TAG, socket.getInetAddress().getHostAddress() + " sent message request without log in");
                                 errorResponse.setMessage("User not logged in");
-                                out.println(gson.toJson(errorResponse));
-                                out.flush();
+                                this.out.println(gson.toJson(errorResponse));
+                                this.out.flush();
                             }
                             break;
                         case login:
@@ -113,7 +123,7 @@ public class ClientHandler implements Runnable {
                         case verify:
                             LOGIN_EXECUTOR.submit(() -> {
                                 if (!isLoggedIn) {
-                                    switch (requestType) {
+                                    switch (type) {
                                         case login:
                                             loginHandler.handleJson(requestObject);
                                             break;
@@ -133,8 +143,18 @@ public class ClientHandler implements Runnable {
                         case logout:
                             logout(false);
                             break;
+                        case voice:
+                            if (isLoggedIn) {
+
+                            } else {
+                                Log.v(LOG_TAG, socket.getInetAddress().getHostAddress() + " made voice call request without log in");
+                                errorResponse.setMessage("User not logged in");
+                                this.out.println(gson.toJson(errorResponse));
+                                this.out.flush();
+                            }
+                            break;
                         default:
-                            Log.d(LOG_TAG, "Made a request of type: " + requestType.toString());
+                            Log.d(LOG_TAG, "Made a request of type: " + type.toString());
                             errorResponse.setMessage("Invalid request");
                             this.out.println(gson.toJson(errorResponse));
                             this.out.flush();
@@ -159,6 +179,11 @@ public class ClientHandler implements Runnable {
 
     public String getEmail() {
         return email;
+    }
+
+    protected void setEmail(String email) {
+        this.email = email;
+
     }
 
     synchronized private void logout(boolean disconnect) {
@@ -188,17 +213,12 @@ public class ClientHandler implements Runnable {
                 socket.setKeepAlive(false);
                 socket.close();
 
-                Log.i(LOG_TAG, socket.getInetAddress() + (kicked ? " was kicked from the server." : " left the session."));
+                Log.i(LOG_TAG, socket.getInetAddress().getHostAddress() + (kicked ? " was kicked from the server." : " left the session."));
 
             } catch (IOException ex) {
                 Log.e(LOG_TAG, "Error occurred", ex);
             }
         }
-    }
-
-    protected void setEmail(String email) {
-        this.email = email;
-
     }
 
     protected void setIsLoggedIn() {

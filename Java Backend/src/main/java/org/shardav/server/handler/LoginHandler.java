@@ -142,10 +142,13 @@ public class LoginHandler {
         ServerExecutors.getDatabaseResultExecutor().submit(()->{
             try {
                 List<Message<PersonalMessageDetails>> messageList = database.fetchMessagesByEmail(client.getEmail());
-                messageList.forEach(message -> {
-                    client.out.println(gson.toJson(message));
-                    client.out.flush();
-                });
+                for (Message<PersonalMessageDetails> message : messageList) {
+                    if (client.isLoggedIn) {
+                        client.out.println(gson.toJson(message));
+                        client.out.flush();
+                        database.deleteMessageById(message.getDetails().getId());
+                    }
+                }
             } catch (SQLException ignore) {
             }
         });

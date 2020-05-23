@@ -31,7 +31,7 @@ dependencies {
 	implementation 'com.sun.mail:javax.mail:1.6.2'
 
     // Include the mysql-connector from maven
-    implementation 'mysql:mysql-connector-java:8.0.19'
+    implementation 'mysql:mysql-connector-java:8.0.20'
 
     // G-SON library
     implementation 'com.google.code.gson:gson:2.8.6'

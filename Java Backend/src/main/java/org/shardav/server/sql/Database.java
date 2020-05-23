@@ -15,11 +15,23 @@ public class Database {
     private final Connection connection;
     private static Database instance;
 
-    private final PreparedStatement VIEW_MESSAGES_BY_EMAIL;
+    // READ PREPARED STATEMENTS
+
+    private final PreparedStatement FETCH_MESSAGES_BY_EMAIL;
+    private final PreparedStatement FETCH_USER_FRIENDS;
     private final PreparedStatement FETCH_USER_DETAILS_BY_EMAIL;
     private final PreparedStatement FETCH_USER_DETAILS_BY_USERNAME;
+
+    // UPDATE PREPARED STATEMENTS
+
+    private final PreparedStatement INSERT_PRIVATE_MESSAGE;
+    private final PreparedStatement INSERT_INTO_USER_FRIENDS;
+    private final PreparedStatement INSERT_USER;
+
+    // DELETE PREPARED STATEMENTS
+
     private final PreparedStatement DELETE_USER_BY_EMAIL;
-    private final PreparedStatement FETCH_USER_FRIENDS;
+    private final PreparedStatement DELETE_MESSAGE_BY_ID;
 
     private static final Object LOCK = new Object();
 
@@ -37,15 +49,29 @@ public class Database {
         statement.executeUpdate(SQLStatements.CREATE_DATABASE);
         statement.executeUpdate(SQLStatements.USE_DATABASE);
 
+        // CREATE STATEMENTS
+
         statement.executeUpdate(SQLStatements.CREATE_TABLE_USERS);
         statement.executeUpdate(SQLStatements.CREATE_TABLE_PRIVATE_MESSAGES);
         statement.executeUpdate(SQLStatements.CREATE_TABLE_USERS_FRIENDS);
 
-        VIEW_MESSAGES_BY_EMAIL = connection.prepareStatement(SQLStatements.VIEW_MESSAGES_BY_EMAIL);
+        // READ STATEMENTS
+
+        FETCH_MESSAGES_BY_EMAIL = connection.prepareStatement(SQLStatements.FETCH_MESSAGES_BY_EMAIL);
         FETCH_USER_DETAILS_BY_EMAIL = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_EMAIL);
         FETCH_USER_DETAILS_BY_USERNAME = connection.prepareStatement(SQLStatements.FETCH_USER_DETAILS_BY_USERNAME);
         FETCH_USER_FRIENDS = connection.prepareStatement(SQLStatements.FETCH_USER_FRIENDS);
+
+        // UPDATE STATEMENTS
+
+        INSERT_PRIVATE_MESSAGE = connection.prepareStatement(SQLStatements.INSERT_PRIVATE_MESSAGE);
+        INSERT_INTO_USER_FRIENDS = connection.prepareStatement(SQLStatements.INSERT_USER_FRIENDS);
+        INSERT_USER = connection.prepareStatement(SQLStatements.INSERT_USER);
+
+        // DELETE STATEMENTS
+
         DELETE_USER_BY_EMAIL = connection.prepareStatement(SQLStatements.DELETE_USER_BY_EMAIL);
+        DELETE_MESSAGE_BY_ID = connection.prepareStatement(SQLStatements.DELETE_MESSAGE_BY_ID);
 
     }
 
@@ -80,44 +106,31 @@ public class Database {
 
     public void addMessage(PersonalMessageDetails details) throws SQLException {
 
-        String statement;
+        INSERT_PRIVATE_MESSAGE.clearParameters();
 
-        if (details.getMedia() == null) {
-            statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MEDIA,
-                    details.getId(),
-                    details.getTo(),
-                    details.getFrom(),
-                    details.getMessage(),
-                    details.getTime());
-        } else if (details.getMessage() == null) {
-            statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITHOUT_MESSAGES,
-                    details.getId(),
-                    details.getTo(),
-                    details.getFrom(),
-                    details.getMedia(),
-                    details.getTime());
-        } else {
-            statement = String.format(SQLStatements.INSERT_INTO_PRIVATE_MESSAGES_WITH_MEDIA,
-                    details.getId(),
-                    details.getTo(),
-                    details.getFrom(),
-                    details.getMedia(),
-                    details.getMessage(),
-                    details.getTime());
-        }
+        INSERT_PRIVATE_MESSAGE.setString(1, details.getId());
+        INSERT_PRIVATE_MESSAGE.setString(2, details.getTo());
+        INSERT_PRIVATE_MESSAGE.setString(3, details.getFrom());
+        INSERT_PRIVATE_MESSAGE.setString(4, details.getMedia());
+        INSERT_PRIVATE_MESSAGE.setString(5, details.getMessage());
+        INSERT_PRIVATE_MESSAGE.setLong(6, details.getTime());
 
-        Statement insertMessage = connection.createStatement();
-        int rows = insertMessage.executeUpdate(statement);
+        int rows = INSERT_PRIVATE_MESSAGE.executeUpdate();
 
         Log.v(LOG_TAG, "Message " + details.getId() + " inserted into database, " + rows + " affected.");
 
     }
 
     public void addUserFriends (String firstEmail, String secondEmail) {
-        String statement = String.format(SQLStatements.INSERT_USER_FRIENDS, firstEmail, secondEmail, secondEmail, firstEmail);
-
         try {
-            connection.createStatement().executeUpdate(statement);
+            INSERT_INTO_USER_FRIENDS.clearParameters();
+            INSERT_INTO_USER_FRIENDS.setString(1, firstEmail);
+            INSERT_INTO_USER_FRIENDS.setString(2, secondEmail);
+            INSERT_INTO_USER_FRIENDS.executeUpdate();
+            INSERT_INTO_USER_FRIENDS.clearParameters();
+            INSERT_INTO_USER_FRIENDS.setString(1, secondEmail);
+            INSERT_INTO_USER_FRIENDS.setString(2, firstEmail);
+            INSERT_INTO_USER_FRIENDS.executeUpdate();
         } catch (SQLException ignore){}
     }
 
@@ -151,13 +164,11 @@ public class Database {
 
     public void insertUser(UserDetails details) throws SQLException {
 
-        String statement = String.format(SQLStatements.INSERT_USER,
-                details.getEmail(),
-                details.getUsername(),
-                details.getPassword());
-
-        Statement insertUser = connection.createStatement();
-        int rows = insertUser.executeUpdate(statement);
+        INSERT_USER.clearParameters();
+        INSERT_USER.setString(1, details.getEmail());
+        INSERT_USER.setString(2, details.getUsername());
+        INSERT_USER.setString(3, details.getPassword());
+        int rows = INSERT_USER.executeUpdate();
 
         Log.v(LOG_TAG, "User " + details.getUsername() + " inserted into database, " + rows + " affected.");
 
@@ -166,10 +177,10 @@ public class Database {
     public List<Message<PersonalMessageDetails>> fetchMessagesByEmail(String email) throws SQLException {
         List<Message<PersonalMessageDetails>> messages = new ArrayList<>();
 
-        VIEW_MESSAGES_BY_EMAIL.clearParameters();
-        VIEW_MESSAGES_BY_EMAIL.setString(1, email);
+        FETCH_MESSAGES_BY_EMAIL.clearParameters();
+        FETCH_MESSAGES_BY_EMAIL.setString(1, email);
 
-        ResultSet result = VIEW_MESSAGES_BY_EMAIL.executeQuery();
+        ResultSet result = FETCH_MESSAGES_BY_EMAIL.executeQuery();
 
         while (result.next()) {
             messages.add(new Message<>(new PersonalMessageDetails(
@@ -184,9 +195,18 @@ public class Database {
 
         result.close();
 
-        if (messages.isEmpty())
-            return null;
         return messages;
+
+    }
+
+    public void deleteMessageById(String id) throws SQLException {
+
+        DELETE_MESSAGE_BY_ID.clearParameters();
+
+        DELETE_MESSAGE_BY_ID.setString(1, id);
+
+        DELETE_MESSAGE_BY_ID.executeUpdate();
+
     }
 
     public UserDetails fetchUserDetailsByUsername(String username) throws SQLException {

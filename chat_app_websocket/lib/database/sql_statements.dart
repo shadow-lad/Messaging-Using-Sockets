@@ -11,16 +11,8 @@ class SQLStatements {
     );
   ''';
 
-  static const String INSERT_INTO_MESSAGES_WITHOUT_MEDIA = '''
-    INSERT INTO messages (id, _from, _to, message, time) VALUES (?, ?, ?, ?, ?);
-  ''';
-
-  static const String INSERT_INTO_MESSAGES_WITH_MEDIA = '''
+  static const String INSERT_INTO_MESSAGES = '''
     INSERT INTO messages (id, _from, _to, message, media, time) VALUES (?, ?, ?, ?, ?, ?);
-  ''';
-
-  static const String INSERT_INTO_MESSAGES_WITHOUT_MESSAGE = '''
-    INSERT INTO messages (id, _from, _to, media, time) VALUES (?, ?, ?, ?, ?);
   ''';
 
   static const String FETCH_MESSAGES = '''

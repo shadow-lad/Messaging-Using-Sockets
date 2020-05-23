@@ -1,4 +1,5 @@
 import 'package:chat_app_websocket/bloc/client.dart';
+import 'package:chat_app_websocket/chat/private_room/private_chat_room.dart';
 import 'package:chat_app_websocket/models/user_details.dart';
 import 'package:flutter/material.dart';
 
@@ -130,19 +131,18 @@ class ChatRoomState extends State<ChatRoom> {
                               ),
                             ),
                           ),
-                          onTap:
-                              null /*(){
+                          onTap:(){
                           Navigator.of(context).push(
                             new MaterialPageRoute(builder: (BuildContext context)=>new privateChatRoom(
-                              my_email: widget.email,
-                              my_name: widget.name,
+                              my_email: widget.client.details.email,
+                              my_name: widget.client.details.username,
                               reciever_mail: snapshot.data[index].email,
-                              reciever_name: snapshot.data[index].name,
-                              c_rsocket: widget.c_rsocket,
-                              socketListener: widget.socketListener,
+                              reciever_name: snapshot.data[index].username,
+//                              c_rsocket: widget.client,
+//                              socketListener: widget.socketListener,
                             ))
                           );
-                        }*/
+                        }
                           ,
                         );
                       },

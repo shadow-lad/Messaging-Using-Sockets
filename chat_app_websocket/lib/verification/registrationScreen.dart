@@ -1,16 +1,14 @@
 import 'dart:io';
 
-import 'package:chat_app_websocket/models/registration_model.dart';
-import 'package:chat_app_websocket/models/user_details.dart';
+import 'package:chat_app_websocket/verification/otp_verification_screen.dart';
+
+import '../bloc/client.dart';
+
+import '../models/registration_model.dart';
+import '../models/user_details.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'otp_verification_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  final Socket socket;
-
-  const RegistrationScreen({Key key, this.socket}) : super(key: key);
-
   @override
   State<StatefulWidget> createState() {
     return new RegistrationScreenState();
@@ -18,49 +16,81 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class RegistrationScreenState extends State<RegistrationScreen> {
-  //Initialize the socket
-//  Socket socket;
-//  void socketInitialize() async{
-//    socket = await Socket.connect('127.0.0.1', 6969);
-//    print(socket.toString());
-//  }
-
   final TextEditingController registerMail = new TextEditingController();
   final TextEditingController registerPassword = new TextEditingController();
   final TextEditingController registerUserName = new TextEditingController();
-  //For password visibility
+
+  // For password visibility
   int vis = 0;
 
-  void onDataHandler(data) {}
+  final Client client = Client.instance;
 
-  void onErrorHandler() {}
-
-  void onDoneHandler() {}
+  @override
+  void initState() {
+    super.initState();
+    client.otpSentState.listen((isOtpSent) {
+      if (isOtpSent) {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text("Email Sent"),
+                content: Text(client.registrationMessage),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text("OK"),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Dimiss Dialog
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => OtpVerificationScreen(),
+                        ), // OTP Screen
+                      );
+                    },
+                  )
+                ],
+              );
+            });
+      } else {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Row(
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                        child: Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                        )),
+                    Text("Error!")
+                  ],
+                ),
+                content: Text(client.registrationMessage),
+                actions: <Widget>[
+                  FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Dismiss Dialog
+                      },
+                      child: Text("OK"))
+                ],
+              );
+            });
+      }
+    });
+  }
 
   void signUp() {
     String username = registerUserName.text.toString().trim();
     String usermail = registerMail.text.toString().trim();
     String userpassword = registerPassword.text.toString().trim();
 
-    UserDetails user =
-        UserDetails(username, usermail, userpassword);
+    UserDetails user = UserDetails(username, usermail, userpassword);
 
-    RegistrationModel registrationModel= RegistrationModel(details: user);
-    String userMap = jsonEncode(registrationModel);
-    widget.socket.writeln(userMap);
-    widget.socket.listen((data) {
-      String serverResponse = String.fromCharCodes(data);
-      Map<String, dynamic> response = jsonDecode(serverResponse);
-      if (response['status'] == 'sent') {
-        Navigator.of(context).push(new MaterialPageRoute(
-            builder: (BuildContext context) => OtpVerificationScreen(
-                  socket: widget.socket,
-                
-            ))); // Replacing Registration Page with OTP Page
-      } else {
-        print('DEBUG: An error occurred' + response['message']);
-      }
-    });
+    RegistrationModel registrationModel = RegistrationModel(details: user);
+
+    client.sendJson(registrationModel.toJson());
   }
 
   @override

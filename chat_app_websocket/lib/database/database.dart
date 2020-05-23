@@ -29,27 +29,10 @@ class DatabaseProvider {
   insertMessage(Message message) async {
     final db = await database;
 
-    var result;
-    if (message.hasMessage()) {
-      print("In database : ${message}");
-      if (message.hasMedia()) {
-        result = await db.rawInsert(
-          SQLStatements.INSERT_INTO_MESSAGES_WITH_MEDIA,
-          [message.id, message.from, message.to, message.message, message.media, message.time] 
-        );
-      } else {
-        result = await db.rawInsert(
-          SQLStatements.INSERT_INTO_MESSAGES_WITHOUT_MEDIA,
-          [message.id, message.from, message.to, message.message, message.time]
-        );
-      }
-    } else {
-      result = await db.rawInsert(
-          SQLStatements.INSERT_INTO_MESSAGES_WITHOUT_MESSAGE,
-          [message.id, message.from, message.to, message.media, message.time]
-        );
-    }
-    return result;
+    return await db.rawInsert(
+        SQLStatements.INSERT_INTO_MESSAGES,
+        [message.id, message.from, message.to, message.message, message.media, message.time]
+    );
   }
 
   Future<List<Message>> getMessages() async {

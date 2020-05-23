@@ -7,7 +7,7 @@ class Message {
   int _time;
 
   Message.fromJson(Map<String, dynamic> json) {
-    if (json['type'] == 'message' && json['event'] == 'personal') {
+//    if (json['type'] == 'message' && json['event'] == 'personal') {
       Map<String, dynamic> details = json['details'];
       this._id = details['id'];
       this._from = details['from'];
@@ -15,7 +15,7 @@ class Message {
       this._message = details['message'];
       this._media = details['media'];
       this._time = details['time'];
-    }
+//    }
   }
 
   Map<String,dynamic> toJson ()=>{

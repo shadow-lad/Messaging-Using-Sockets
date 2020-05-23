@@ -1,15 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'login_screen.dart';
+import '../bloc/client.dart';
 import '../models/otp_verification_model.dart';
 import 'package:flutter/material.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-  final Socket socket;
-
-  const OtpVerificationScreen({Key key, this.socket}) : super(key: key);
-
   @override
   State<StatefulWidget> createState() {
     return new OtpVerificationScreenState();
@@ -17,43 +10,74 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final TextEditingController otp = new TextEditingController();
+  final client = Client.instance;
+  final otp = new TextEditingController();
 
-  void register(String credential) {
-
-    widget.socket.listen((data) {
-      String recievedMessage = new String.fromCharCodes(data).trim();
-      print("DEBUG: Received message from server: " + recievedMessage);
-
-      Map<String, String> response = jsonDecode(recievedMessage);
-
-      if (response['status'] == 'success') {
-        Navigator.of(context)
-            .pop(); // Popping OTP Page back to Registration Page
-        Navigator.of(context)
-            .pop(); // Popping Registration Page back to Login Page
-
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) =>
-                LoginScreen())); // Replacing Login Page
+  @override
+  void initState() {
+    super.initState();
+    client.otpVerifySuccess.listen((verified) {
+      if (verified) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Row(
+              children: <Widget>[
+                Text("Successful")
+              ],
+            ),
+            content: Text("Account creation successful!"),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss Dialog
+                  Navigator.of(context).pop(); // Back to Registration Page
+                  Navigator.of(context).pop(); // Back to Login Page
+                }, 
+                child: Text("LOGIN")
+              )
+            ],
+          ),
+        );
       } else {
-        print('DEBUG: An error occurred' + response['message']);
-        Navigator.of(context)
-            .pop(); // Popping OTP Page back to Registration Page
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Row(
+              children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                    child: Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                    )),
+                Text("Error!")
+              ],
+            ),
+            content: Text(client.registrationMessage),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss Dialog
+                  Navigator.of(context).pop(); // Back to Registration Page
+                }, 
+                child: Text("OK")
+              )
+            ],
+          ),
+        );
       }
     });
+  }
 
+  void register(String credential) {
     print("DEBUG: Listener initialized");
 
     print("DEBUG: Got otp from user");
     OtpVerificationModel otpVerificationObject =
         OtpVerificationModel(credential);
 
-    String otpMap = jsonEncode(otpVerificationObject);
-
-    widget.socket.writeln(otpMap);
-    print("DEBUG: Sent otp to server");
-
+    client.sendJson(otpVerificationObject.toJson());
   }
 
   @override

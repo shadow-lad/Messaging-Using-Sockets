@@ -68,12 +68,12 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "type": "registration",
-    "details": {
-        "email": "xyz@abc.com",
-        "password": "md5-hashed-password",
-        "username": "xyz"
-    }
+	"type": "registration",
+	"details": {
+		"email": "xyz@abc.com",
+		"password": "md5-hashed-password",
+		"username": "xyz"
+	}
 }
 ```
 
@@ -81,8 +81,8 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "type": "verify",
-    "otp": "1234"
+	"type": "verify",
+	"otp": "1234"
 }
 ```
 
@@ -92,9 +92,9 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "event": "sent",
-    "type": "otp",
-    "message": "OTP sent to xyz@abc.com"
+	"event": "sent",
+	"type": "otp",
+	"message": "OTP sent to xyz@abc.com"
 }
 ```
 
@@ -102,8 +102,8 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "event": "success",
-    "type": "verify"
+	"event": "success",
+	"type": "verify"
 }
 ```
 
@@ -111,9 +111,9 @@ When registering, **NONE OF THE KEYS CAN BE NULL**.
 
 ```json
 {
-    "event": "failed",
-    "type": "otp or registration or verify",
-    "message": "Reason why the user was not registered"
+	"event": "failed",
+	"type": "otp or registration or verify",
+	"message": "Reason why the user was not registered"
 }
 ```
 
@@ -131,12 +131,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "login",
-    "details": {
-        "username": "xyz",
-        "email": "xyz@abc.com",
-        "password": "md5-hashed-password"
-    }
+	"type": "login",
+	"details": {
+		"username": "xyz",
+		"email": "xyz@abc.com",
+		"password": "md5-hashed-password"
+	}
 }
 ```
 
@@ -149,22 +149,22 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "success",
-    "type": "login",
-    "details": {
-        "username": "xyz",
-        "email": "xyz@abc.com",
-        "friends": [
-            {
-                "email": "xyz@abc.com",
-                "username": "xyz"
-            },
-            {
-                "email": "def@abc.com",
-                "username": "def"
-            }
-        ]
-    }
+	"event": "success",
+	"type": "login",
+	"details": {
+		"username": "xyz",
+		"email": "xyz@abc.com",
+		"friends": [
+			{
+				"email": "xyz@abc.com",
+				"username": "xyz"
+			},
+			{
+				"email": "def@abc.com",
+				"username": "def"
+			}
+		]
+	}
 }
 ```
 
@@ -172,9 +172,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "failed",
-    "type": "login",
-    "message": "Reason why user was not logged in"
+	"event": "failed",
+	"type": "login",
+	"message": "Reason why user was not logged in"
 }
 ```
 
@@ -186,7 +186,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "logout"
+	"type": "logout"
 }
 ```
 
@@ -194,8 +194,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "success",
-    "type": "logout"
+	"event": "success",
+	"type": "logout"
 }
 ```
 
@@ -214,12 +214,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "global",
-    "type": "message",
-    "details": {
-        "message": "Hello World",
-        "time": 1234567890
-    }
+	"event": "global",
+	"type": "message",
+	"details": {
+		"message": "Hello World",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -227,13 +227,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "global",
-    "type": "message",
-    "details": {
-        "message": "Hello World",
-        "media": "https://url-to-firestore/",
-        "time": 1234567890
-    }
+	"event": "global",
+	"type": "message",
+	"details": {
+		"message": "Hello World",
+		"media": "https://url-to-firestore/",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -243,13 +243,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "global",
-    "type": "message",
-    "details": {
-        "message": "Hello World",
-        "from": "xyz@abc.com",
-        "time": 1234567890
-    }
+	"event": "global",
+	"type": "message",
+	"details": {
+		"message": "Hello World",
+		"from": "xyz@abc.com",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -257,14 +257,14 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "global",
-    "type": "message",
-    "details": {
-        "message": "Hello World",
-        "media": "https://url-to-firstore",
-        "from": "xyz@abc.com",
-        "time": 1234567890
-    }
+	"event": "global",
+	"type": "message",
+	"details": {
+		"message": "Hello World",
+		"media": "https://url-to-firstore",
+		"from": "xyz@abc.com",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -278,13 +278,13 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "personal",
-    "type": "message",
-    "details": {
-        "to": "def@abc.com",
-        "message": "Hello World",
-        "time": 1234567890
-    }
+	"event": "personal",
+	"type": "message",
+	"details": {
+		"to": "def@abc.com",
+		"message": "Hello World",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -292,14 +292,14 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "personal",
-    "type": "message",
-    "details": {
-        "to": "def@abc.com",
-        "message": "Hello World",
-        "media": "https://url-to-firestore/",
-        "time": 1234567890
-    }
+	"event": "personal",
+	"type": "message",
+	"details": {
+		"to": "def@abc.com",
+		"message": "Hello World",
+		"media": "https://url-to-firestore/",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -309,14 +309,14 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "personal",
-    "type": "message",
-    "details": {
-        "id": "some-id",
-        "message": "Hello World",
-        "from": "xyz@abc.com",
-        "time": 1234567890
-    }
+	"event": "personal",
+	"type": "message",
+	"details": {
+		"id": "some-id",
+		"message": "Hello World",
+		"from": "xyz@abc.com",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -324,15 +324,15 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "personal",
-    "type": "message",
-    "details": {
-        "id": "some-id",
-        "message": "Hello World",
-        "media": "https://url-to-firestore",
-        "from": "xyz@abc.com",
-        "time": 1234567890
-    }
+	"event": "personal",
+	"type": "message",
+	"details": {
+		"id": "some-id",
+		"message": "Hello World",
+		"media": "https://url-to-firestore",
+		"from": "xyz@abc.com",
+		"time": 1234567890
+	}
 }
 ```
 
@@ -343,9 +343,9 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "sent",
-    "type": "message",
-    "id": "id-for-the-message"
+	"event": "sent",
+	"type": "message",
+	"id": "id-for-the-message"
 }
 ```
 
@@ -357,7 +357,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "users"
+	"type": "users"
 }
 ```
 
@@ -365,15 +365,15 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "success",
-    "type": "users",
-    "details": [
-        {
-            "username": "xyz",
-            "email": "xyz@abc.com"
-        },
-        "List-of-objects"
-    ]
+	"event": "success",
+	"type": "users",
+	"details": [
+		{
+			"username": "xyz",
+			"email": "xyz@abc.com"
+		},
+		"List-of-objects"
+	]
 }
 ```
 
@@ -385,11 +385,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "call",
-    "details": {
-        "email": "email@userto.call"
-    }
+	"type": "voice",
+	"event": "call",
+	"details": {
+		"email": "email@userto.call"
+	}
 }
 ```
 
@@ -399,11 +399,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "request",
-    "details": {
-        "email": "email@calling.user"
-    }
+	"type": "voice",
+	"event": "request",
+	"details": {
+		"email": "email@calling.user"
+	}
 }
 ```
 
@@ -413,11 +413,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "accept",
-    "details": {
-        "email": "email@calling.user"
-    }
+	"type": "voice",
+	"event": "accept",
+	"details": {
+		"email": "email@calling.user"
+	}
 }
 ```
 
@@ -427,11 +427,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "reject",
-    "details": {
-        "email": "email@calling.user"
-    }
+	"type": "voice",
+	"event": "reject",
+	"details": {
+		"email": "email@calling.user"
+	}
 }
 ```
 
@@ -442,11 +442,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "reason": "time",
-    "details": {
-        "email": "email@userto.call"
-    }
+	"type": "voice",
+	"reason": "time",
+	"details": {
+		"email": "email@userto.call"
+	}
 }
 ```
 
@@ -454,11 +454,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "voice",
-    "reason": "time",
-    "details": {
-        "email": "email@calling.user"
-    }
+	"event": "voice",
+	"reason": "time",
+	"details": {
+		"email": "email@calling.user"
+	}
 }
 ```
 
@@ -473,12 +473,12 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "accepted",
-    "details": {
-        "ip": "x.x.x.x",
-        "port": "0000"
-    }
+	"type": "voice",
+	"event": "accept",
+	"details": {
+		"ip": "x.x.x.x",
+		"port": "0000"
+	}
 }
 ```
 
@@ -488,11 +488,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "rejected",
-    "details": {
-        "email": "email@userto.call"
-    }
+	"type": "voice",
+	"event": "reject",
+	"details": {
+		"email": "email@userto.call"
+	}
 }
 ```
 
@@ -502,11 +502,11 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "type": "voice",
-    "event": "offline",
-    "details": {
-        "email": "email@userto.call"
-    }
+	"type": "voice",
+	"event": "offline",
+	"details": {
+		"email": "email@userto.call"
+	}
 }
 ```
 
@@ -516,8 +516,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-    "event": "invalid or failed",
-    "type": "type-of-request-made",
-    "message": "A message regarding the event."
+	"event": "invalid or failed",
+	"type": "type-of-request-made",
+	"message": "A message regarding the event."
 }
 ```

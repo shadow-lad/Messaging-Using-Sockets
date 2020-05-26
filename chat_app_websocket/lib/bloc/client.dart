@@ -42,7 +42,7 @@ class Client {
   Stream<List<UserDetails>> get userList => _userListStateController.stream;
 
   //Explicitly for private chats
-  final _chatStateController = StreamController<List<Message>>();
+  final _chatStateController = StreamController<List<Message>>.broadcast();
   StreamSink<List<Message>> get _chatCounter => _chatStateController.sink;
   Stream<List<Message>> get chats => _chatStateController.stream;
 
@@ -75,7 +75,7 @@ class Client {
 
   initializeSocket() async {
     print("CLIENT: Connecting to Server");
-    _socket = await Socket.connect("127.0.0.1", 6969);
+    _socket = await Socket.connect("192.168.29.52", 6969);
     print("CLIENT: Connected to server");
     _socket.listen((data) => handleJson(String.fromCharCodes(data)));
     print("CLIENT: Listening for input from server");

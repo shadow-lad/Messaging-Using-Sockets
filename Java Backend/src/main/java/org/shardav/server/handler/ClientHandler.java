@@ -144,8 +144,8 @@ public class ClientHandler implements Runnable {
                             logout(false);
                             break;
                         case voice:
-                            if (isLoggedIn) {
-
+                            if (this.isLoggedIn) {
+                                VOICE_EXECUTOR.submit(()-> voiceCallHandler.handleJson(requestObject));
                             } else {
                                 Log.v(LOG_TAG, socket.getInetAddress().getHostAddress() + " made voice call request without log in");
                                 errorResponse.setMessage("User not logged in");
@@ -232,6 +232,14 @@ public class ClientHandler implements Runnable {
         } else {
             this.friends.addAll(friends);
         }
+    }
+
+    protected String getIpAddress() {
+        return this.socket.getInetAddress().getHostAddress();
+    }
+
+    protected int getPort() {
+        return this.socket.getPort();
     }
 
     protected Set<String> getFriends() {

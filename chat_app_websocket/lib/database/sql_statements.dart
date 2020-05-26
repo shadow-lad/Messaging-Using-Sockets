@@ -20,7 +20,7 @@ class SQLStatements {
   ''';
 
   static const String FETCH_MESSAGES_BY_USER = '''
-    SELECT * FROM messages WHERE _from=? OR _to=?;
+    SELECT * FROM messages WHERE _from= ? OR _to= ?;
   ''';
 
 }

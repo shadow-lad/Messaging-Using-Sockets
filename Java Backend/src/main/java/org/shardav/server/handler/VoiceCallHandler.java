@@ -7,6 +7,7 @@ import org.shardav.server.comms.Response;
 import org.shardav.server.comms.Response.ResponseEvent;
 import org.shardav.server.comms.Response.ResponseType;
 import org.shardav.server.comms.login.UserDetails;
+import org.shardav.server.comms.voice.ClientDetails;
 import org.shardav.server.comms.voice.VoiceCall.VoiceEvents;
 import org.shardav.server.comms.voice.VoiceResponse;
 
@@ -38,7 +39,9 @@ public class VoiceCallHandler {
                 handleCallEvent(gson.fromJson(root.getAsJsonObject("details"), UserDetails.class));
                 break;
             case accept:
+                handleAcceptEvent(gson.fromJson(root.getAsJsonObject("details"), UserDetails.class));
             case reject:
+                handleRejectEvent(gson.fromJson(root.getAsJsonObject("details"), UserDetails.class));
             default:
 
         }
@@ -52,14 +55,14 @@ public class VoiceCallHandler {
                 ClientHandler clientToCall = Server.CLIENT_MAP.getOrDefault(details.getEmail(), null);
                 if (clientToCall == null || !clientToCall.isLoggedIn) {
                     voiceResponse.setEvent(VoiceEvents.offline);
-                    client.out.println(gson.toJson(voiceResponse));
-                    client.out.flush();
+                    this.client.out.println(gson.toJson(voiceResponse));
+                    this.client.out.flush();
                 } else if (clientToCall.isOnVoiceCall()) {
                     Response<UserDetails> failedResponse = new Response<>(ResponseEvent.failed, ResponseType.voice);
                     failedResponse.setMessage("User is already on another call");
                     failedResponse.setDetails(details);
-                    client.out.println(gson.toJson(failedResponse));
-                    client.out.flush();
+                    this.client.out.println(gson.toJson(failedResponse));
+                    this.client.out.flush();
                 } else {
                     voiceResponse.setEvent(VoiceEvents.request);
                     voiceResponse.setDetails(new UserDetails(client.getEmail(), null));
@@ -75,8 +78,8 @@ public class VoiceCallHandler {
         } else {
             Response<Void> errorResponse = new Response<>(ResponseEvent.failed, ResponseType.voice,
                     "Provide the email of the user to be called.");
-            client.out.println(gson.toJson(errorResponse));
-            client.out.flush();
+            this.client.out.println(gson.toJson(errorResponse));
+            this.client.out.flush();
         }
     }
 
@@ -87,17 +90,31 @@ public class VoiceCallHandler {
                 ClientHandler clientToAccept = Server.CLIENT_MAP.getOrDefault(clientWhoCalled.getEmail(), null);
                 if (clientToAccept == null || !clientToAccept.isLoggedIn) {
                     VoiceResponse<UserDetails> voiceResponse = new VoiceResponse<>(VoiceEvents.offline, clientWhoCalled);
-                    client.out.println(gson.toJson(voiceResponse));
-                    client.out.flush();
+                    this.client.out.println(gson.toJson(voiceResponse));
+                    this.client.out.flush();
                 } else {
-                    // Send IP details
+                    ClientDetails thisDetails = new ClientDetails(this.client.getIpAddress(), this.client.getPort());
+                    ClientDetails otherDetails = new ClientDetails(clientToAccept.getIpAddress(), clientToAccept.getPort());
+
+                    VoiceResponse<ClientDetails> sendToOther =
+                            new VoiceResponse<>(VoiceEvents.accept, thisDetails);
+
+                    VoiceResponse<ClientDetails> sendToThis =
+                            new VoiceResponse<>(VoiceEvents.accept, otherDetails);
+
+                    this.client.out.println(gson.toJson(sendToThis));
+                    clientToAccept.out.println(gson.toJson(sendToOther));
+
+                    this.client.out.flush();
+                    clientToAccept.out.flush();
+
                 }
             }
         } else {
             Response<Void> errorResponse = new Response<>(ResponseEvent.failed, ResponseType.voice,
                     "Provide the email of the user whose call is to be accepted.");
-            client.out.println(gson.toJson(errorResponse));
-            client.out.flush();
+            this.client.out.println(gson.toJson(errorResponse));
+            this.client.out.flush();
         }
     }
 
@@ -107,22 +124,22 @@ public class VoiceCallHandler {
                 this.timeOut.interrupt();
                 this.isOnVoiceCall = false;
                 this.isTimedOut = false;
-                ClientHandler clientToAccept = Server.CLIENT_MAP.getOrDefault(details.getEmail(), null);
-                if (clientToAccept == null || !clientToAccept.isLoggedIn) {
+                ClientHandler clientToReject = Server.CLIENT_MAP.getOrDefault(details.getEmail(), null);
+                if (clientToReject == null || !clientToReject.isLoggedIn) {
                     VoiceResponse<UserDetails> voiceResponse = new VoiceResponse<>(VoiceEvents.offline, details);
-                    client.out.println(gson.toJson(voiceResponse));
-                    client.out.flush();
+                    this.client.out.println(gson.toJson(voiceResponse));
+                    this.client.out.flush();
                 } else {
                     VoiceResponse<UserDetails> reject = new VoiceResponse<>(VoiceEvents.reject, details);
-                    client.out.println(gson.toJson(reject));
-                    client.out.flush();
+                    clientToReject.out.println(gson.toJson(reject));
+                    clientToReject.out.flush();
                 }
             }
         } else {
             Response<Void> errorResponse = new Response<>(ResponseEvent.failed, ResponseType.voice,
                     "Provide the email of the user whose call is to be rejected.");
-            client.out.println(gson.toJson(errorResponse));
-            client.out.flush();
+            this.client.out.println(gson.toJson(errorResponse));
+            this.client.out.flush();
         }
     }
 
@@ -141,8 +158,8 @@ public class VoiceCallHandler {
             this.isTimedOut = true;
             this.isOnVoiceCall = false;
             VoiceResponse<UserDetails> timedOut = new VoiceResponse<>(VoiceEvents.time, this.otherClient);
-            client.out.println(gson.toJson(timedOut));
-            client.out.flush();
+            this.client.out.println(gson.toJson(timedOut));
+            this.client.out.flush();
         } catch (InterruptedException ignore) {
         }
     }

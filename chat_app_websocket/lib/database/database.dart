@@ -55,7 +55,7 @@ class DatabaseProvider {
     List<Message> message = [];
 
     var results = await db.rawQuery(SQLStatements.FETCH_MESSAGES_BY_USER,
-      [email,email]
+      [email, email]
     );
 
     for (var result in results) {

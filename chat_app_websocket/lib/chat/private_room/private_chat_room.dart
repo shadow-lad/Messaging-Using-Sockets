@@ -78,11 +78,7 @@ class privateChatRoomState extends State<privateChatRoom>{
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return WillPopScope(
-      onWillPop: ()async{
-        return !(Navigator.of(context).userGestureInProgress);
-      },
-      child: Scaffold(
+    return Scaffold(
         body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -177,7 +173,6 @@ class privateChatRoomState extends State<privateChatRoom>{
 //          },
 //        )
         ),
-      ),
     );
   }
 }

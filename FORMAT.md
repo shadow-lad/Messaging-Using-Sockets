@@ -443,7 +443,7 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 ```json
 {
 	"type": "voice",
-	"reason": "time",
+	"event": "time",
 	"details": {
 		"email": "email@userto.call"
 	}
@@ -454,8 +454,8 @@ Either the _"username"_ or the _"email"_&nbsp; key can be null, both cannot be n
 
 ```json
 {
-	"event": "voice",
-	"reason": "time",
+	"type": "voice",
+	"event": "time",
 	"details": {
 		"email": "email@calling.user"
 	}
